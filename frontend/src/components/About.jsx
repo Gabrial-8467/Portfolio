@@ -8,14 +8,14 @@ const skills = [
   { name: "Tailwind CSS", level: 65, icon: <FaCss3Alt className="text-blue-600 text-2xl" /> },
   { name: "JavaScript", level: 70, icon: <SiJavascript className="text-yellow-400 text-2xl" /> },
   { name: "ReactJS", level: 50, icon: <FaReact className="text-blue-500 text-2xl" /> },
-  { name: "ExpressJS", level: 65, icon: <SiTypescript className="text-blue-400 text-2xl" /> },
+  { name: "ExpressJS", level: 65, icon: <SiExpress className="text-blue-400 text-2xl" /> },
   { name: "Node.js", level: 75, icon: <FaNodeJs className="text-green-600 text-2xl" /> },
-  { name: "MongoDB", level: 50, icon: <FaFigma className="text-pink-500 text-2xl" /> },
-  { name: "Github", level: 85, icon: <FaGitAlt className="text-red-500 text-2xl" /> },
-  { name: "Python", level: 40, icon: <FaFigma className="text-pink-500 text-2xl" /> },
-  { name: "Linux", level: 75, icon: <SiTypescript className="text-blue-400 text-2xl" /> },
-  { name: "SQL", level: 60, icon: <SiTypescript className="text-blue-400 text-2xl" /> },
-  { name: "Ethical Hacking", level: 30, icon: <SiTypescript className="text-blue-400 text-2xl" /> },
+  { name: "MongoDB", level: 50, icon: <FaMongodb className="text-pink-500 text-2xl" /> },
+  { name: "Github", level: 85, icon: <FaGithub className="text-red-500 text-2xl" /> },
+  { name: "Python", level: 40, icon: <FaPython className="text-pink-500 text-2xl" /> },
+  { name: "Linux", level: 75, icon: <SiLinux className="text-blue-400 text-2xl" /> },
+  { name: "SQL", level: 60, icon: <SiSqlite className="text-blue-400 text-2xl" /> },
+  { name: "Ethical Hacking", level: 30, icon: <SiEthicalhacking className="text-blue-400 text-2xl" /> }, 
 ];
 
 const About = () => {
