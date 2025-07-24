@@ -4,8 +4,8 @@ import { FaGithub, FaLinkedin, FaBars, FaTimes, FaUser, FaBriefcase, FaGraduatio
 const navLinks = [
   { href: "#home", label: "Home", icon: <FaUser className="inline mr-1" /> },
   { href: "#about", label: "About", icon: <FaUser className="inline mr-1" /> },
-  { href: "#experience", label: "Experience", icon: <FaBriefcase className="inline mr-1" /> },
   { href: "#education", label: "Education", icon: <FaGraduationCap className="inline mr-1" /> },
+  { href: "#experience", label: "Experience", icon: <FaBriefcase className="inline mr-1" /> },
   { href: "#achievements", label: "Achievements", icon: <FaTrophy className="inline mr-1" /> },
   { href: "#projects", label: "Projects", icon: <FaProjectDiagram className="inline mr-1" /> },
   { href: "#contact", label: "Contact", icon: <FaEnvelope className="inline mr-1" /> },
