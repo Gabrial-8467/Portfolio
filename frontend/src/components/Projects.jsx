@@ -52,6 +52,20 @@ const projects = [
     source: "https://github.com/Gabrial-8467/intelliquiz",
     tech: ["React", "Node.js", "MongoDB","ExpressJS","CSS","Gemini API"],
   },
+  {
+    title: "Deskassitant-Prototype",
+    description: "Its voice assistant prototype built with python. It can perform tasks like opening applications, searching the internet, and more.",
+    details: "Libraries used in this projects are pyttsx3, speech_recognition, datetime, time, playsound, os, webbrowser, keyboard, pywhatkit, wikipedia, pywikihow.",
+    source: "https://github.com/Gabrial-8467/deskassitant-prototype",
+    tech: ["Python"],
+  },
+  {
+    title: "Virtual Mouse",
+    description: "Its a virtual mouse built with python. It can perform tasks like moving the mouse, clicking by showing the hand gesture.",
+    details: "Libraries used in this projects are OpenCV, mediapipe and pyautogui.",
+    source: "https://github.com/Gabrial-8467/virtual_mouse_by_GabrialDeora",
+    tech: ["Python"],
+  },
 ];
 
 const Projects = () => {
