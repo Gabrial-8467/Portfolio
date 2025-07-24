@@ -4,6 +4,7 @@ import ProjectImage from "./ProjectImage";
 import image from "../assets/image.png";
 import karan from "../assets/karanhomeopharmacy.png"
 import karan2 from "../assets/karan2.png"
+import intelli from "../assets/intelli.png"
 
 const projects = [
   {
@@ -29,16 +30,25 @@ const projects = [
     tech: ["React", "Tailwind CSS","NodeJS","MongoDB", "ExpressJS", "Razorpay"],
   },
   {
-    title: "Blog Platform",
-    description: "A full-featured blog platform with authentication and markdown support.",
-    details: "Users can write, edit, and delete posts. Built with React, Node.js, and MongoDB.",
+    title: "Pizza Delivery Website",
+    description: "A full-featured website to order pizza online.",
+    details: "Includes product listings, cart, and checkout. Built with React, Bootstrap CSS. ",
     images: [
-      "https://via.placeholder.com/400x200?text=Blog+Platform+1",
-      "https://via.placeholder.com/400x200?text=Blog+Platform+2"
+      pizza,
+      pizza2,
     ],
-    link: "#",
-    source: "#",
-    tech: ["React", "Node.js", "MongoDB"],
+    source: "https://github.com/Gabrial-8467/pizzadelivery_web_app",
+    tech: ["React", "Node.js", "MongoDB","ExpressJS","Bootstrap"],
+  },
+  {
+    title: "IntelliQuiz",
+    description: "A quiz application to test your knowledge.",
+    details: "A modern quiz application built with React.js frontend and MongoDB backend, designed to deliver interactive quiz experiences with real-time analytics.",
+    images: [
+      intelli,
+    ],
+    source: "https://github.com/Gabrial-8467/intelliquiz",
+    tech: ["React", "Node.js", "MongoDB","ExpressJS","CSS","Gemini API"],
   },
 ];
 
