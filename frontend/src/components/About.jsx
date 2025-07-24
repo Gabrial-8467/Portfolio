@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import Counters from "./Counters";
-import { FaReact, FaNodeJs, FaCss3Alt, FaHtml5, FaGitAlt, FaFigma, FaMongodb, FaGithub, FaPython } from "react-icons/fa";
+import { FaReact, FaNodeJs, FaCss3Alt, FaHtml5, FaMongodb, FaGithub, FaPython } from "react-icons/fa";
 import { SiJavascript, SiLinux, SiSqlite, SiEthicalhacking, SiExpress } from "react-icons/si";
 
 const skills = [
