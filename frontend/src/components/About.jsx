@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import Counters from "./Counters";
 import { FaReact, FaNodeJs, FaCss3Alt, FaHtml5, FaGitAlt, FaFigma, FaGithub, FaUserSecret } from "react-icons/fa";
 import { SiJavascript, SiLinux, SiSqlite, SiExpress, SiMongodb, SiPython } from "react-icons/si";
+import profile from "../assets/profile.jpg";
 
 const skills = [
   { name: "HTML5", level: 70, icon: <FaHtml5 className="text-orange-500 text-2xl" /> },
@@ -36,7 +37,7 @@ const About = () => {
         className="w-full max-w-4xl flex flex-col md:flex-row items-center gap-24 mt-16"
       >
         <img
-          src="/profile.jpg"
+          src={profile}
           alt="Gabrial Deora"
           className="w-44 h-44 md:w-64 md:h-64 rounded-full object-cover border-4 border-blue-200 shadow-lg mb-14 md:mb-0"
         />
