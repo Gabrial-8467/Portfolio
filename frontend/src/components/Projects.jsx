@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import ProjectImage from "./ProjectImage";
+import image from "../assets/image.png";
 
 const projects = [
   {
@@ -8,10 +9,10 @@ const projects = [
     description: "A personal portfolio website to showcase my work and skills.",
     details: "Built with React, Tailwind CSS, and Framer Motion. Features responsive design and animated sections.",
     images: [
-      "image.png",
+      image,
     ],
-    link: "#",
-    source: "#",
+    link: "https://portfolio-peach-rho-97.vercel.app/",
+    source: "https://github.com/Gabrial-8467/Portfolio",
     tech: ["React", "Tailwind CSS", "Framer Motion"],
   },
   {
