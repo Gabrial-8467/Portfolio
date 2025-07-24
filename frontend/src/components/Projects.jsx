@@ -4,6 +4,8 @@ import ProjectImage from "./ProjectImage";
 import image from "../assets/image.png";
 import karan from "../assets/karanhomeopharmacy.png"
 import karan2 from "../assets/karan2.png"
+import pizza from "../assets/pizza.png"
+import pizza2 from "../assets/pizza2.png"
 import intelli from "../assets/intelli.png"
 
 const projects = [
