@@ -27,7 +27,7 @@ const Achievements = () => (
       transition={{ duration: 0.7 }}
       className="text-3xl font-bold text-blue-800 mb-8 bg-gradient-to-r from-blue-400 to-blue-600 text-transparent bg-clip-text"
     >
-      <span className="inline-flex items-center gap-2"><FaTrophy className="text-yellow-500 text-2xl" /> Achievements & Awards</span>
+      <span className="inline-flex items-center gap-2"><FaTrophy className="text-yellow-500 text-2xl" /> Achievements</span>
     </motion.h2>
     <div className="relative w-full max-w-3xl">
       <div className="absolute left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-200 to-yellow-400 rounded-full"></div>
