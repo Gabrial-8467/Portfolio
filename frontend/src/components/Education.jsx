@@ -6,7 +6,7 @@ const education = [
     year: "2022-2026",
     title: "B.TECH CSE Specialization in Cyber Security and Forensics",
     org: "CT University",
-    description: "Currently Pursuing B.Tech in 2026.",
+    description: "Graduation Expected to be completed in 2026.",
   },
   {
     year: "March 2022",
