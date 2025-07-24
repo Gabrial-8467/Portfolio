@@ -6,10 +6,9 @@ const projects = [
   {
     title: "Portfolio Website",
     description: "A personal portfolio website to showcase my work and skills.",
-    details: "Built with React, Tailwind CSS, and Framer Motion. Features responsive design, dark mode, and animated sections.",
+    details: "Built with React, Tailwind CSS, and Framer Motion. Features responsive design and animated sections.",
     images: [
-      "https://via.placeholder.com/400x200?text=Portfolio+Website+1",
-      "https://via.placeholder.com/400x200?text=Portfolio+Website+2"
+      "image.png",
     ],
     link: "#",
     source: "#",
