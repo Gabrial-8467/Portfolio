@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import Counters from "./Counters";
-import { FaReact, FaNodeJs, FaCss3Alt, FaHtml5, FaMongodb, FaGithub, FaPython } from "react-icons/fa";
-import { SiJavascript, SiLinux, SiSqlite, SiEthicalhacking, SiExpress } from "react-icons/si";
+import { FaReact, FaNodeJs, FaCss3Alt, FaHtml5, FaGitAlt, FaFigma, FaGithub, FaUserSecret } from "react-icons/fa";
+import { SiJavascript, SiLinux, SiSqlite, SiExpress, SiMongodb, SiPython } from "react-icons/si";
 
 const skills = [
   { name: "HTML5", level: 70, icon: <FaHtml5 className="text-orange-500 text-2xl" /> },
@@ -10,12 +10,12 @@ const skills = [
   { name: "ReactJS", level: 50, icon: <FaReact className="text-blue-500 text-2xl" /> },
   { name: "ExpressJS", level: 65, icon: <SiExpress className="text-blue-400 text-2xl" /> },
   { name: "Node.js", level: 75, icon: <FaNodeJs className="text-green-600 text-2xl" /> },
-  { name: "MongoDB", level: 50, icon: <FaMongodb className="text-pink-500 text-2xl" /> },
+  { name: "MongoDB", level: 50, icon: <SiMongodb className="text-pink-500 text-2xl" /> },
   { name: "Github", level: 85, icon: <FaGithub className="text-red-500 text-2xl" /> },
-  { name: "Python", level: 40, icon: <FaPython className="text-pink-500 text-2xl" /> },
+  { name: "Python", level: 40, icon: <SiPython className="text-pink-500 text-2xl" /> },
   { name: "Linux", level: 75, icon: <SiLinux className="text-blue-400 text-2xl" /> },
   { name: "SQL", level: 60, icon: <SiSqlite className="text-blue-400 text-2xl" /> },
-  { name: "Ethical Hacking", level: 30, icon: <SiEthicalhacking className="text-blue-400 text-2xl" /> }, 
+  { name: "Ethical Hacking", level: 30, icon: <FaUserSecret className="text-blue-400 text-2xl" /> },
 ];
 
 const About = () => {
