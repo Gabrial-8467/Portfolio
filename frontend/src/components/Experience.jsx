@@ -3,16 +3,22 @@ import { FaBriefcase } from "react-icons/fa";
 
 const experience = [
   {
-    year: "2023 - Present",
-    title: "Full Stack Web Developer",
-    org: "Awesome Tech Solutions",
-    description: "Building scalable web apps with React, Node.js, and cloud services. Collaborated with cross-functional teams to deliver high-quality products.",
+    year: "Aug 2023 -Sep 2023",
+    title: "Intern Trainee",
+    org: "All Soft Solutions",
+    description: "In this internship I have learned about the basics of Linux, Ethical Hacking and Cyber Security.",
   },
   {
-    year: "2021 - 2023",
-    title: "Frontend Developer",
-    org: "Creative Studio",
-    description: "Developed modern, responsive UIs and contributed to design systems for multiple clients.",
+    year: "Jun 2024 - Aug 2024",
+    title: "Intern Trainee",
+    org: "Sensation Software Solutions",
+    description: "Gained hands on experience with MongoDB, ExpressJS, ReactJS, NodeJS, and TailwindCSS.",
+  },
+  {
+    year: "Jun 2025 - Jul 2025",
+    title: "Intern Trainee",
+    org: "Techlive Solutions",
+    description: "Gained hands on experience with MongoDB, ExpressJS, ReactJS, NodeJS, and Bootstrap.",
   },
 ];
 
