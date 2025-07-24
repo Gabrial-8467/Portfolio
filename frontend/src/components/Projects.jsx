@@ -26,7 +26,6 @@ const projects = [
       karan2,
     ],
     link: "https://karan-homeo-pharmacy.vercel.app/",
-    source: "##",
     tech: ["React", "Tailwind CSS","NodeJS","MongoDB", "ExpressJS", "Razorpay"],
   },
   {
