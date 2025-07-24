@@ -41,19 +41,8 @@ const projects = [
   },
 ];
 
-const allTech = [
-  "All",
-  ...Array.from(new Set(projects.flatMap((p) => p.tech))),
-];
-
 const Projects = () => {
   const [selected, setSelected] = useState(null);
-  const [filter, setFilter] = useState("All");
-
-  const filteredProjects =
-    filter === "All"
-      ? projects
-      : projects.filter((p) => p.tech.includes(filter));
 
   return (
     <section id="projects" className="py-24 bg-blue-50 flex flex-col items-center px-4 md:px-0">
@@ -65,24 +54,9 @@ const Projects = () => {
       >
         Projects
       </motion.h2>
-      <div className="flex flex-wrap gap-3 mb-8">
-        {allTech.map((tech) => (
-          <button
-            key={tech}
-            onClick={() => setFilter(tech)}
-            className={`px-4 py-2 rounded-full font-medium border transition shadow-sm focus:outline-none ${
-              filter === tech
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white text-blue-700 border-blue-200 hover:bg-blue-100"
-            }`}
-          >
-            {tech}
-          </button>
-        ))}
-      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
         <AnimatePresence>
-          {filteredProjects.map((project, idx) => (
+          {projects.map((project, idx) => (
             <motion.button
               key={project.title}
               onClick={() => setSelected(project)}
