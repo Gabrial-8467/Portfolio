@@ -1,0 +1,176 @@
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import ProjectImage from "./ProjectImage";
+
+const projects = [
+  {
+    title: "Portfolio Website",
+    description: "A personal portfolio website to showcase my work and skills.",
+    details: "Built with React, Tailwind CSS, and Framer Motion. Features responsive design, dark mode, and animated sections.",
+    images: [
+      "https://via.placeholder.com/400x200?text=Portfolio+Website+1",
+      "https://via.placeholder.com/400x200?text=Portfolio+Website+2"
+    ],
+    link: "#",
+    source: "#",
+    tech: ["React", "Tailwind CSS", "Framer Motion"],
+  },
+  {
+    title: "E-commerce App",
+    description: "A modern e-commerce application with React and Tailwind CSS.",
+    details: "Includes product listings, cart, and checkout. Built with React, Tailwind CSS, and Stripe integration.",
+    images: [
+      "https://via.placeholder.com/400x200?text=E-commerce+App+1",
+      "https://via.placeholder.com/400x200?text=E-commerce+App+2"
+    ],
+    link: "#",
+    source: "#",
+    tech: ["React", "Tailwind CSS", "Stripe"],
+  },
+  {
+    title: "Blog Platform",
+    description: "A full-featured blog platform with authentication and markdown support.",
+    details: "Users can write, edit, and delete posts. Built with React, Node.js, and MongoDB.",
+    images: [
+      "https://via.placeholder.com/400x200?text=Blog+Platform+1",
+      "https://via.placeholder.com/400x200?text=Blog+Platform+2"
+    ],
+    link: "#",
+    source: "#",
+    tech: ["React", "Node.js", "MongoDB"],
+  },
+];
+
+const allTech = [
+  "All",
+  ...Array.from(new Set(projects.flatMap((p) => p.tech))),
+];
+
+const Projects = () => {
+  const [selected, setSelected] = useState(null);
+  const [filter, setFilter] = useState("All");
+
+  const filteredProjects =
+    filter === "All"
+      ? projects
+      : projects.filter((p) => p.tech.includes(filter));
+
+  return (
+    <section id="projects" className="py-24 bg-blue-50 flex flex-col items-center px-4 md:px-0">
+      <motion.h2
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+        className="text-3xl font-bold text-gray-900 mb-8"
+      >
+        Projects
+      </motion.h2>
+      <div className="flex flex-wrap gap-3 mb-8">
+        {allTech.map((tech) => (
+          <button
+            key={tech}
+            onClick={() => setFilter(tech)}
+            className={`px-4 py-2 rounded-full font-medium border transition shadow-sm focus:outline-none ${
+              filter === tech
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white text-blue-700 border-blue-200 hover:bg-blue-100"
+            }`}
+          >
+            {tech}
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
+        <AnimatePresence>
+          {filteredProjects.map((project, idx) => (
+            <motion.button
+              key={project.title}
+              onClick={() => setSelected(project)}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.6, delay: idx * 0.15 }}
+              className="block bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition border border-gray-100 text-left cursor-pointer w-full"
+            >
+              <h3 className="text-xl font-semibold text-blue-700 mb-2">{project.title}</h3>
+              <p className="text-gray-600 mb-2">{project.description}</p>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {project.tech.map((t) => (
+                  <span key={t} className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                    {t}
+                  </span>
+                ))}
+              </div>
+              <span className="text-blue-500 text-sm font-medium">View Details →</span>
+            </motion.button>
+          ))}
+        </AnimatePresence>
+      </div>
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelected(null)}
+          >
+            <motion.div
+              className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full relative flex flex-col"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none"
+                onClick={() => setSelected(null)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+              <div className="flex flex-col md:flex-row gap-6 mb-4">
+                <div className="flex-1 flex flex-col gap-2">
+                  {selected.images.map((img, i) => (
+                    <ProjectImage key={i} src={img} alt={selected.title + ' screenshot ' + (i+1)} />
+                  ))}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-blue-700 mb-2">{selected.title}</h3>
+                  <p className="text-gray-700 mb-2">{selected.details}</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {selected.tech.map((t) => (
+                      <span key={t} className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-4">
+                    <a
+                      href={selected.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition"
+                    >
+                      Live Demo
+                    </a>
+                    <a
+                      href={selected.source}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded font-medium hover:bg-gray-300 transition"
+                    >
+                      Source Code
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+};
+
+export default Projects; 
