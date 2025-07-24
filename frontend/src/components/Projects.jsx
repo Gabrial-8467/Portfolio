@@ -2,6 +2,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import ProjectImage from "./ProjectImage";
 import image from "../assets/image.png";
+import karan from "../assets/karanhomeopharmacy.png"
+import karan2 from "../assets/karan2.png"
 
 const projects = [
   {
@@ -16,16 +18,16 @@ const projects = [
     tech: ["React", "Tailwind CSS", "Framer Motion"],
   },
   {
-    title: "E-commerce App",
-    description: "A modern e-commerce application with React and Tailwind CSS.",
-    details: "Includes product listings, cart, and checkout. Built with React, Tailwind CSS, and Stripe integration.",
+    title: "KARAN HOMEO PHARMACY",
+    description: "A e-commerce application with React and Tailwind CSS to sell Homeopathic medicines.",
+    details: "Includes product listings, cart, and checkout. Built with React, Tailwind CSS, and Razorpay integration.",
     images: [
-      "https://via.placeholder.com/400x200?text=E-commerce+App+1",
-      "https://via.placeholder.com/400x200?text=E-commerce+App+2"
+      karan, 
+      karan2,
     ],
-    link: "#",
-    source: "#",
-    tech: ["React", "Tailwind CSS", "Stripe"],
+    link: "https://karan-homeo-pharmacy.vercel.app/",
+    source: "##",
+    tech: ["React", "Tailwind CSS","NodeJS","MongoDB", "ExpressJS", "Razorpay"],
   },
   {
     title: "Blog Platform",
