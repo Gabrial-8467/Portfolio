@@ -39,7 +39,7 @@ const About = () => {
         <img
           src={profile}
           alt="Gabrial Deora"
-          className="w-44 h-44 md:w-64 md:h-64 rounded-full object-cover border-4 border-blue-200 shadow-lg mb-14 md:mb-0"
+          className="w-44 h-44 md:w-70 md:h-70 rounded-full object-cover border-4 border-blue-200 shadow-lg mb-14 md:mb-0"
         />
         <div className="flex-1">
           <h3 className="text-xl font-bold mb-8 text-blue-800">My Journey</h3>
