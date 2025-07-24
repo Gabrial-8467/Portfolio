@@ -14,8 +14,8 @@ const Home = () => {
       <Navbar name="Gabrial Deora" />
       <Hero />
       <About />
-      <Experience />
       <Education />
+      <Experience />
       <Achievements />
       <Projects />
       <Contact />

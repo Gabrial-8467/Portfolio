@@ -3,16 +3,15 @@ import { FaGraduationCap } from "react-icons/fa";
 
 const education = [
   {
-    year: "2018 - 2021",
-    title: "B.Sc. in Computer Science",
-    org: "University of Technology",
-    description: "Graduated with honors. Specialized in web development, algorithms, and databases.",
+    year: "2022-2026",
+    title: "B.TECH CSE Specialization in Cyber Security and Forensics",
+    org: "CT University",
+    description: "Currently Pursuing B.Tech in 2026.",
   },
   {
-    year: "2022",
-    title: "Certified React Developer",
-    org: "React Training Institute",
-    description: "Completed an advanced React certification program focused on modern frontend development best practices.",
+    year: "March 2022",
+    title: "10+2 (Non-Medical)",
+    org: "Teja Singh Sutantar Memorial Sr. Sec. School",
   },
 ];
 
