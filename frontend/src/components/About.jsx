@@ -74,6 +74,7 @@ const About = () => {
                 initial={{ width: 0 }}
                 whileInView={{ width: `${skill.level}%` }}
                 transition={{ duration: 1, delay: idx * 0.2 }}
+                viewport={{ once: true }}
                 className="h-3 rounded-full bg-blue-600"
                 style={{ width: `${skill.level}%` }}
               />
