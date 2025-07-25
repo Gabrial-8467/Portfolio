@@ -15,7 +15,7 @@ const skills = [
   { name: "Github", level: 85, icon: <FaGithub className="text-red-500 text-2xl" /> },
   { name: "Python", level: 40, icon: <SiPython className="text-pink-500 text-2xl" /> },
   { name: "Linux", level: 75, icon: <SiLinux className="text-blue-400 text-2xl" /> },
-  { name: "SQL", level: 60, icon: <SiSqlite className="text-blue-400 text-2xl" /> },
+  { name: "SQL", level: 50, icon: <SiSqlite className="text-blue-400 text-2xl" /> },
   { name: "Ethical Hacking", level: 30, icon: <FaUserSecret className="text-blue-400 text-2xl" /> },
 ];
 
