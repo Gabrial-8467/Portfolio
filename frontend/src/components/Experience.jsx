@@ -20,6 +20,12 @@ const experience = [
     org: "Techlive Solutions",
     description: "Gained hands on experience with MongoDB, ExpressJS, ReactJS, NodeJS, and Bootstrap.",
   },
+  {
+    year: "Jul 2025 - Currently Pursuing",
+    title: "Internship",
+    org: "Brainwave Matrix Solutions",
+    description: "In this internship I made 2 projects Expenditure Tracker and an E-Commerce Website using MERN STACK.",
+  },
 ];
 
 const Experience = () => (
