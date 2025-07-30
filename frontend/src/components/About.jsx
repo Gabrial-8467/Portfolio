@@ -70,14 +70,7 @@ const About = () => {
               <span className="text-sm text-gray-500">{skill.level}%</span>
             </div>
             <div className="w-full bg-blue-100 rounded-full h-3">
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: `${skill.level}%` }}
-                transition={{ duration: 1, delay: idx * 0.2 }}
-                viewport={{ once: true }}
-                className="h-3 rounded-full bg-blue-600"
-                style={{ width: `${skill.level}%` }}
-              />
+              
             </div>
           </div>
         ))}
