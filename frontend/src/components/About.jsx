@@ -3,6 +3,7 @@ import Counters from "./Counters";
 import { FaReact, FaNodeJs, FaCss3Alt, FaHtml5, FaGitAlt, FaFigma, FaGithub, FaUserSecret } from "react-icons/fa";
 import { SiJavascript, SiLinux, SiSqlite, SiExpress, SiMongodb, SiPython } from "react-icons/si";
 import profile from "../assets/profile.jpg";
+import resume from "../assets/resume.pdf";
 
 const skills = [
   { name: "HTML5", level: 70, icon: <FaHtml5 className="text-orange-500 text-2xl" /> },
@@ -52,7 +53,7 @@ const About = () => {
             <li>Participated in Hackathon (SIH) held at LPU in 2025</li>
           </ul>
           <a
-            href="/resume.pdf"
+            href={resume}
             download
             className="inline-block mt-8 px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold rounded-full shadow hover:scale-105 hover:from-blue-700 hover:to-blue-500 transition transform duration-200"
           >
