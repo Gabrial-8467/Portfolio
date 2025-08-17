@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import Counters from "./Counters";
 import { FaReact, FaNodeJs, FaCss3Alt, FaHtml5, FaGitAlt, FaFigma, FaGithub, FaUserSecret } from "react-icons/fa";
-import { SiJavascript, SiLinux, SiSqlite, SiExpress, SiMongodb, SiPython } from "react-icons/fa";
+import { SiJavascript, SiLinux, SiSqlite, SiExpress, SiMongodb, SiPython } from "react-icons/si";
 import profile from "../assets/profile.jpg";
 import resume from "../assets/resume.pdf";
 
