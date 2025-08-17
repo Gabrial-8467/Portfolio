@@ -74,16 +74,16 @@ const Projects = () => {
   const [selected, setSelected] = useState(null);
 
   return (
-    <section id="projects" className="py-24 bg-blue-50 flex flex-col items-center px-4 md:px-0">
+    <section id="projects" className="py-16 sm:py-20 md:py-24 bg-blue-50 flex flex-col items-center px-4 sm:px-6 md:px-0">
       <motion.h2
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="text-3xl font-bold text-gray-900 mb-8"
+        className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center"
       >
         Projects
       </motion.h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full max-w-6xl">
         <AnimatePresence>
           {projects.map((project, idx) => (
             <motion.button
@@ -93,11 +93,11 @@ const Projects = () => {
               whileInView={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 30 }}
               transition={{ duration: 0.6, delay: idx * 0.15 }}
-              className="block bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition border border-gray-100 text-left cursor-pointer w-full"
+              className="block bg-white rounded-xl shadow-lg p-4 sm:p-6 hover:shadow-2xl transition border border-gray-100 text-left cursor-pointer w-full"
             >
-              <h3 className="text-xl font-semibold text-blue-700 mb-2">{project.title}</h3>
-              <p className="text-gray-600 mb-2">{project.description}</p>
-              <div className="flex flex-wrap gap-2 mb-2">
+              <h3 className="text-lg sm:text-xl font-semibold text-blue-700 mb-2">{project.title}</h3>
+              <p className="text-gray-600 mb-2 text-sm sm:text-base">{project.description}</p>
+              <div className="flex flex-wrap gap-1 sm:gap-2 mb-2">
                 {project.tech.map((t) => (
                   <span key={t} className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                     {t}
@@ -112,56 +112,58 @@ const Projects = () => {
       <AnimatePresence>
         {selected && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-2"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelected(null)}
           >
             <motion.div
-              className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full relative flex flex-col"
+              className="bg-white rounded-xl shadow-2xl p-4 sm:p-6 md:p-8 max-w-sm sm:max-w-md md:max-w-2xl w-full relative flex flex-col max-h-[90vh] overflow-y-auto"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={e => e.stopPropagation()}
             >
               <button
-                className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none"
+                className="absolute top-2 sm:top-3 right-2 sm:right-3 text-gray-400 hover:text-gray-700 text-xl sm:text-2xl font-bold focus:outline-none"
                 onClick={() => setSelected(null)}
                 aria-label="Close"
               >
                 &times;
               </button>
-              <div className="flex flex-col md:flex-row gap-6 mb-4">
+              <div className="flex flex-col md:flex-row gap-4 sm:gap-6 mb-4">
                 <div className="flex-1 flex flex-col gap-2">
                   {selected.images.map((img, i) => (
                     <ProjectImage key={i} src={img} alt={selected.title + ' screenshot ' + (i+1)} />
                   ))}
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-blue-700 mb-2">{selected.title}</h3>
-                  <p className="text-gray-700 mb-2">{selected.details}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <h3 className="text-xl sm:text-2xl font-bold text-blue-700 mb-2">{selected.title}</h3>
+                  <p className="text-gray-700 mb-2 text-sm sm:text-base">{selected.details}</p>
+                  <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
                     {selected.tech.map((t) => (
                       <span key={t} className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                         {t}
                       </span>
                     ))}
                   </div>
-                  <div className="flex gap-4">
-                    <a
-                      href={selected.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition"
-                    >
-                      Live Demo
-                    </a>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                    {selected.link && (
+                      <a
+                        href={selected.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition text-sm sm:text-base text-center"
+                      >
+                        Live Demo
+                      </a>
+                    )}
                     <a
                       href={selected.source}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded font-medium hover:bg-gray-300 transition"
+                      className="px-3 sm:px-4 py-2 bg-gray-200 text-gray-800 rounded font-medium hover:bg-gray-300 transition text-sm sm:text-base text-center"
                     >
                       Source Code
                     </a>
