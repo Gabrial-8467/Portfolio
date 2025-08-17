@@ -1,20 +1,31 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import ProjectImage from "./ProjectImage";
-import image from "../assets/image.png";
+import portfolio from "../assets/portfolio.png";
 import karan from "../assets/karanhomeopharmacy.png"
 import karan2 from "../assets/karan2.png"
 import pizza from "../assets/pizza.png"
 import pizza2 from "../assets/pizza2.png"
 import intelli from "../assets/intelli.png"
+import planpocket from "../assets/planpocket.png"
 
 const projects = [
+  {
+    title: "PlanPocket",
+    description: "Its a web application to manage your daily expenses and income.Basically its a budget planner or expense tracker.",
+    details: "Built with React using vite, Tailwind CSS, NodeJS, MongoDB, ExpressJS. Features include adding expenses, income, and categories. It also provides a summary of your expenses and income. It also has a login and signup page, and a dashboard to view your expenses and income, and a profile page to view your profile and update your profile,summary of your expenses and income,and a login and signup page it also tracks about your loans and savings.",
+    images: [
+      planpocket,
+    ],
+    source: "https://github.com/Gabrial-8467/PlanPocket",
+    tech: ["React", "Tailwind CSS","NodeJS","MongoDB", "ExpressJS"],
+  },
   {
     title: "Portfolio Website",
     description: "A personal portfolio website to showcase my work and skills.",
     details: "Built with React, Tailwind CSS, and Framer Motion. Features responsive design and animated sections.",
     images: [
-      image,
+      portfolio,
     ],
     link: "https://portfolio-peach-rho-97.vercel.app/",
     source: "https://github.com/Gabrial-8467/Portfolio",
