@@ -36,11 +36,11 @@ const Navbar = ({ name = "Gabrial Deora" }) => {
           ))}
         </ul>
         {/* Socials */}
-        <div className="hidden md:flex items-center space-x-4">
-          <a href="https://github.com/Gabrial-8467" target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-blue-700 text-xl transition">
+        <div className="hidden md:flex mt-3 items-center space-x-4">
+          <a href="https://github.com/Gabrial-8467" target="_blank" className="text-gray-700 hover:text-blue-700 text-xl transition">
             <FaGithub />
           </a>
-          <a href="https://linkedin.com/in/gabrial-deora" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-900 text-xl transition">
+          <a href="https://linkedin.com/in/gabrial-deora" target="_blank" className="text-blue-700 hover:text-blue-900 text-xl transition">
             <FaLinkedin />
           </a>
         </div>
