@@ -37,10 +37,10 @@ const Navbar = ({ name = "Gabrial Deora" }) => {
         </ul>
         {/* Socials */}
         <div className="hidden md:flex items-center space-x-4">
-          <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-blue-700 text-xl transition">
+          <a href="https://github.com/Gabrial-8467" target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-blue-700 text-xl transition">
             <FaGithub />
           </a>
-          <a href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-900 text-xl transition">
+          <a href="https://linkedin.com/in/gabrial-deora" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-900 text-xl transition">
             <FaLinkedin />
           </a>
         </div>
@@ -69,11 +69,11 @@ const Navbar = ({ name = "Gabrial Deora" }) => {
                 </a>
               </li>
             ))}
-            <li className="flex space-x-4 mt-3 sm:mt-4 pt-2 border-t border-gray-200">
-              <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-blue-700 text-lg sm:text-xl transition">
+            <li className="flex space-x-4 mt-4 sm:mt-4 pt-2 border-t border-gray-200">
+              <a href="https://github.com/Gabrial-8467" target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-blue-700 text-lg sm:text-xl transition">
                 <FaGithub />
               </a>
-              <a href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-900 text-lg sm:text-xl transition">
+              <a href="https://linkedin.com/in/gabrial-deora" target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-900 text-lg sm:text-xl transition">
                 <FaLinkedin />
               </a>
             </li>
