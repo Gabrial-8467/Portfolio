@@ -3,7 +3,7 @@ import { FaBriefcase } from "react-icons/fa";
 
 const experience = [
   {
-    year: "Aug 2023 -Sep 2023",
+    year: "Jul 2023 -Sep 2023",
     title: "Intern Trainee",
     org: "All Soft Solutions",
     description: "In this internship I have learned about the basics of Linux, Ethical Hacking and Cyber Security.",
@@ -64,3 +64,4 @@ const Experience = () => (
 );
 
 export default Experience; 
+
