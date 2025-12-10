@@ -4,20 +4,26 @@ import { FaBriefcase } from "react-icons/fa";
 const experience = [
   {
     year: "Jul 2023 -Sep 2023",
-    title: "Intern Trainee",
+    title: "Intern",
     org: "All Soft Solutions",
     description: "In this internship I have learned about the basics of Linux, Ethical Hacking and Cyber Security.",
   },
   {
     year: "Jun 2024 - Aug 2024",
-    title: "Intern Trainee",
+    title: "Intern",
     org: "Sensation Software Solutions",
     description: "Gained hands on experience with MongoDB, ExpressJS, ReactJS, NodeJS, and TailwindCSS.",
   },
   {
     year: "Jun 2025 - Jul 2025",
-    title: "Intern Trainee",
+    title: "Intern",
     org: "Techlive Solutions",
+    description: "Gained hands on experience with MongoDB, ExpressJS, ReactJS, NodeJS, and Bootstrap.",
+  },
+  {
+    year: "Jun 2025 - Aug 2025",
+    title: "Intern",
+    org: "Branwave Matrix Solutions",
     description: "Gained hands on experience with MongoDB, ExpressJS, ReactJS, NodeJS, and Bootstrap.",
   },
 ];
