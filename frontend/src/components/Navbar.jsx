@@ -8,7 +8,6 @@ const navLinks = [
   { href: "#experience", label: "Experience", icon: <FaBriefcase className="inline mr-1" /> },
   { href: "#achievements", label: "Achievements", icon: <FaTrophy className="inline mr-1" /> },
   { href: "#projects", label: "Projects", icon: <FaProjectDiagram className="inline mr-1" /> },
-  { href: "#contact", label: "Contact", icon: <FaEnvelope className="inline mr-1" /> },
 ];
 
 const Navbar = ({ name = "Gabrial Deora" }) => {
@@ -83,5 +82,6 @@ const Navbar = ({ name = "Gabrial Deora" }) => {
     </nav>
   );
 };
+
 
 export default Navbar; 
