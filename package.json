@@ -1,15 +1,24 @@
 {
-  "name": "gabrial-deora-portfolio",
-  "version": "1.0.0",
+  "name": "rahul-pg-portfolio",
   "private": true,
-  "description": "Full-Stack Portfolio and Content Management System",
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "postinstall": "npm --prefix server install && npm --prefix Portfolio install && npm --prefix Portfolio run build",
-    "build": "npm --prefix Portfolio run build",
-    "start": "node server/src/index.js",
-    "dev": "npm --prefix server run dev",
-    "dev:server": "npm --prefix server run dev",
-    "dev:client": "npm --prefix Portfolio run dev",
-    "lint": "npm --prefix Portfolio run lint"
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-react": "^1.28.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "oxlint": "^1.75.0",
+    "vite": "^8.2.0"
   }
 }

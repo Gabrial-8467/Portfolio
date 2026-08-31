@@ -2,7 +2,20 @@ import './App.css';
 import './animations.css';
 import './mobile.css';
 
-import { usePortfolioData } from './api';
+import {
+  SITE,
+  SOCIALS,
+  NAV_LINKS,
+  STATS,
+  PROCESS_STEPS,
+  projects,
+  skills,
+  services,
+  experience,
+  education,
+  achievements,
+} from './data';
+
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -12,9 +25,21 @@ import Skills from './components/Skills';
 import Hackathons from './components/Hackathons';
 import Footer from './components/Footer';
 
-function App() {
-  const { data } = usePortfolioData();
+const data = {
+  site: SITE,
+  nav: NAV_LINKS,
+  socials: SOCIALS,
+  stats: STATS,
+  processSteps: PROCESS_STEPS,
+  projects,
+  skills,
+  services,
+  experience,
+  education,
+  achievements,
+};
 
+function App() {
   return (
     <div className="layout-container">
       <Navbar site={data.site} nav={data.nav} />

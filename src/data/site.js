@@ -1,5 +1,19 @@
 export const SITE = {
   name: 'Gabrial Deora',
+  heroBadge: 'Full Stack',
+  heroTitle: 'Building Web Apps That Actually Perform',
+  heroBgText: 'Developer',
+  heroBio: "I'm Gabrial Deora, a Full Stack Web Developer with hands-on internship experience building responsive, high-performance web applications.",
+  avatarUrl: '/hero.png',
+  aboutTitle: 'The Developer Shaping Modern Web Experiences',
+  aboutDesc1: "I'm a dynamic Full Stack Web Developer with strong internship experience in crafting responsive and high-performance web applications. I specialize in React.js, Node.js, and MongoDB.",
+  aboutDesc2: "My commitment is to enhancing user experience through clean, scalable code and modern design. I'm passionate about leveraging technology to tackle real-world challenges and continuously improving code quality.",
+  bio: 'A passionate Full Stack Web Developer with hands-on experience in building responsive, scalable web applications using the MERN stack.',
+  phone: '+91 7888695062',
+  phoneHref: 'tel:+917888695062',
+  email: 'gabrialdeora003@gmail.com',
+  emailHref: 'mailto:gabrialdeora003@gmail.com',
+  github: 'https://github.com/Gabrial-8467',
   copyright: '© 2026 Gabrial Deora. All Rights Reserved.',
 };
 
