@@ -4,11 +4,12 @@
   "private": true,
   "description": "Full-Stack Portfolio and Content Management System",
   "scripts": {
+    "postinstall": "npm --prefix server install && npm --prefix Portfolio install",
+    "build": "npm --prefix Portfolio run build",
+    "start": "node server/src/index.js",
+    "dev": "npm --prefix server run dev",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix Portfolio run dev",
-    "install:all": "npm install --prefix Portfolio && npm install --prefix server",
-    "build": "npm --prefix Portfolio run build",
-    "start": "npm --prefix server start",
     "lint": "npm --prefix Portfolio run lint"
   }
 }
