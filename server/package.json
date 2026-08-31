@@ -6,6 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "node --watch src/index.js",
+    "build": "npm --prefix ../Portfolio install && npm --prefix ../Portfolio run build",
     "start": "node src/index.js"
   },
   "dependencies": {
