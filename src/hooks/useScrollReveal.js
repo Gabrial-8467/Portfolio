@@ -83,30 +83,3 @@ export function useCountUp(end, shouldStart, duration = 1800) {
 
   return { value, suffix };
 }
-
-/**
- * Custom hook for parallax scroll effect on an element.
- * Applies a translateY based on scroll position.
- *
- * @param {number} speed - Parallax speed factor. Default 0.3
- */
-export function useParallax(speed = 0.3) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const handleScroll = () => {
-      const rect = element.getBoundingClientRect();
-      const scrolled = window.scrollY;
-      const offset = (rect.top + scrolled) * speed;
-      element.style.transform = `translateY(${scrolled * speed - offset}px)`;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [speed]);
-
-  return ref;
-}
