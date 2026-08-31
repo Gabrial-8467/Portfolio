@@ -45,7 +45,7 @@ export function requireAuth(req, res, next) {
 export function setAuthCookie(res) {
   res.cookie(COOKIE_NAME, TOKEN, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: NODE_ENV === 'production' ? 'none' : 'lax',
     secure: NODE_ENV === 'production',
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     path: '/',
@@ -54,7 +54,12 @@ export function setAuthCookie(res) {
 }
 
 export function clearAuthCookie(res) {
-  res.clearCookie(COOKIE_NAME, { path: '/', signed: true });
+  res.clearCookie(COOKIE_NAME, {
+    path: '/',
+    signed: true,
+    sameSite: NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: NODE_ENV === 'production',
+  });
 }
 
 export { COOKIE_NAME, ADMIN_USERNAME };

@@ -6,6 +6,7 @@
   "scripts": {
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix Portfolio run dev",
+    "install:all": "npm install --prefix Portfolio && npm install --prefix server",
     "build": "npm --prefix Portfolio run build",
     "start": "npm --prefix server start",
     "lint": "npm --prefix Portfolio run lint"

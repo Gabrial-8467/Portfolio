@@ -8,7 +8,7 @@ import cookieParser from 'cookie-parser';
 
 import { PORT, NODE_ENV, COOKIE_SECRET, CORS_ORIGIN } from './config.js';
 import { requireAuth, isAuthenticated } from './auth.js';
-import { apiLimiter, writeLimiter, notFoundHandler, errorHandler } from './middleware.js';
+import { apiLimiter, authLimiter, writeLimiter, notFoundHandler, errorHandler } from './middleware.js';
 import { collectionRouter } from './routes/collections.js';
 import { siteRouter } from './routes/site.js';
 import { authRouter } from './routes/auth.js';
@@ -22,11 +22,14 @@ const app = express();
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
-// Production Helmet configuration that allows necessary fonts/assets without breaking UI
+// Production Helmet configuration that hardens HTTP headers against attacks
 app.use(
   helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
+    xContentTypeOptions: true,
+    frameguard: { action: 'deny' },
+    hsts: NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
   })
 );
 
@@ -50,7 +53,7 @@ app.use(
 );
 
 app.use(cookieParser(COOKIE_SECRET));
-app.use(express.json({ limit: process.env.BODY_LIMIT || '512kb' }));
+app.use(express.json({ limit: process.env.BODY_LIMIT || '256kb', strict: true }));
 
 // Health check (public)
 app.get('/api/health', (_req, res) => {
@@ -61,8 +64,8 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// Auth (login is rate-limited to prevent brute force)
-app.use('/api/auth', writeLimiter, authRouter());
+// Dedicated strict brute-force protection on Auth endpoint
+app.use('/api/auth', authLimiter, authRouter());
 
 // Public API is rate-limited; writes on collections/site are additionally
 // protected by the auth middleware + write limiter.

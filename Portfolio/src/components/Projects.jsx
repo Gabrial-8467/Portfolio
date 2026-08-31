@@ -2,8 +2,15 @@ import { ArrowUpRight } from 'lucide-react';
 import { Reveal } from './AnimatedSection';
 import GridLines from './GridLines';
 
+const safeLink = (url) => {
+  if (!url || typeof url !== 'string') return '#';
+  const trimmed = url.trim();
+  if (/^(javascript|data|vbscript):/i.test(trimmed)) return '#';
+  return trimmed;
+};
+
 export default function Projects({ projects = [], site = {} }) {
-  const allProjectsHref = site.github || 'https://github.com/Gabrial-8467';
+  const allProjectsHref = safeLink(site.github || 'https://github.com/Gabrial-8467');
 
   return (
     <section id="projects" className="section section-dark">
@@ -13,7 +20,7 @@ export default function Projects({ projects = [], site = {} }) {
           <Reveal type="left" className="projects-col-1">
             <div className="section-label">Featured Projects</div>
             <div className="projects-cta-container">
-              <a href={allProjectsHref} target="_blank" rel="noreferrer" className="btn-primary">
+              <a href={allProjectsHref} target="_blank" rel="noopener noreferrer" className="btn-primary">
                 All Projects
                 <span className="btn-arrow-circle"><ArrowUpRight size={20} /></span>
               </a>
@@ -29,6 +36,7 @@ export default function Projects({ projects = [], site = {} }) {
           <div className="projects-col-3-4 projects-dev-grid">
             {projects.map((proj, idx) => {
               const tags = Array.isArray(proj.tags) ? proj.tags : [];
+              const validLink = safeLink(proj.link);
               return (
                 <Reveal
                   key={proj.id || `${proj.name}-${idx}`}
@@ -40,9 +48,9 @@ export default function Projects({ projects = [], site = {} }) {
                     <div className="project-dev-meta">{proj.meta}</div>
                     {proj.link && (
                       <a
-                        href={proj.link}
+                        href={validLink}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="project-dev-link"
                         aria-label={`View ${proj.name}`}
                       >

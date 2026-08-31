@@ -11,7 +11,16 @@ export const apiLimiter = rateLimit({
   message: { error: 'Too many requests, please try again later.' },
 });
 
-// Stricter limiter for write operations and login to deter abuse.
+// Dedicated strict brute-force protection for login attempts
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes window
+  limit: 10, // Max 10 attempts per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts. Please wait 15 minutes and try again.' },
+});
+
+// Stricter limiter for write operations to deter abuse.
 export const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 120,
@@ -26,7 +35,6 @@ export function notFoundHandler(_req, res) {
 
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(err, _req, res, _next) {
-  console.error('[error]', err);
   const status = err.status || 500;
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'Invalid JSON body' });
@@ -34,8 +42,11 @@ export function errorHandler(err, _req, res, _next) {
   if (err.type === 'entity.too.large') {
     return res.status(413).json({ error: 'Payload too large' });
   }
-  if (NODE_ENV === 'production' && status >= 500) {
-    return res.status(500).json({ error: 'Internal server error' });
+  if (NODE_ENV === 'production') {
+    return res.status(status >= 500 ? 500 : status).json({
+      error: status >= 500 ? 'Internal server error' : (err.message || 'Request failed'),
+    });
   }
+  console.error('[error]', err);
   res.status(status).json({ error: err.message || 'Internal server error' });
 }

@@ -1,14 +1,31 @@
 // Per-collection field schemas. `pick` whitelists which fields are accepted so
-// clients cannot inject arbitrary keys into the store.
+// clients cannot inject arbitrary keys or prototype pollution into the store.
 
-const str = (min = 0, max = 3000) => (v) =>
-  typeof v === 'string' && v.length >= min && v.length <= max ? v : null;
+const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+const str = (min = 0, max = 3000) => (v) => {
+  if (typeof v !== 'string') return null;
+  const trimmed = v.trim();
+  return trimmed.length >= min && trimmed.length <= max ? trimmed : null;
+};
+
+const safeUrl = (max = 1000) => (v) => {
+  if (typeof v !== 'string') return null;
+  const trimmed = v.trim();
+  if (!trimmed) return '';
+  if (trimmed.length > max) return null;
+  // Disallow executable protocols
+  if (/^(javascript|data|vbscript|file):/i.test(trimmed)) return null;
+  return trimmed;
+};
+
 const strArr = (maxLen = 100) => (v) =>
   Array.isArray(v) &&
   v.length <= maxLen &&
-  v.every((s) => typeof s === 'string' && s.length <= 500)
-    ? v
+  v.every((s) => typeof s === 'string' && s.length <= 500 && !/^(javascript|data):/i.test(s.trim()))
+    ? v.map((s) => s.trim()).filter(Boolean)
     : null;
+
 const num = () => (v) => (Number.isFinite(v) ? v : typeof v === 'string' && v !== '' && Number.isFinite(Number(v)) ? Number(v) : null);
 
 const SCHEMAS = {
@@ -19,7 +36,7 @@ const SCHEMAS = {
       name: str(1, 200),
       desc: str(0, 2500),
       tags: strArr(),
-      link: str(0, 500),
+      link: safeUrl(500),
     },
     required: ['name'],
     idField: 'id',
@@ -88,13 +105,13 @@ const SINGLETON_SCHEMAS = {
     aboutTitle: str(0, 300),
     aboutDesc1: str(0, 2000),
     aboutDesc2: str(0, 2000),
-    avatarUrl: str(0, 500),
+    avatarUrl: safeUrl(500),
     copyright: str(0, 200),
     phone: str(0, 50),
-    phoneHref: str(0, 100),
+    phoneHref: safeUrl(100),
     email: str(0, 150),
-    emailHref: str(0, 200),
-    github: str(0, 300),
+    emailHref: safeUrl(200),
+    github: safeUrl(300),
     bio: str(0, 2000),
   },
 };
@@ -119,10 +136,15 @@ export function isCommonSingleton(key) {
  * Returns { value, error }.
  */
 export function sanitizeRecord(schema, input, { partial = false } = {}) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    return { value: null, error: 'Expected a JSON object payload' };
+  }
+
   const out = {};
   const errors = [];
 
   for (const [field, checker] of Object.entries(schema.fields)) {
+    if (FORBIDDEN_KEYS.has(field)) continue;
     if (input[field] === undefined) {
       if (partial) continue;
       if (schema.required?.includes(field)) {
@@ -157,9 +179,13 @@ export function sanitizeRecord(schema, input, { partial = false } = {}) {
  */
 export function sanitizeSingleton(key, input) {
   if (key === 'site') {
+    if (!input || typeof input !== 'object' || Array.isArray(input)) {
+      return { value: null, error: 'Expected an object for site settings' };
+    }
     const out = {};
     const errors = [];
     for (const [field, checker] of Object.entries(SINGLETON_SCHEMAS.site)) {
+      if (FORBIDDEN_KEYS.has(field)) continue;
       if (input[field] === undefined) continue;
       const cleaned = checker(input[field]);
       if (cleaned === null) errors.push(`Invalid value for '${field}'`);
@@ -167,10 +193,28 @@ export function sanitizeSingleton(key, input) {
     }
     return { value: out, error: errors.length ? errors.join(', ') : null };
   }
-  // Common singletons are arrays of arbitrary objects — ensure it's an array
-  // of plain objects with reasonable string values.
+
+  // Common singletons are arrays of plain objects with sanitized string properties
   if (!Array.isArray(input)) {
     return { value: null, error: 'Expected an array' };
   }
-  return { value: input, error: null };
+
+  const sanitizedArray = [];
+  for (const item of input) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+    const cleanItem = {};
+    for (const [k, v] of Object.entries(item)) {
+      if (FORBIDDEN_KEYS.has(k)) continue;
+      if (typeof v === 'string') {
+        const trimmed = v.trim();
+        if (/^(javascript|data):/i.test(trimmed)) cleanItem[k] = '';
+        else cleanItem[k] = trimmed.slice(0, 500);
+      } else {
+        cleanItem[k] = v;
+      }
+    }
+    sanitizedArray.push(cleanItem);
+  }
+
+  return { value: sanitizedArray, error: null };
 }

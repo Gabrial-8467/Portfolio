@@ -13,11 +13,10 @@ import {
   STATS as fallbackStats,
   PROCESS_STEPS as fallbackSteps,
 } from './data';
+import { ENDPOINTS } from './endpoints';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
-
-async function fetchJson(path) {
-  const res = await fetch(`${API_BASE}${path}`);
+async function fetchJson(url) {
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`Request failed: ${res.status}`);
   return res.json();
 }
@@ -71,13 +70,13 @@ export function usePortfolioData() {
           siteConfig,
           projects, skills, services, experience, education, achievements,
         ] = await Promise.all([
-          fetchJson('/site'),
-          fetchJson('/projects'),
-          fetchJson('/skills'),
-          fetchJson('/services'),
-          fetchJson('/experience'),
-          fetchJson('/education'),
-          fetchJson('/achievements'),
+          fetchJson(ENDPOINTS.SITE),
+          fetchJson(ENDPOINTS.PROJECTS),
+          fetchJson(ENDPOINTS.SKILLS),
+          fetchJson(ENDPOINTS.SERVICES),
+          fetchJson(ENDPOINTS.EXPERIENCE),
+          fetchJson(ENDPOINTS.EDUCATION),
+          fetchJson(ENDPOINTS.ACHIEVEMENTS),
         ]);
 
         if (!active) return;

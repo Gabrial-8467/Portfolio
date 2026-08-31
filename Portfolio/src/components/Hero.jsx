@@ -1,8 +1,15 @@
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import GridLines from './GridLines';
 
+const safeLink = (url) => {
+  if (!url || typeof url !== 'string') return '#';
+  const trimmed = url.trim();
+  if (/^(javascript|data|vbscript):/i.test(trimmed)) return '#';
+  return trimmed;
+};
+
 const scrollToAbout = () =>
-  document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
 
 export default function Hero({ site = {} }) {
   const heroBadge = site.heroBadge || 'Full Stack';
@@ -12,8 +19,8 @@ export default function Hero({ site = {} }) {
     "I'm Gabrial Deora, a Full Stack Web Developer with hands-on internship experience building responsive, high-performance web applications.";
   const heroTitle = site.heroTitle || 'Building Web Apps That Actually Perform';
   const heroBgText = site.heroBgText || 'Developer';
-  const avatarUrl = site.avatarUrl || '/hero.png';
-  const contactHref = site.emailHref || '#contact';
+  const avatarUrl = safeLink(site.avatarUrl || '/hero.png');
+  const contactHref = safeLink(site.emailHref || '#contact');
 
   return (
     <section className="hero">

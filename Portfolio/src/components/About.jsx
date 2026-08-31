@@ -3,6 +3,13 @@ import GridLines from './GridLines';
 import { ICON_KEYS } from '../data/iconKeys';
 import { GlobeIcon } from './Icons';
 
+const safeLink = (url) => {
+  if (!url || typeof url !== 'string') return '#';
+  const trimmed = url.trim();
+  if (/^(javascript|data|vbscript):/i.test(trimmed)) return '#';
+  return trimmed;
+};
+
 export default function About({ socials = [], site = {} }) {
   const aboutTitle = site.aboutTitle || 'The Developer Shaping Modern Web Experiences';
   const desc1 =
@@ -23,15 +30,16 @@ export default function About({ socials = [], site = {} }) {
             <div className="socials-list">
               {socials.map(({ key, label, href }, i) => {
                 const Icon = ICON_KEYS[key] || GlobeIcon;
+                const validHref = safeLink(href);
                 return (
                   <Reveal
                     key={`${key}-${label}-${i}`}
                     as="a"
                     type="up"
                     delay={i + 1}
-                    href={href}
+                    href={validHref}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="social-pill-btn"
                   >
                     {Icon && <Icon />} {label || key}

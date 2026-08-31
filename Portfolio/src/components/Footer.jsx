@@ -2,13 +2,20 @@ import { ArrowUpRight } from 'lucide-react';
 import { Reveal } from './AnimatedSection';
 import GridLines from './GridLines';
 
+const safeLink = (url) => {
+  if (!url || typeof url !== 'string') return '#';
+  const trimmed = url.trim();
+  if (/^(javascript|data|vbscript):/i.test(trimmed)) return '#';
+  return trimmed;
+};
+
 export default function Footer({ site = {}, nav = [] }) {
   const navLinks = Array.isArray(nav) ? nav.slice(0, 6) : [];
   const nameParts = (site.name || 'Gabrial Deora').trim().split(' ');
   const firstName = nameParts[0] || 'Gabrial';
   const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : (site.heroBgText || 'Portfolio');
   const bio = site.bio || 'A passionate Full Stack Web Developer building responsive, high-performance web applications.';
-  const contactHref = site.emailHref || (site.email ? `mailto:${site.email}` : '#contact');
+  const contactHref = safeLink(site.emailHref || (site.email ? `mailto:${site.email}` : '#contact'));
 
   return (
     <footer id="contact" className="footer-section">
@@ -39,13 +46,13 @@ export default function Footer({ site = {}, nav = [] }) {
             <div className="footer-links-title">Contact</div>
             <div className="footer-contact-info">
               {site.phone && (
-                <a href={site.phoneHref || `tel:${site.phone}`}>• {site.phone}</a>
+                <a href={safeLink(site.phoneHref || `tel:${site.phone}`)}>• {site.phone}</a>
               )}
               {site.email && (
-                <a href={site.emailHref || `mailto:${site.email}`}>• {site.email}</a>
+                <a href={safeLink(site.emailHref || `mailto:${site.email}`)}>• {site.email}</a>
               )}
               {site.github && (
-                <a href={site.github} target="_blank" rel="noreferrer">
+                <a href={safeLink(site.github)} target="_blank" rel="noopener noreferrer">
                   • {site.github.replace(/^https?:\/\//, '')}
                 </a>
               )}

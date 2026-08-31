@@ -83,7 +83,15 @@ const KV_SETS = {
 };
 
 const $ = (sel) => document.querySelector(sel);
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const esc = (s) =>
+  String(s ?? '').replace(/[&<>"'`]/g, (c) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '`': '&#96;',
+  }[c] || c));
 
 function banner(msg, type = 'success') {
   const el = $('#banner');
