@@ -2,6 +2,7 @@ import './App.css';
 import './animations.css';
 import './mobile.css';
 
+import { usePortfolioData } from './api';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -12,18 +13,20 @@ import Hackathons from './components/Hackathons';
 import Footer from './components/Footer';
 
 function App() {
+  const { data } = usePortfolioData();
+
   return (
     <div className="layout-container">
-      <Navbar />
+      <Navbar site={data.site} nav={data.nav} />
       <main>
-        <Hero />
-        <About />
-        <Experience />
-        <Projects />
-        <Skills />
-        <Hackathons />
+        <Hero site={data.site} />
+        <About socials={data.socials} site={data.site} />
+        <Experience data={data} />
+        <Projects projects={data.projects} site={data.site} />
+        <Skills services={data.services} skills={data.skills} />
+        <Hackathons achievements={data.achievements} site={data.site} />
       </main>
-      <Footer />
+      <Footer site={data.site} nav={data.nav} />
     </div>
   );
 }

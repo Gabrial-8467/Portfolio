@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Admin Dashboard</title>
+  <link rel="stylesheet" href="/dashboard/assets/styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>Portfolio Dashboard</h1>
+    <div class="right">
+      <a href="http://localhost:3000" target="_blank" rel="noreferrer">View site</a>
+      <button id="logout">Log out</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <button class="tab" data-view="projects">Projects</button>
+      <button class="tab" data-view="skills">Skills</button>
+      <button class="tab" data-view="services">Services</button>
+      <button class="tab" data-view="experience">Experience</button>
+      <button class="tab" data-view="education">Education</button>
+      <button class="tab" data-view="achievements">Achievements</button>
+      <button class="tab" data-view="site">Settings</button>
+    </aside>
+
+    <main class="content" id="content">
+      <div class="panel-head">
+        <h2 id="panel-title">Loading…</h2>
+        <button class="primary" id="add-btn" hidden>Add New</button>
+      </div>
+      <div id="banner"></div>
+      <div class="toolbar" id="toolbar" hidden>
+        <input class="search" id="search" type="search" placeholder="Search…" />
+      </div>
+      <div id="list" class="grid"></div>
+      <div id="settings"></div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h3 id="modal-title">Edit</h3>
+      <p class="sub" id="modal-sub"></p>
+      <div id="modal-body"></div>
+      <div class="modal-actions">
+        <button id="modal-cancel">Cancel</button>
+        <button class="primary" id="modal-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/dashboard/assets/app.js"></script>
+</body>
+</html>
