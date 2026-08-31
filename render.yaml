@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: portfolio
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: https://portfolio-2qra.onrender.com,https://gabrialdeora.vercel.app,http://localhost:3000
