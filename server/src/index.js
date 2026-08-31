@@ -14,7 +14,7 @@ import { siteRouter } from './routes/site.js';
 import { authRouter } from './routes/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PUBLIC_DIR = path.join(__dirname, '..', 'public');
+const DASHBOARD_DIR = path.resolve(__dirname, '../../dashboard');
 const CLIENT_DIST_DIR = path.resolve(__dirname, '../../Portfolio/dist');
 
 const app = express();
@@ -84,13 +84,13 @@ app.use('/api', notFoundHandler);
 
 // Admin dashboard static files. The login page and shared assets are public;
 // all other dashboard pages require the admin auth cookie.
-app.use('/dashboard/assets', express.static(path.join(PUBLIC_DIR, 'dashboard', 'assets')));
-app.use('/dashboard/login', express.static(path.join(PUBLIC_DIR, 'dashboard', 'login.html')));
+app.use('/dashboard/assets', express.static(path.join(DASHBOARD_DIR, 'assets')));
+app.use('/dashboard/login', express.static(path.join(DASHBOARD_DIR, 'login.html')));
 
 // Every other dashboard page requires the admin auth cookie.
 app.use('/dashboard', (req, res, next) => {
   if (!isAuthenticated(req)) return res.redirect('/dashboard/login');
-  return express.static(path.join(PUBLIC_DIR, 'dashboard'))(req, res, next);
+  return express.static(DASHBOARD_DIR)(req, res, next);
 });
 
 // Serve frontend client build if present (Unified single-server production deployment)
