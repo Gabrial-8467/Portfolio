@@ -1,8 +1,23 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { CheckCircle2, Copy, KeyRound, Zap, Terminal, ShieldCheck } from 'lucide-react';
+import {
+  CheckCircle2,
+  Copy,
+  Zap,
+  Terminal,
+  ShieldCheck,
+  Mail,
+  Lock,
+  User,
+  Layers,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  ArrowLeft,
+  Loader2,
+  Sparkles,
+} from 'lucide-react';
 import { useAuth } from '../../admin/useAuth';
-import Field, { TextInput } from '../../admin/components/Field';
 import ItemModal from '../../admin/components/ItemModal';
 import { useToast } from '../../admin/components/useToast';
 
@@ -11,12 +26,14 @@ export default function Login() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const [mode, setMode] = useState('login');
 
+  const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [portfolioName, setPortfolioName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [revealedKey, setRevealedKey] = useState(null);
@@ -62,134 +79,238 @@ export default function Login() {
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 1600);
-    toast('API key copied', 'success');
+    toast('API key copied to clipboard', 'success');
   };
 
   return (
     <div className="admin-login-page">
-      {/* Left Brand Feature Banner */}
+      {/* Left Feature Showcase Banner */}
       <div className="admin-login-banner">
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: '#4f46e5', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(79, 70, 229, 0.4)' }}>
+        <div className="login-banner-glow" />
+
+        <div className="login-banner-top">
+          <div className="login-brand-pill">
+            <div className="login-brand-icon">
               <Zap size={18} />
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff' }}>
-                Portfolio CMS
-              </div>
-              <div style={{ fontSize: 12, color: '#94a3b8' }}>Developer Platform</div>
+              <div className="login-brand-name">Portfolio CMS</div>
+              <div className="login-brand-sub">Developer Infrastructure</div>
             </div>
           </div>
 
-          <h2 style={{ fontSize: 32, fontWeight: 850, letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 16, maxWidth: 440 }}>
-            The Headless Content Engine for Modern Developers.
+          <h2 className="login-banner-heading">
+            The headless content engine for modern developers.
           </h2>
-          <p style={{ fontSize: 15, color: '#94a3b8', lineHeight: 1.6, maxWidth: 420, marginBottom: 36 }}>
-            Manage your projects, experience, media assets, and credentials in one dashboard, delivered instantly to any frontend via high-speed REST APIs.
+          <p className="login-banner-desc">
+            Manage your sections, media assets, API keys, and portfolio state with instant low-latency REST API delivery.
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#e2e8f0' }}>
-              <Terminal size={16} color="#38bdf8" />
-              <span>Type-safe REST API & JSON content delivery</span>
+          <div className="login-feature-list">
+            <div className="login-feature-item">
+              <div className="login-feature-icon" style={{ color: '#38bdf8' }}>
+                <Terminal size={16} />
+              </div>
+              <div className="login-feature-text">
+                <strong>Type-Safe REST Endpoints</strong>
+                <span>Instant JSON payloads for React, Next.js &amp; Flutter</span>
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#e2e8f0' }}>
-              <KeyRound size={16} color="#fbbf24" />
-              <span>One-click API key generation with SHA-256</span>
+
+            <div className="login-feature-item">
+              <div className="login-feature-icon" style={{ color: '#fbbf24' }}>
+                <Sparkles size={16} />
+              </div>
+              <div className="login-feature-text">
+                <strong>Dynamic Section CMS</strong>
+                <span>Visual structured editing + raw JSON schema mode</span>
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#e2e8f0' }}>
-              <ShieldCheck size={16} color="#34d399" />
-              <span>Multi-tenant portfolio workspaces</span>
+
+            <div className="login-feature-item">
+              <div className="login-feature-icon" style={{ color: '#34d399' }}>
+                <ShieldCheck size={16} />
+              </div>
+              <div className="login-feature-text">
+                <strong>Secure API Keys</strong>
+                <span>SHA-256 encrypted authentication &amp; rotation</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Mini Terminal Preview */}
-        <div style={{ background: '#030712', borderRadius: 8, padding: '14px 18px', border: '1px solid #1e293b', fontFamily: 'var(--admin-mono)', fontSize: 12, color: '#f8fafc', maxWidth: 420 }}>
-          <div style={{ color: '#38bdf8', marginBottom: 4 }}>$ curl https://api.portfolio.com/api/v1/portfolio</div>
-          <div style={{ color: '#94a3b8' }}>&gt; 200 OK (14ms) · 8 sections delivered</div>
+        {/* Live Code Preview Mockup */}
+        <div className="login-terminal-window">
+          <div className="login-terminal-bar">
+            <span className="login-term-dot red" />
+            <span className="login-term-dot yellow" />
+            <span className="login-term-dot green" />
+            <span className="login-term-title">api-live-request.sh</span>
+          </div>
+          <div className="login-terminal-content">
+            <p className="term-line">
+              <span className="term-prompt">$</span> curl -X GET https://api.portfolio.com/api/v1/portfolio \
+            </p>
+            <p className="term-line indent">
+              -H <span className="term-str">&quot;Authorization: Bearer pk_live_••••••••&quot;</span>
+            </p>
+            <div className="term-status-badge">
+              <span className="term-status-dot" />
+              <span>HTTP 200 OK (14ms) · 8 Sections Delivered</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Right Login Form Pane */}
       <div className="admin-login-form-pane">
         <div className="admin-login-card">
-          <h1 className="admin-login-title">{mode === 'login' ? 'Sign in to Dashboard' : 'Create an Account'}</h1>
-          <p className="admin-login-subtitle">
-            {mode === 'login' ? 'Enter your administrator credentials to access your CMS.' : 'Set up your developer workspace in seconds.'}
-          </p>
+          <div className="admin-login-header">
+            <h1 className="admin-login-title">
+              {mode === 'login' ? 'Sign in to Dashboard' : 'Create Admin Workspace'}
+            </h1>
+            <p className="admin-login-subtitle">
+              {mode === 'login'
+                ? 'Welcome back! Enter your administrator credentials to access your CMS.'
+                : 'Set up your multi-tenant developer workspace in seconds.'}
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="admin-form" style={{ border: 'none', padding: 0, boxShadow: 'none', background: 'transparent' }}>
+          {/* Mode Switcher Pills */}
+          <div className="login-mode-tabs">
+            <button
+              type="button"
+              className={`login-mode-tab ${mode === 'login' ? 'active' : ''}`}
+              onClick={() => { setMode('login'); setError(''); }}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              className={`login-mode-tab ${mode === 'register' ? 'active' : ''}`}
+              onClick={() => { setMode('register'); setError(''); }}
+            >
+              Register
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="admin-login-form">
             {mode === 'register' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 14 }}>
-                <Field label="Your Name">
-                  <TextInput value={name} onChange={setName} placeholder="Jane Doe" required autoComplete="name" />
-                </Field>
-                <Field label="Portfolio Workspace Name" hint="Defaults to your name if left empty.">
-                  <TextInput value={portfolioName} onChange={setPortfolioName} placeholder="My Portfolio" />
-                </Field>
+              <div className="login-field-group">
+                <div className="login-field">
+                  <label className="login-label" htmlFor="register-name">Full Name</label>
+                  <div className="login-input-wrap">
+                    <User size={16} className="login-input-icon" />
+                    <input
+                      id="register-name"
+                      type="text"
+                      className="login-input"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Jane Doe"
+                      required
+                      autoComplete="name"
+                    />
+                  </div>
+                </div>
+
+                <div className="login-field">
+                  <label className="login-label" htmlFor="register-portfolio">Portfolio Name</label>
+                  <div className="login-input-wrap">
+                    <Layers size={16} className="login-input-icon" />
+                    <input
+                      id="register-portfolio"
+                      type="text"
+                      className="login-input"
+                      value={portfolioName}
+                      onChange={(e) => setPortfolioName(e.target.value)}
+                      placeholder="My Portfolio"
+                    />
+                  </div>
+                  <span className="login-hint">Defaults to your full name if left empty.</span>
+                </div>
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 16 }}>
-              <Field label="Email Address">
-                <TextInput
-                  type="email"
-                  value={email}
-                  onChange={setEmail}
-                  placeholder="admin@example.com"
-                  required
-                  autoComplete="email"
-                />
-              </Field>
-              <Field label="Password">
-                <input
-                  type="password"
-                  className="admin-input"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                />
-              </Field>
+            <div className="login-field-group">
+              <div className="login-field">
+                <label className="login-label" htmlFor="login-email">Email Address</label>
+                <div className="login-input-wrap">
+                  <Mail size={16} className="login-input-icon" />
+                  <input
+                    id="login-email"
+                    type="email"
+                    className="login-input"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@example.com"
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+
+              <div className="login-field">
+                <label className="login-label" htmlFor="login-password">Password</label>
+                <div className="login-input-wrap">
+                  <Lock size={16} className="login-input-icon" />
+                  <input
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="login-input"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    required
+                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  />
+                  <button
+                    type="button"
+                    className="login-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {error && <div className="admin-form-error">{error}</div>}
+            {error && (
+              <div className="login-error-alert" role="alert">
+                <span>{error}</span>
+              </div>
+            )}
 
-            <button type="submit" className="admin-btn admin-btn-primary admin-btn-block" disabled={loading} style={{ padding: '10px 14px' }}>
-              {loading ? 'Authenticating…' : mode === 'login' ? 'Sign In' : 'Create Account'}
+            <button
+              type="submit"
+              className="login-submit-btn"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="spin-icon" />
+                  <span>Authenticating…</span>
+                </>
+              ) : (
+                <>
+                  <span>{mode === 'login' ? 'Sign In to Dashboard' : 'Create Workspace'}</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
             </button>
           </form>
 
-          <div style={{ marginTop: 20, textAlign: 'center', fontSize: 13, color: 'var(--admin-text-muted)' }}>
-            {mode === 'login' ? (
-              <>
-                Need a new workspace?{' '}
-                <button type="button" className="admin-link-btn" onClick={() => { setMode('register'); setError(''); }}>
-                  Create an account
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{' '}
-                <button type="button" className="admin-link-btn" onClick={() => { setMode('login'); setError(''); }}>
-                  Sign in
-                </button>
-              </>
-            )}
-          </div>
-
-          <div style={{ marginTop: 24, textAlign: 'center' }}>
-            <Link to="/" style={{ fontSize: 12, color: 'var(--admin-text-muted)', textDecoration: 'none' }}>
-              ← Return to Portfolio Website
+          <div className="login-footer-links">
+            <Link to="/" className="login-back-link">
+              <ArrowLeft size={14} />
+              <span>Return to Portfolio Website</span>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Secret Key Modal */}
+      {/* Secret API Key Reveal Modal */}
       <ItemModal
         title="Your API Key is Ready"
         open={Boolean(revealedKey)}
@@ -197,12 +318,12 @@ export default function Login() {
         onSubmit={finish}
         loading={false}
       >
-        <div style={{ padding: '12px 14px', background: 'var(--admin-warning-light)', border: '1px solid var(--admin-warning-border)', borderRadius: 'var(--admin-radius-sm)', marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--admin-warning)', marginBottom: 2 }}>
+        <div style={{ padding: '14px 16px', background: 'var(--admin-warning-light)', border: '1px solid var(--admin-warning-border)', borderRadius: 'var(--admin-radius-sm)', marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--admin-warning)', marginBottom: 4 }}>
             ⚠ Save this secret key now
           </div>
-          <div style={{ fontSize: 12, color: 'var(--admin-text-secondary)' }}>
-            This is the <strong>only time</strong> the full key will be shown. You can revoke it anytime in API Key settings.
+          <div style={{ fontSize: 12, color: 'var(--admin-text-secondary)', lineHeight: 1.5 }}>
+            This is the <strong>only time</strong> the full secret key will be revealed. You can regenerate or revoke it anytime in API Key settings.
           </div>
         </div>
 
