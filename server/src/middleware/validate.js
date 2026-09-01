@@ -1,6 +1,6 @@
 import { ApiError } from './errorHandler.js';
 
-const str = (v, max = 500) => {
+const sanitizeStr = (v, max = 500) => {
   if (v === undefined || v === null) return undefined;
   const s = String(v).trim();
   if (!s) return undefined;
@@ -8,7 +8,18 @@ const str = (v, max = 500) => {
   return s;
 };
 
-const strArr = (v, maxItems = 50, maxItemLen = 200) => {
+const str = (...args) => {
+  if (args.length === 0) {
+    return (v) => sanitizeStr(v, 500);
+  }
+  const [vOrMax, max] = args;
+  if (typeof vOrMax === 'number' && max === undefined) {
+    return (v) => sanitizeStr(v, vOrMax);
+  }
+  return sanitizeStr(vOrMax, max ?? 500);
+};
+
+const sanitizeStrArr = (v, maxItems = 50, maxItemLen = 200) => {
   if (v === undefined || v === null) return undefined;
   if (!Array.isArray(v)) {
     if (typeof v === 'string') return v ? [v.trim()] : [];
@@ -24,6 +35,17 @@ const strArr = (v, maxItems = 50, maxItemLen = 200) => {
     });
 };
 
+const strArr = (...args) => {
+  if (args.length === 0) {
+    return (v) => sanitizeStrArr(v, 50, 200);
+  }
+  const [vOrMaxItems, maxItemLen] = args;
+  if (typeof vOrMaxItems === 'number') {
+    return (v) => sanitizeStrArr(v, vOrMaxItems, maxItemLen ?? 200);
+  }
+  return sanitizeStrArr(vOrMaxItems, 50, maxItemLen ?? 200);
+};
+
 const num = (v) => {
   if (v === undefined || v === null) return undefined;
   const n = Number(v);
@@ -36,7 +58,7 @@ const bool = (v) => {
   return v === true || v === 'true' || v === 1 || v === '1';
 };
 
-const linkItems = (v, maxItems = 20) => {
+const sanitizeLinkItems = (v, maxItems = 20) => {
   if (v === undefined || v === null) return undefined;
   if (!Array.isArray(v)) throw new ApiError(400, 'Expected an array of links');
   if (v.length > maxItems) throw new ApiError(400, `Array exceeds max items ${maxItems}`);
@@ -44,21 +66,43 @@ const linkItems = (v, maxItems = 20) => {
     .map((item) => {
       if (!item || typeof item !== 'object') throw new ApiError(400, 'Each link must be an object with label and href');
       return {
-        label: str(item.label, 100),
-        href: str(item.href, 500),
+        label: sanitizeStr(item.label, 100),
+        href: sanitizeStr(item.href, 500),
       };
     })
     .filter((item) => item && item.label && item.href);
 };
 
-const slug = (v) => {
+const linkItems = (...args) => {
+  if (args.length === 0) {
+    return (v) => sanitizeLinkItems(v, 20);
+  }
+  const [vOrMaxItems] = args;
+  if (typeof vOrMaxItems === 'number') {
+    return (v) => sanitizeLinkItems(v, vOrMaxItems);
+  }
+  return sanitizeLinkItems(vOrMaxItems, 20);
+};
+
+const sanitizeSlug = (v, max = 80) => {
   if (v === undefined || v === null) return undefined;
   const s = String(v).trim().toLowerCase();
   if (!/^[a-z0-9][a-z0-9-]*$/.test(s)) {
     throw new ApiError(400, 'Slug may only contain lowercase letters, numbers, and hyphens');
   }
-  if (s.length > 80) throw new ApiError(400, 'Slug exceeds max length 80');
+  if (s.length > max) throw new ApiError(400, `Slug exceeds max length ${max}`);
   return s;
+};
+
+const slug = (...args) => {
+  if (args.length === 0) {
+    return (v) => sanitizeSlug(v, 80);
+  }
+  const [vOrMax] = args;
+  if (typeof vOrMax === 'number') {
+    return (v) => sanitizeSlug(v, vOrMax);
+  }
+  return sanitizeSlug(vOrMax, 80);
 };
 
 const MAX_JSON_DEPTH = 6;
@@ -88,7 +132,7 @@ const sanitizeValue = (v, depth = 0, seen = new Set()) => {
         if (v.length > MAX_ARR_LEN) v = v.slice(0, MAX_ARR_LEN);
         result = v.map((item) => sanitizeValue(item, depth + 1, seen)).filter((item) => item !== undefined);
       } else {
-        const entries = Object.entries(v);
+        let entries = Object.entries(v);
         if (entries.length > MAX_KEYS) entries = entries.slice(0, MAX_KEYS);
         result = {};
         for (const [key, val] of entries) {
@@ -114,8 +158,11 @@ const jsonPatch = jsonContent;
 const validate = (body, fields) => {
   const clean = {};
   for (const [key, rule] of Object.entries(fields)) {
-    const raw = body[key];
-    const value = rule(raw);
+    const raw = body ? body[key] : undefined;
+    let value = typeof rule === 'function' ? rule(raw) : rule;
+    if (typeof value === 'function') {
+      value = value(raw);
+    }
     if (value !== undefined) clean[key] = value;
   }
   return clean;

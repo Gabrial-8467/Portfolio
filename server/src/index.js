@@ -14,8 +14,35 @@ import superadminRoutes from './routes/superadminRoutes.js';
 
 const app = express();
 
-app.use(helmet());
-app.use(cors({ origin: config.corsOrigins, credentials: true }));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, Postman, same-origin)
+    if (!origin) return callback(null, true);
+
+    // In development mode, allow any origin (e.g. localhost:3000, localhost:5173, 127.0.0.1, LAN IPs)
+    if (config.nodeEnv !== 'production') {
+      return callback(null, true);
+    }
+
+    if (config.corsOrigins.includes(origin) || config.corsOrigins.includes('*')) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`Origin ${origin} not allowed by CORS`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 
 const authLimiter = rateLimit({
