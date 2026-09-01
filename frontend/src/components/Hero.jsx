@@ -1,76 +1,168 @@
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import GridLines from './GridLines';
-
-const safeLink = (url) => {
-  if (!url || typeof url !== 'string') return '#';
-  const trimmed = url.trim();
-  if (/^(javascript|data|vbscript):/i.test(trimmed)) return '#';
-  return trimmed;
-};
-
-const scrollToAbout = () =>
-  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+import { useState, useEffect, useRef } from 'react';
+import { ArrowUpRight, ArrowDownRight, Sparkles, Terminal } from 'lucide-react';
+import MagneticButton from './MagneticButton';
 
 export default function Hero({ site = {} }) {
-  const heroBadge = site.heroBadge || 'Full Stack';
-  const heroBio =
-    site.heroBio ||
-    site.bio ||
-    "I'm Gabrial Deora, a Full Stack Web Developer with hands-on internship experience building responsive, high-performance web applications.";
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+  const heroRef = useRef(null);
+
+  const name = site.name || 'Gabrial Deora';
+  const heroBadge = site.heroBadge || 'Available for full-time & contract roles';
   const heroTitle = site.heroTitle || 'Building Web Apps That Actually Perform';
-  const heroBgText = site.heroBgText || 'Developer';
-  const avatarUrl = safeLink(site.avatarUrl || '/hero.png');
-  const contactHref = safeLink(site.emailHref || '#contact');
+  const heroBio = site.heroBio || site.bio || 'Full Stack Developer with hands-on experience building responsive, high-performance web applications with React, Node.js, and MongoDB.';
+  const heroBgText = site.heroBgText || 'DEVELOPER';
+  const avatarUrl = site.avatarUrl || '/hero.png';
+
+  useEffect(() => {
+    // Only desktop parallax
+    if (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return undefined;
+    }
+
+    const handleMouseMove = (e) => {
+      const { innerWidth, innerHeight } = window;
+      const x = (e.clientX / innerWidth - 0.5) * 2; // -1 to 1
+      const y = (e.clientY / innerHeight - 0.5) * 2; // -1 to 1
+      setMouseOffset({ x, y });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const scrollToSection = (e, id) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Split name for dramatic character/word reveal
+  const nameParts = name.toUpperCase().split(' ');
 
   return (
-    <section className="hero">
-      <GridLines />
-      <div className="hero-bg-text-container hero-bg-text-animated">
-        <span className="hero-bg-text">{heroBgText}</span>
+    <section id="hero" ref={heroRef} className="hero-modern-section">
+      {/* Background Parallax Typography & Grid */}
+      <div
+        className="hero-ambient-backdrop"
+        style={{
+          transform: `translate3d(${mouseOffset.x * 6}px, ${mouseOffset.y * 6}px, 0)`,
+        }}
+      >
+        <span className="hero-giant-bg-text">{heroBgText}</span>
       </div>
 
-      <div className="content-wrapper">
-        <div className="hero-content">
-          <div className="hero-left-col">
-            <div>
-              <div className="hero-badge hero-badge-animated">{heroBadge}</div>
-              <p className="hero-bio">{heroBio}</p>
+      <div className="hero-content-container">
+        {/* Top Eyebrow & Status */}
+        <div className="hero-eyebrow-row">
+          <div className="hero-status-pill">
+            <span className="pulse-dot" />
+            <span>{heroBadge}</span>
+          </div>
+
+          <div className="hero-intro-text">
+            <span>HELLO, I&apos;M {name.split(' ')[0]?.toUpperCase()}</span>
+          </div>
+        </div>
+
+        {/* Main Giant Name Heading with Staggered Reveal */}
+        <div className="hero-display-heading">
+          {nameParts.map((word, wIdx) => (
+            <div key={word} className="hero-name-word">
+              {word.split('').map((char, cIdx) => (
+                <span
+                  key={`${word}-${char}-${cIdx}`}
+                  className="hero-split-char"
+                  style={{ animationDelay: `${wIdx * 120 + cIdx * 35 + 100}ms` }}
+                >
+                  {char}
+                </span>
+              ))}
             </div>
-            <button
-              className="hero-scroll-btn"
-              onClick={scrollToAbout}
-              aria-label="Scroll to About section"
-              type="button"
+          ))}
+        </div>
+
+        {/* Dynamic Tagline & Supporting Copy */}
+        <div className="hero-narrative-grid">
+          <div>
+            <h2 className="hero-tagline">{heroTitle}</h2>
+            <p className="hero-description">{heroBio}</p>
+
+            {/* Magnetic CTA Action Buttons */}
+            <div className="hero-cta-group">
+              <MagneticButton
+                as="a"
+                href="#projects"
+                className="btn-primary btn-lg"
+                data-cursor="VIEW"
+                onClick={(e) => scrollToSection(e, 'projects')}
+              >
+                <span>View Projects</span>
+                <span className="btn-arrow-circle"><ArrowUpRight size={18} /></span>
+              </MagneticButton>
+
+              <MagneticButton
+                as="a"
+                href="#contact"
+                className="btn-secondary btn-lg"
+                data-cursor="TALK"
+                onClick={(e) => scrollToSection(e, 'contact')}
+              >
+                <span>Let&apos;s Talk</span>
+                <ArrowDownRight size={18} />
+              </MagneticButton>
+            </div>
+          </div>
+
+          {/* Interactive Floating Parallax Visual Scene with Avatar */}
+          <div className="hero-visual-column">
+            <div
+              className="hero-floating-card-scene"
+              style={{
+                transform: `translate3d(${mouseOffset.x * 12}px, ${mouseOffset.y * 12}px, 0)`,
+              }}
             >
-              <ArrowDownRight size={24} />
-            </button>
-          </div>
+              {/* Image Card Container */}
+              <div className="hero-avatar-card" data-cursor="GABRIAL">
+                <div className="avatar-img-frame">
+                  <img
+                    src={avatarUrl}
+                    alt={name}
+                    className="avatar-photo"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <div className="avatar-overlay-gradient" />
+                </div>
 
-          <div className="hero-title-container">
-            <h1 className="hero-title hero-title-animated">{heroTitle}</h1>
-          </div>
+                <div className="avatar-caption-bar">
+                  <div>
+                    <div className="avatar-name">{name}</div>
+                    <div className="avatar-role">Full Stack Web Developer</div>
+                  </div>
+                  <span className="avatar-online-indicator">Online</span>
+                </div>
+              </div>
 
-          <div className="hero-interactive-zone">
-            <div className="hero-cta-left">
-              <a href="#projects" className="btn-primary btn-primary-pulse">
-                View My Work
-                <span className="btn-arrow-circle"><ArrowUpRight size={20} /></span>
-              </a>
-            </div>
+              {/* Floating Orbit Badges */}
+              <div
+                className="floating-orbit-pill pill-top-right"
+                style={{
+                  transform: `translate3d(${-mouseOffset.x * 8}px, ${-mouseOffset.y * 8}px, 0)`,
+                }}
+              >
+                <Sparkles size={14} color="#4f46e5" />
+                <span>React 19 &amp; Vite 8</span>
+              </div>
 
-            <div className="hero-image-wrapper">
-              <img
-                src={avatarUrl}
-                alt={`${site.name || 'Developer'} tech graphic`}
-                className="hero-portrait hero-portrait-animated"
-              />
-            </div>
-
-            <div className="hero-cta-right">
-              <a href={contactHref} className="btn-primary">
-                Let's Work Together
-                <span className="btn-arrow-circle"><ArrowUpRight size={20} /></span>
-              </a>
+              <div
+                className="floating-orbit-pill pill-bottom-left"
+                style={{
+                  transform: `translate3d(${mouseOffset.x * 10}px, ${mouseOffset.y * 10}px, 0)`,
+                }}
+              >
+                <Terminal size={14} color="#10b981" />
+                <span>MERN &amp; Headless APIs</span>
+              </div>
             </div>
           </div>
         </div>

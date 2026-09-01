@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ArrowRight,
   BookOpen,
@@ -7,10 +7,13 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { PORTFOLIO_SLUG } from '../api/client';
+import MagneticButton from './MagneticButton';
 
 export default function Hero({ onOpenRegister }) {
   const [activeTab, setActiveTab] = useState('response');
   const [copied, setCopied] = useState(false);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const cardRef = useRef(null);
 
   const requestSnippet = `GET /api/v1/portfolio HTTP/1.1
 Host: api.portfoliocms.dev
@@ -55,13 +58,35 @@ Accept: application/json`;
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleMouseMove = (e) => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    const node = cardRef.current;
+    if (!node) return;
+
+    const rect = node.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -6;
+    const rotateY = ((x - centerX) / centerX) * 6;
+
+    setTilt({ x: rotateX, y: rotateY });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+  };
+
   return (
     <section className="saas-hero">
       <div className="saas-container">
         <div className="hero-grid">
           {/* Left Column: Value Proposition */}
           <div>
-            <div className="saas-badge">
+            <div className="saas-badge" data-cursor="NEXTGEN">
               <Sparkles size={14} /> Next-Gen Headless CMS for Portfolios
             </div>
             <h1 className="hero-title">
@@ -74,16 +99,23 @@ Accept: application/json`;
             </p>
 
             <div className="hero-actions">
-              <button
+              <MagneticButton
+                as="button"
                 type="button"
                 className="btn btn-primary btn-lg"
                 onClick={onOpenRegister}
+                data-cursor="START"
               >
-                Start Building — Free <ArrowRight size={17} />
-              </button>
-              <a href="#docs" className="btn btn-secondary btn-lg">
-                <BookOpen size={17} /> Explore API Docs
-              </a>
+                <span>Start Building — Free</span> <ArrowRight size={17} />
+              </MagneticButton>
+              <MagneticButton
+                as="a"
+                href="#docs"
+                className="btn btn-secondary btn-lg"
+                data-cursor="DOCS"
+              >
+                <BookOpen size={17} /> <span>Explore API Docs</span>
+              </MagneticButton>
             </div>
 
             <div className="hero-stats">
@@ -102,67 +134,87 @@ Accept: application/json`;
             </div>
           </div>
 
-          {/* Right Column: Realistic API Preview Card */}
-          <div>
-            <div className="hero-code-card">
-              <div className="code-card-header">
-                <div className="code-dots">
-                  <div className="code-dot red" />
-                  <div className="code-dot yellow" />
-                  <div className="code-dot green" />
-                </div>
-                <div className="code-tabs">
-                  <button
-                    type="button"
-                    className={`code-tab-btn ${activeTab === 'response' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('response')}
-                  >
-                    Response (200 OK)
-                  </button>
-                  <button
-                    type="button"
-                    className={`code-tab-btn ${activeTab === 'request' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('request')}
-                  >
-                    Request Header
-                  </button>
-                </div>
+          {/* Right Column: Interactive Code Visualizer with 3D Mouse Tilt */}
+          <div
+            ref={cardRef}
+            className="hero-code-card"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            data-cursor="JSON"
+            style={{
+              transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+              transition: 'transform 0.15s ease-out, box-shadow 0.2s ease',
+            }}
+          >
+            <div className="code-card-header">
+              <div className="code-dots">
+                <span className="code-dot red" />
+                <span className="code-dot yellow" />
+                <span className="code-dot green" />
+              </div>
+
+              <div className="code-tabs">
                 <button
                   type="button"
-                  className="code-copy-btn"
-                  onClick={handleCopy}
-                  title="Copy code"
+                  className={`code-tab-btn ${activeTab === 'response' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('response')}
                 >
-                  {copied ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
-                  <span>{copied ? 'Copied' : 'Copy'}</span>
+                  200 OK — JSON Response
+                </button>
+                <button
+                  type="button"
+                  className={`code-tab-btn ${activeTab === 'request' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('request')}
+                >
+                  HTTP Request
                 </button>
               </div>
 
-              <div className="code-body">
-                {activeTab === 'request' ? (
-                  <div>
-                    <div className="code-request-line">
-                      <span className="method-tag method-get">GET</span>
-                      <span style={{ color: '#ffffff', fontWeight: 600 }}>/api/v1/portfolio</span>
-                    </div>
-                    <pre style={{ margin: 0 }}>
-                      <span className="tok-key">Host:</span> <span className="tok-str">api.portfoliocms.dev</span>{'\n'}
-                      <span className="tok-key">Authorization:</span> <span className="tok-str">Bearer pk_live_9d82f71a9320e4b7c</span>{'\n'}
-                      <span className="tok-key">Accept:</span> <span className="tok-str">application/json</span>
-                    </pre>
+              <button
+                type="button"
+                className="code-copy-btn"
+                onClick={handleCopy}
+                data-cursor="COPY"
+                title="Copy code"
+              >
+                {copied ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+                <span>{copied ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
+
+            <div className="code-body">
+              {activeTab === 'request' ? (
+                <div>
+                  <div className="code-request-line">
+                    <span className="method-tag method-get">GET</span>
+                    <span style={{ color: '#38bdf8' }}>/api/v1/portfolio</span>
+                    <span style={{ color: '#64748b' }}>HTTP/1.1</span>
                   </div>
-                ) : (
-                  <div>
-                    <div className="code-request-line">
-                      <span className="method-tag method-get" style={{ background: '#10b981' }}>200 OK</span>
-                      <span style={{ color: '#94a3b8', fontSize: 12 }}>32ms · application/json</span>
-                    </div>
-                    <pre style={{ margin: 0 }}>
-                      {`{\n  "success": true,\n  "data": {\n    "portfolio": {\n      "name": "Gabrial Deora",\n      "slug": "${PORTFOLIO_SLUG}"\n    },\n    "sections": [\n      {\n        "key": "site",\n        "label": "Site & Hero",\n        "isPublished": true\n      },\n      {\n        "key": "projects",\n        "items": 9,\n        "isPublished": true\n      }\n    ]\n  }\n}`}
-                    </pre>
-                  </div>
-                )}
-              </div>
+                  <pre style={{ margin: 0 }}>
+                    <code>
+                      <span style={{ color: '#94a3b8' }}>Host: </span><span style={{ color: '#f1f5f9' }}>api.portfoliocms.dev</span>{'\n'}
+                      <span style={{ color: '#94a3b8' }}>Authorization: </span><span style={{ color: '#fbbf24' }}>Bearer pk_live_9d82f71a9320e4b7c</span>{'\n'}
+                      <span style={{ color: '#94a3b8' }}>Accept: </span><span style={{ color: '#a7f3d0' }}>application/json</span>
+                    </code>
+                  </pre>
+                </div>
+              ) : (
+                <pre style={{ margin: 0 }}>
+                  <code>
+                    <span className="tok-brace">&#123;</span>{'\n'}
+                    {'  '}<span className="tok-key">&quot;success&quot;</span>: <span className="tok-bool">true</span>,{'\n'}
+                    {'  '}<span className="tok-key">&quot;data&quot;</span>: <span className="tok-brace">&#123;</span>{'\n'}
+                    {'    '}<span className="tok-key">&quot;portfolio&quot;</span>: <span className="tok-brace">&#123;</span>{'\n'}
+                    {'      '}<span className="tok-key">&quot;name&quot;</span>: <span className="tok-str">&quot;Gabrial Deora&quot;</span>,{'\n'}
+                    {'      '}<span className="tok-key">&quot;slug&quot;</span>: <span className="tok-str">&quot;{PORTFOLIO_SLUG}&quot;</span>,{'\n'}
+                    {'      '}<span className="tok-key">&quot;settings&quot;</span>: <span className="tok-brace">&#123;</span> <span className="tok-key">&quot;theme&quot;</span>: <span className="tok-str">&quot;developer-dark&quot;</span> <span className="tok-brace">&#125;</span>{'\n'}
+                    {'    '}<span className="tok-brace">&#125;</span>,{'\n'}
+                    {'    '}<span className="tok-key">&quot;sections&quot;</span>: [<span className="tok-brace">&#123;</span> <span className="tok-key">&quot;key&quot;</span>: <span className="tok-str">&quot;site&quot;</span>, <span className="tok-key">&quot;isPublished&quot;</span>: <span className="tok-bool">true</span> <span className="tok-brace">&#125;</span>, <span className="tok-brace">&#123;</span> <span className="tok-key">&quot;key&quot;</span>: <span className="tok-str">&quot;projects&quot;</span> <span className="tok-brace">&#125;</span>]{'\n'}
+                    {'  '}<span className="tok-brace">&#125;</span>{'\n'}
+                    <span className="tok-brace">&#125;</span>
+                  </code>
+                </pre>
+              )}
             </div>
           </div>
         </div>

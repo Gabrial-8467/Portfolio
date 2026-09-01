@@ -14,6 +14,7 @@ import {
   Menu,
   X,
 } from 'lucide-react';
+import MagneticButton from './MagneticButton';
 import { ADMIN_URL } from '../api/client';
 
 export default function Navbar({ onOpenRegister, onSelectTab }) {
@@ -24,7 +25,7 @@ export default function Navbar({ onOpenRegister, onSelectTab }) {
       <div className="saas-container">
         <div className="saas-nav-inner">
           {/* Logo */}
-          <a href="#" className="saas-logo" onClick={() => onSelectTab && onSelectTab('overview')}>
+          <a href="#" className="saas-logo" data-cursor="CMS" onClick={() => onSelectTab && onSelectTab('overview')}>
             <div className="saas-logo-icon">
               <Layers size={18} />
             </div>
@@ -34,7 +35,7 @@ export default function Navbar({ onOpenRegister, onSelectTab }) {
           {/* Desktop Links */}
           <div className="saas-nav-links">
             <div className="nav-item">
-              <a href="#features" className="nav-link">
+              <a href="#features" className="nav-link" data-cursor="EXPLORE">
                 Product <ChevronDown size={14} />
               </a>
               <div className="nav-dropdown">
@@ -54,7 +55,7 @@ export default function Navbar({ onOpenRegister, onSelectTab }) {
             </div>
 
             <div className="nav-item">
-              <a href="#docs" className="nav-link">
+              <a href="#docs" className="nav-link" data-cursor="DOCS">
                 Developers <ChevronDown size={14} />
               </a>
               <div className="nav-dropdown">
@@ -78,7 +79,7 @@ export default function Navbar({ onOpenRegister, onSelectTab }) {
             </div>
 
             <div className="nav-item">
-              <a href="#faq" className="nav-link">
+              <a href="#faq" className="nav-link" data-cursor="FAQ">
                 Resources <ChevronDown size={14} />
               </a>
               <div className="nav-dropdown">
@@ -93,7 +94,7 @@ export default function Navbar({ onOpenRegister, onSelectTab }) {
               </div>
             </div>
 
-            <a href="#pricing" className="nav-link">Pricing</a>
+            <a href="#pricing" className="nav-link" data-cursor="PLANS">Pricing</a>
           </div>
 
           {/* Nav Actions */}
@@ -103,16 +104,18 @@ export default function Navbar({ onOpenRegister, onSelectTab }) {
               className="btn btn-secondary"
               target="_blank"
               rel="noreferrer"
+              data-cursor="SIGNIN"
             >
               Sign In
             </a>
-            <button
+            <MagneticButton
               type="button"
               className="btn btn-primary"
               onClick={onOpenRegister}
+              data-cursor="START"
             >
-              Get Started <ArrowRight size={15} />
-            </button>
+              <span>Get Started</span> <ArrowRight size={15} />
+            </MagneticButton>
             <button
               type="button"
               className="mobile-menu-btn"

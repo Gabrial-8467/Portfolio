@@ -1,112 +1,92 @@
-import { ArrowUpRight } from 'lucide-react';
-import { Reveal, AnimatedCounter } from './AnimatedSection';
-import GridLines from './GridLines';
-
-function ProcessPills({ steps = [] }) {
-  if (!steps.length) return null;
-  return (
-    <div className="process-pills-row">
-      {steps.map(({ text, variant }, i) => (
-        <Reveal key={`${text}-${i}`} as="div" type="scale" delay={i + 1} className={`process-pill ${variant || 'grey'}`}>
-          {text === 'arrow' ? <ArrowUpRight size={32} /> : text}
-        </Reveal>
-      ))}
-    </div>
-  );
-}
-
-function Stats({ stats = [] }) {
-  if (!stats.length) return null;
-  return (
-    <div className="stats-grid">
-      {stats.map((stat, i) => (
-        <Reveal key={stat.label || i} type="up" delay={i + 1} className="stat-card stat-card-animated">
-          <div className="stat-label">{stat.label}</div>
-          <AnimatedCounter end={String(stat.value)} className="stat-number" />
-          <div className="stat-subtext">{stat.subtext}</div>
-        </Reveal>
-      ))}
-    </div>
-  );
-}
-
-function Timeline({ items = [] }) {
-  if (!items.length) return null;
-  return (
-    <div className="experience-timeline">
-      {items.map((exp, i) => {
-        const points = Array.isArray(exp.points) ? exp.points : [];
-        return (
-          <div key={exp.id || `${exp.company}-${exp.period}-${i}`} className="exp-card">
-            <div className="exp-left">
-              <div className="exp-period">{exp.period}</div>
-              {exp.location && <div className="exp-location">{exp.location}</div>}
-            </div>
-            <div className="exp-right">
-              <div className="exp-role">{exp.role}</div>
-              <div className="exp-company">{exp.company}</div>
-              {points.length > 0 && (
-                <ul className="exp-points">
-                  {points.map((point, idx) => (
-                    <li key={idx}>{point}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function Education({ items = [] }) {
-  if (!items.length) return null;
-  return (
-    <div className="education-section">
-      <div className="section-label" style={{ marginBottom: '1.5rem' }}>Education</div>
-      {items.map((edu, i) => (
-        <div key={edu.id || `${edu.institution}-${edu.period}-${i}`} className="edu-card">
-          <div className="edu-period">{edu.period}</div>
-          <div className="edu-degree">{edu.degree}</div>
-          <div className="edu-institution">
-            {edu.institution}{edu.location ? ` — ${edu.location}` : ''}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+import { Briefcase, GraduationCap, Calendar, MapPin, CheckCircle2 } from 'lucide-react';
+import { useInView } from '../hooks/useInView';
 
 export default function Experience({ data = {} }) {
-  const processSteps = data.processSteps || [];
-  const stats = data.stats || [];
-  const experience = data.experience || [];
-  const education = data.education || [];
-  const experienceTitle = data.site?.experienceTitle || 'Crafting Scalable Solutions That Matter.';
+  const [sectionRef, isInView] = useInView({ threshold: 0.1 });
+  const experienceList = Array.isArray(data.experience) ? data.experience : [];
+  const educationList = Array.isArray(data.education) ? data.education : [];
 
   return (
-    <section id="experience" className="section">
-      <GridLines />
-      <div className="content-wrapper">
-        <div className="designer-section">
-          <ProcessPills steps={processSteps} />
-
-          <div className="designer-details">
-            <div className="designer-title-col">
-              <Reveal type="left" className="designer-label-area">
-                <div className="section-label">Experience</div>
-              </Reveal>
-              <Reveal type="up" delay={1} className="designer-title-area">
-                <h2 className="designer-heading">{experienceTitle}</h2>
-              </Reveal>
+    <section id="experience" ref={sectionRef} className="experience-modern-section">
+      <div className="section-container">
+        {/* Section Header */}
+        <div className="section-header-row">
+          <div>
+            <div className="card-badge">
+              <Briefcase size={14} /> Career &amp; Education
             </div>
+            <h2 className="section-main-title">Experience &amp; Background</h2>
+          </div>
+          <p className="section-header-desc">
+            Hands-on software development experience across live client projects and technical computer science education.
+          </p>
+        </div>
 
-            <Stats stats={stats} />
+        <div className={`experience-timeline-layout ${isInView ? 'in-view' : ''}`}>
+          {/* Work Experience Column */}
+          <div className="timeline-column">
+            <h3 className="timeline-col-title">
+              <Briefcase size={18} color="var(--saas-primary)" /> Work Experience
+            </h3>
+
+            <div className="timeline-items-list">
+              {experienceList.map((item, idx) => (
+                <div key={item.company || idx} className="timeline-card">
+                  <div className="timeline-card-header">
+                    <span className="timeline-period-pill">
+                      <Calendar size={12} /> {item.period}
+                    </span>
+                    {item.location && (
+                      <span className="timeline-location">
+                        <MapPin size={12} /> {item.location}
+                      </span>
+                    )}
+                  </div>
+
+                  <h4 className="timeline-role-title">{item.role}</h4>
+                  <div className="timeline-company-name">{item.company}</div>
+
+                  {Array.isArray(item.points) && (
+                    <ul className="timeline-points-list">
+                      {item.points.map((pt, pIdx) => (
+                        <li key={pIdx} className="timeline-point-item">
+                          <CheckCircle2 size={14} color="var(--saas-primary)" style={{ flexShrink: 0, marginTop: 4 }} />
+                          <span>{pt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
-          <Timeline items={experience} />
-          <Education items={education} />
+          {/* Education Column */}
+          <div className="timeline-column">
+            <h3 className="timeline-col-title">
+              <GraduationCap size={18} color="var(--saas-accent)" /> Education
+            </h3>
+
+            <div className="timeline-items-list">
+              {educationList.map((edu, idx) => (
+                <div key={edu.degree || idx} className="timeline-card">
+                  <div className="timeline-card-header">
+                    <span className="timeline-period-pill">
+                      <Calendar size={12} /> {edu.period}
+                    </span>
+                    {edu.location && (
+                      <span className="timeline-location">
+                        <MapPin size={12} /> {edu.location}
+                      </span>
+                    )}
+                  </div>
+
+                  <h4 className="timeline-role-title">{edu.degree}</h4>
+                  <div className="timeline-company-name">{edu.institution}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

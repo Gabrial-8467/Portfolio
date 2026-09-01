@@ -1,6 +1,6 @@
 /* ============================================================
    Portfolio CMS — Modern Developer SaaS Landing & Docs System
-   Design: Light-first, High-credibility, Stripe/Vercel/Linear feel
+   Design: Light-first, High-credibility, Wide & Spacious
    ============================================================ */
 
 :root {
@@ -71,6 +71,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.land-page {
+  position: relative;
+  overflow-x: hidden;
+  background-color: var(--saas-bg);
+  background-image:
+    radial-gradient(1200px 700px at 15% -10%, rgba(99, 102, 241, 0.08), transparent 70%),
+    radial-gradient(1200px 700px at 85% -10%, rgba(37, 99, 235, 0.08), transparent 70%),
+    linear-gradient(to right, rgba(226, 232, 240, 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(226, 232, 240, 0.4) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 72px 72px, 72px 72px;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -90,18 +102,19 @@ input, textarea, select {
 /* ---------- Typography & Utility ---------- */
 .saas-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 36px;
 }
 
 .saas-section {
-  padding: 96px 0;
+  padding: 100px 0;
   position: relative;
 }
 
 .saas-section-alt {
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
   border-top: 1px solid var(--saas-border);
   border-bottom: 1px solid var(--saas-border);
 }
@@ -121,8 +134,8 @@ input, textarea, select {
 }
 
 .saas-heading {
-  font-size: 40px;
-  font-weight: 800;
+  font-size: 42px;
+  font-weight: 850;
   letter-spacing: -0.03em;
   line-height: 1.15;
   color: var(--saas-text);
@@ -132,7 +145,7 @@ input, textarea, select {
 .saas-subheading {
   font-size: 18px;
   color: var(--saas-text-secondary);
-  max-width: 640px;
+  max-width: 720px;
   line-height: 1.6;
 }
 
@@ -145,6 +158,82 @@ input, textarea, select {
   margin-right: auto;
 }
 
+/* ---------- Custom Cursor ---------- */
+.custom-cursor-dot {
+  position: fixed;
+  top: -4px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--saas-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.15s ease;
+}
+
+.custom-cursor-follower {
+  position: fixed;
+  top: -20px;
+  left: -20px;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid rgba(79, 70, 229, 0.45);
+  background: rgba(79, 70, 229, 0.04);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.25s cubic-bezier(0.25, 1, 0.5, 1),
+              height 0.25s cubic-bezier(0.25, 1, 0.5, 1),
+              background 0.25s ease,
+              border-color 0.25s ease;
+}
+
+.custom-cursor-follower.has-text {
+  width: 68px;
+  height: 68px;
+  top: -34px;
+  left: -34px;
+  background: #0f172a;
+  border-color: #0f172a;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+}
+
+.cursor-text {
+  font-family: var(--saas-font);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+/* ---------- Scroll Progress Bar ---------- */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: transparent;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.scroll-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4f46e5, #2563eb, #06b6d4);
+  transition: width 0.1s ease-out;
+}
+
+/* ---------- Magnetic Button Wrapper ---------- */
+.magnetic-btn-wrap {
+  display: inline-flex;
+}
+
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-flex;
@@ -153,7 +242,7 @@ input, textarea, select {
   gap: 8px;
   font-size: 14px;
   font-weight: 600;
-  padding: 10px 18px;
+  padding: 10px 20px;
   border-radius: var(--saas-radius-sm);
   transition: all 0.15s ease;
   white-space: nowrap;
@@ -162,12 +251,12 @@ input, textarea, select {
 .btn-primary {
   background: var(--saas-primary);
   color: #ffffff;
-  box-shadow: 0 2px 4px 0 rgba(79, 70, 229, 0.25);
+  box-shadow: 0 2px 6px 0 rgba(79, 70, 229, 0.3);
 }
 
 .btn-primary:hover {
   background: var(--saas-primary-hover);
-  box-shadow: 0 4px 12px 0 rgba(79, 70, 229, 0.35);
+  box-shadow: 0 6px 16px 0 rgba(79, 70, 229, 0.4);
   transform: translateY(-1px);
 }
 
@@ -195,7 +284,7 @@ input, textarea, select {
 }
 
 .btn-lg {
-  padding: 14px 26px;
+  padding: 14px 28px;
   font-size: 15px;
   border-radius: var(--saas-radius);
 }
@@ -205,8 +294,8 @@ input, textarea, select {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--saas-border);
   transition: all 0.2s ease;
 }
@@ -215,35 +304,35 @@ input, textarea, select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 68px;
+  height: 70px;
 }
 
 .saas-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--saas-text);
   letter-spacing: -0.02em;
 }
 
 .saas-logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   background: linear-gradient(135deg, #4f46e5, #2563eb);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
 }
 
 .saas-nav-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .nav-item {
@@ -254,7 +343,7 @@ input, textarea, select {
   font-size: 14px;
   font-weight: 500;
   color: var(--saas-text-secondary);
-  padding: 8px 12px;
+  padding: 8px 14px;
   border-radius: var(--saas-radius-sm);
   display: flex;
   align-items: center;
@@ -271,7 +360,7 @@ input, textarea, select {
   position: absolute;
   top: 100%;
   left: 0;
-  width: 240px;
+  width: 250px;
   background: #ffffff;
   border: 1px solid var(--saas-border);
   border-radius: var(--saas-radius);
@@ -328,24 +417,23 @@ input, textarea, select {
 
 /* ---------- Hero Section ---------- */
 .saas-hero {
-  padding: 80px 0 60px;
+  padding: 88px 0 72px;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(1000px 500px at 50% -20%, rgba(99, 102, 241, 0.1), transparent 70%);
 }
 
 .hero-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 48px;
+  grid-template-columns: 1.15fr 0.95fr;
+  gap: 56px;
   align-items: center;
 }
 
 .hero-title {
-  font-size: 52px;
+  font-size: 58px;
   font-weight: 850;
   letter-spacing: -0.04em;
-  line-height: 1.08;
+  line-height: 1.06;
   color: var(--saas-text);
   margin-bottom: 20px;
 }
@@ -357,26 +445,26 @@ input, textarea, select {
 }
 
 .hero-subtext {
-  font-size: 19px;
+  font-size: 20px;
   color: var(--saas-text-secondary);
   line-height: 1.6;
-  margin-bottom: 32px;
-  max-width: 540px;
+  margin-bottom: 36px;
+  max-width: 600px;
 }
 
 .hero-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 36px;
+  gap: 16px;
+  margin-bottom: 40px;
   flex-wrap: wrap;
 }
 
 .hero-stats {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  padding-top: 24px;
+  padding-top: 28px;
   border-top: 1px solid var(--saas-border);
 }
 
@@ -386,13 +474,13 @@ input, textarea, select {
 }
 
 .hero-stat-val {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--saas-text);
 }
 
 .hero-stat-lbl {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--saas-text-muted);
   font-weight: 500;
 }
@@ -408,7 +496,7 @@ input, textarea, select {
 
 .code-card-header {
   background: var(--saas-code-header);
-  padding: 12px 18px;
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -433,13 +521,13 @@ input, textarea, select {
 
 .code-tabs {
   display: flex;
-  gap: 4px;
+  gap: 6px;
 }
 
 .code-tab-btn {
   font-size: 12px;
   font-family: var(--saas-mono);
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 4px;
   color: #94a3b8;
   background: transparent;
@@ -455,40 +543,40 @@ input, textarea, select {
   color: #94a3b8;
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  padding: 4px 8px;
+  gap: 5px;
+  font-size: 12px;
+  padding: 5px 10px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .code-copy-btn:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .code-body {
-  padding: 18px;
+  padding: 22px;
   font-family: var(--saas-mono);
   font-size: 13px;
   color: var(--saas-code-text);
   overflow-x: auto;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .code-request-line {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
   border-bottom: 1px dashed #334155;
 }
 
 .method-tag {
   font-weight: 700;
   font-size: 11px;
-  padding: 2px 6px;
+  padding: 2px 8px;
   border-radius: 4px;
 }
 
@@ -502,23 +590,12 @@ input, textarea, select {
   color: #ffffff;
 }
 
-.method-put {
-  background: #d97706;
-  color: #ffffff;
-}
-
-.method-delete {
-  background: #dc2626;
-  color: #ffffff;
-}
-
-/* Syntax Highlighting Colors */
+/* Syntax Highlighting */
 .tok-key { color: #38bdf8; }
 .tok-str { color: #a7f3d0; }
 .tok-num { color: #fde047; }
 .tok-bool { color: #f472b6; }
 .tok-null { color: #94a3b8; }
-.tok-comment { color: #64748b; font-style: italic; }
 
 /* ---------- Product Showcase / CMS Demo Mockup ---------- */
 .cms-showcase {
@@ -528,12 +605,13 @@ input, textarea, select {
   box-shadow: var(--saas-shadow-xl);
   overflow: hidden;
   margin-top: 48px;
+  width: 100%;
 }
 
 .cms-mockup-topbar {
   background: #f8fafc;
   border-bottom: 1px solid var(--saas-border);
-  padding: 12px 20px;
+  padding: 14px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -541,14 +619,14 @@ input, textarea, select {
 
 .cms-mockup-body {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 260px 1fr;
   min-height: 480px;
 }
 
 .cms-mockup-sidebar {
   background: #f8fafc;
   border-right: 1px solid var(--saas-border);
-  padding: 16px 12px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -558,7 +636,7 @@ input, textarea, select {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 13px;
   font-weight: 600;
   color: var(--saas-text-secondary);
@@ -573,23 +651,23 @@ input, textarea, select {
 }
 
 .cms-mockup-content {
-  padding: 24px 32px;
+  padding: 32px 40px;
   background: #ffffff;
 }
 
 /* ---------- Feature Grid ---------- */
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
-  margin-top: 48px;
+  margin-top: 56px;
 }
 
 .feature-card {
   background: #ffffff;
   border: 1px solid var(--saas-border);
   border-radius: var(--saas-radius);
-  padding: 28px 24px;
+  padding: 30px 26px;
   transition: all 0.2s ease;
   box-shadow: var(--saas-shadow-sm);
   position: relative;
@@ -604,41 +682,41 @@ input, textarea, select {
 }
 
 .feature-icon-wrapper {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   background: var(--saas-primary-light);
   color: var(--saas-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .feature-title {
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 750;
   color: var(--saas-text);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .feature-desc {
   font-size: 14px;
   color: var(--saas-text-secondary);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 /* ---------- Problem vs Solution ---------- */
 .problem-solution-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  margin-top: 48px;
+  gap: 36px;
+  margin-top: 52px;
 }
 
 .comparison-box {
   border-radius: var(--saas-radius-lg);
-  padding: 32px;
+  padding: 36px;
   border: 1px solid var(--saas-border);
   background: #ffffff;
 }
@@ -654,45 +732,45 @@ input, textarea, select {
 }
 
 .comparison-title {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 800;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .comparison-steps {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .step-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
+  gap: 14px;
+  padding: 12px 16px;
   background: #ffffff;
   border: 1px solid var(--saas-border);
   border-radius: var(--saas-radius-sm);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 550;
 }
 
 /* ---------- How It Works (3 Steps) ---------- */
 .steps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
-  margin-top: 56px;
+  gap: 36px;
+  margin-top: 60px;
 }
 
 .step-card {
   background: #ffffff;
   border: 1px solid var(--saas-border);
   border-radius: var(--saas-radius-lg);
-  padding: 32px 28px;
+  padding: 36px 32px;
   box-shadow: var(--saas-shadow-sm);
   position: relative;
 }
@@ -706,12 +784,12 @@ input, textarea, select {
   padding: 4px 10px;
   border-radius: 6px;
   display: inline-block;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .step-card-title {
-  font-size: 19px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 750;
   color: var(--saas-text);
   margin-bottom: 12px;
 }
@@ -726,7 +804,7 @@ input, textarea, select {
 .dev-section-wrapper {
   background: #0f172a;
   border-radius: var(--saas-radius-xl);
-  padding: 48px;
+  padding: 52px;
   color: #ffffff;
   box-shadow: var(--saas-shadow-xl);
 }
@@ -736,8 +814,8 @@ input, textarea, select {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #334155;
-  padding-bottom: 16px;
-  margin-bottom: 24px;
+  padding-bottom: 18px;
+  margin-bottom: 28px;
   flex-wrap: wrap;
   gap: 16px;
 }
@@ -753,7 +831,7 @@ input, textarea, select {
 .dev-tab {
   font-size: 13px;
   font-weight: 600;
-  padding: 6px 14px;
+  padding: 7px 16px;
   color: #94a3b8;
   border-radius: 4px;
   transition: all 0.15s;
@@ -771,30 +849,31 @@ input, textarea, select {
   border-radius: var(--saas-radius-xl);
   box-shadow: var(--saas-shadow-lg);
   overflow: hidden;
-  margin-top: 40px;
+  margin-top: 48px;
+  width: 100%;
 }
 
 .playground-header {
-  padding: 18px 24px;
+  padding: 20px 28px;
   background: #f8fafc;
   border-bottom: 1px solid var(--saas-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
 }
 
 .playground-controls {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
   flex-wrap: wrap;
   width: 100%;
 }
 
 .select-input, .text-input {
-  padding: 8px 12px;
+  padding: 9px 14px;
   border: 1px solid var(--saas-border);
   border-radius: var(--saas-radius-sm);
   background: #ffffff;
@@ -811,11 +890,11 @@ input, textarea, select {
 .playground-split {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 380px;
+  min-height: 420px;
 }
 
 .playground-pane {
-  padding: 24px;
+  padding: 28px;
 }
 
 .playground-pane:first-child {
@@ -828,15 +907,15 @@ input, textarea, select {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--saas-text-muted);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 /* ---------- Tree Explorer ---------- */
 .tree-node {
-  margin-left: 16px;
+  margin-left: 20px;
   font-family: var(--saas-mono);
   font-size: 13px;
-  line-height: 1.8;
+  line-height: 1.85;
 }
 
 .tree-key {
@@ -846,16 +925,16 @@ input, textarea, select {
 
 .tree-type {
   color: #94a3b8;
-  font-size: 11px;
-  margin-left: 6px;
+  font-size: 12px;
+  margin-left: 8px;
 }
 
 /* ---------- Pricing Cards ---------- */
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
-  margin-top: 56px;
+  gap: 36px;
+  margin-top: 60px;
   align-items: stretch;
 }
 
@@ -863,7 +942,7 @@ input, textarea, select {
   background: #ffffff;
   border: 1px solid var(--saas-border);
   border-radius: var(--saas-radius-lg);
-  padding: 36px 32px;
+  padding: 40px 36px;
   display: flex;
   flex-direction: column;
   box-shadow: var(--saas-shadow-sm);
@@ -878,7 +957,7 @@ input, textarea, select {
 }
 
 .pricing-plan-name {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 800;
   color: var(--saas-text);
   margin-bottom: 6px;
@@ -891,11 +970,11 @@ input, textarea, select {
 }
 
 .pricing-price-wrap {
-  margin: 24px 0;
+  margin: 26px 0;
 }
 
 .pricing-price {
-  font-size: 44px;
+  font-size: 48px;
   font-weight: 850;
   letter-spacing: -0.03em;
   color: var(--saas-text);
@@ -908,10 +987,10 @@ input, textarea, select {
 
 .pricing-features-list {
   list-style: none;
-  margin: 24px 0 32px;
+  margin: 26px 0 36px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   flex: 1;
 }
 
@@ -927,41 +1006,41 @@ input, textarea, select {
 .faq-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-top: 48px;
+  gap: 28px;
+  margin-top: 52px;
 }
 
 .faq-card {
   background: #ffffff;
   border: 1px solid var(--saas-border);
   border-radius: var(--saas-radius);
-  padding: 24px;
+  padding: 28px;
 }
 
 .faq-q {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 750;
   color: var(--saas-text);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .faq-a {
   font-size: 14px;
   color: var(--saas-text-secondary);
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 /* ---------- Modal & Dialogs ---------- */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
   animation: modal-fade-in 0.2s ease-out;
 }
 
@@ -975,7 +1054,7 @@ input, textarea, select {
   border-radius: var(--saas-radius-lg);
   border: 1px solid var(--saas-border);
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
   box-shadow: var(--saas-shadow-xl);
   overflow: hidden;
   animation: modal-slide-up 0.2s ease-out;
@@ -987,7 +1066,7 @@ input, textarea, select {
 }
 
 .modal-header {
-  padding: 20px 24px;
+  padding: 22px 26px;
   border-bottom: 1px solid var(--saas-border);
   display: flex;
   align-items: center;
@@ -995,30 +1074,30 @@ input, textarea, select {
 }
 
 .modal-title {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 750;
   color: var(--saas-text);
 }
 
 .modal-body {
-  padding: 24px;
+  padding: 26px;
 }
 
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .form-label {
   display: block;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--saas-text);
   margin-bottom: 6px;
 }
 
 .form-input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 11px 15px;
   border: 1px solid var(--saas-border);
   border-radius: var(--saas-radius-sm);
   font-size: 14px;
@@ -1057,38 +1136,38 @@ input, textarea, select {
 .saas-footer {
   background: #ffffff;
   border-top: 1px solid var(--saas-border);
-  padding: 80px 0 40px;
+  padding: 88px 0 44px;
 }
 
 .footer-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-  gap: 48px;
-  margin-bottom: 60px;
+  grid-template-columns: 2.2fr 1fr 1fr 1fr 1fr;
+  gap: 52px;
+  margin-bottom: 64px;
 }
 
 .footer-brand-col p {
   font-size: 14px;
   color: var(--saas-text-secondary);
-  line-height: 1.6;
-  margin-top: 14px;
-  max-width: 300px;
+  line-height: 1.65;
+  margin-top: 16px;
+  max-width: 320px;
 }
 
 .footer-col-title {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 750;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--saas-text);
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .footer-links {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 13px;
 }
 
 .footer-link {
@@ -1105,13 +1184,18 @@ input, textarea, select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 32px;
+  padding-top: 36px;
   border-top: 1px solid var(--saas-border);
   font-size: 13px;
   color: var(--saas-text-muted);
 }
 
 /* ---------- Responsive Breakpoints ---------- */
+@media (max-width: 1200px) {
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 2fr 1fr 1fr; }
+}
+
 @media (max-width: 1024px) {
   .hero-grid { grid-template-columns: 1fr; }
   .cms-mockup-body { grid-template-columns: 1fr; }
@@ -1120,11 +1204,13 @@ input, textarea, select {
   .problem-solution-grid, .faq-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .playground-split { grid-template-columns: 1fr; }
+  .hero-stats { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
+  .saas-container { padding: 0 20px; }
   .saas-nav-links { display: none; }
-  .hero-title { font-size: 38px; }
+  .hero-title { font-size: 40px; }
   .saas-heading { font-size: 32px; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }

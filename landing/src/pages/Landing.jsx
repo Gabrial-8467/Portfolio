@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../landing/landing.css';
+import CustomCursor from '../components/CustomCursor';
+import ScrollProgress from '../components/ScrollProgress';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import CmsDemo from '../components/CmsDemo';
@@ -20,6 +22,12 @@ export default function Landing() {
 
   return (
     <div className="land-page">
+      {/* Custom Desktop Cursor */}
+      <CustomCursor />
+
+      {/* Top Scroll Indicator */}
+      <ScrollProgress />
+
       <Navbar onOpenRegister={() => setRegisterOpen(true)} />
       <main>
         <Hero onOpenRegister={() => setRegisterOpen(true)} />

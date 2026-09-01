@@ -1,62 +1,107 @@
-import { Reveal } from './AnimatedSection';
-import GridLines from './GridLines';
-import { ICON_KEYS } from '../data/iconKeys';
-import { GlobeIcon } from './Icons';
+import { useEffect, useRef, useState } from 'react';
+import { Sparkles } from 'lucide-react';
+import { useInView } from '../hooks/useInView';
 
-const safeLink = (url) => {
-  if (!url || typeof url !== 'string') return '#';
-  const trimmed = url.trim();
-  if (/^(javascript|data|vbscript):/i.test(trimmed)) return '#';
-  return trimmed;
-};
+export default function About({ site = {}, socials = [], stats = [] }) {
+  const [sectionRef, isInView] = useInView();
+  const statementRef = useRef(null);
+  const [highlightRatio, setHighlightRatio] = useState(0);
 
-export default function About({ socials = [], site = {} }) {
+  const statement = 'I build digital products where clean engineering meets thoughtful interaction design.';
+  const words = statement.split(' ');
+
   const aboutTitle = site.aboutTitle || 'The Developer Shaping Modern Web Experiences';
-  const desc1 =
-    site.aboutDesc1 ||
-    site.bio ||
-    "I'm a dynamic Full Stack Web Developer with strong internship experience in crafting responsive and high-performance web applications. I specialize in React.js, Node.js, and MongoDB.";
-  const desc2 =
-    site.aboutDesc2 ||
-    "My commitment is to enhancing user experience through clean, scalable code and modern design. I'm passionate about leveraging technology to tackle real-world challenges and continuously improving code quality.";
+  const aboutDesc1 = site.aboutDesc1 || "I'm a dynamic Full Stack Web Developer with strong internship experience crafting responsive, high-performance web applications using React.js, Node.js, and MongoDB.";
+  const aboutDesc2 = site.aboutDesc2 || "My commitment is to enhancing user experience through clean, scalable architecture and modern design systems. I specialize in turning complex requirements into seamless digital products.";
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const node = statementRef.current;
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+
+      // Calculate how far the statement has entered the viewport
+      const start = windowHeight * 0.85;
+      const end = windowHeight * 0.25;
+
+      const progress = (start - rect.top) / (start - end);
+      setHighlightRatio(Math.min(1, Math.max(0, progress)));
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <section id="about" className="section section-dark">
-      <GridLines />
-      <div className="content-wrapper">
-        <div className="about-grid">
-          <Reveal type="left" className="about-col-1">
-            <div className="section-label">About Me</div>
-            <div className="socials-list">
-              {socials.map(({ key, label, href }, i) => {
-                const Icon = ICON_KEYS[key] || GlobeIcon;
-                const validHref = safeLink(href);
-                return (
-                  <Reveal
-                    key={`${key}-${label}-${i}`}
-                    as="a"
-                    type="up"
-                    delay={i + 1}
-                    href={validHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="social-pill-btn"
-                  >
-                    {Icon && <Icon />} {label || key}
-                  </Reveal>
-                );
-              })}
+    <section id="about" ref={sectionRef} className="about-modern-section">
+      <div className="section-container">
+        {/* Large Scroll-Driven Statement */}
+        <div ref={statementRef} className="about-statement-box">
+          <p className="about-statement-text">
+            {words.map((word, idx) => {
+              const wordThreshold = idx / words.length;
+              const isLit = highlightRatio >= wordThreshold;
+              return (
+                <span
+                  key={`${word}-${idx}`}
+                  className={`statement-word ${isLit ? 'lit' : ''}`}
+                >
+                  {word}{' '}
+                </span>
+              );
+            })}
+          </p>
+        </div>
+
+        {/* Narrative & Highlights Grid */}
+        <div className={`about-detail-grid ${isInView ? 'in-view' : ''}`}>
+          {/* Left Narrative Column */}
+          <div className="about-narrative-card">
+            <div className="card-badge">
+              <Sparkles size={14} /> Philosophy &amp; Experience
             </div>
-          </Reveal>
-          <Reveal type="up" delay={1} className="about-col-2">
-            <h2 className="about-title">{aboutTitle}</h2>
-          </Reveal>
-          <Reveal type="up" delay={2} className="about-col-3">
-            <p className="about-desc">{desc1}</p>
-          </Reveal>
-          <Reveal type="up" delay={3} className="about-col-4">
-            <p className="about-desc">{desc2}</p>
-          </Reveal>
+            <h3 className="about-narrative-title">{aboutTitle}</h3>
+            <p className="about-narrative-body">{aboutDesc1}</p>
+            <p className="about-narrative-body">{aboutDesc2}</p>
+
+            {/* Social Proof Pills */}
+            <div className="about-socials-row">
+              {Array.isArray(socials) && socials.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="social-pill-link"
+                  data-cursor="OPEN"
+                >
+                  <span>{s.label}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Metrics / Stats Column */}
+          <div className="about-stats-column">
+            {Array.isArray(stats) && stats.map((stat, i) => (
+              <div
+                key={stat.label || i}
+                className="stat-metric-card"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <div className="stat-card-header">
+                  <span className="stat-card-label">{stat.label}</span>
+                  <span className="stat-card-value">{stat.value}</span>
+                </div>
+                {stat.subtext && (
+                  <p className="stat-card-subtext">{stat.subtext}</p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

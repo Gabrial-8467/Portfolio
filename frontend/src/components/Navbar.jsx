@@ -1,56 +1,162 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
-import { useDarkSections } from '../hooks/useDarkSections';
+import { useState, useEffect } from 'react';
+import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { useScrollProgress } from '../hooks/useScrollProgress';
 
 export default function Navbar({ site = {}, nav = [] }) {
-  const [isNavOpen, setIsNavOpen] = useState(false);
-  const isNavDark = useDarkSections();
+  const { isScrolled } = useScrollProgress();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
 
-  const toggleNav = () => setIsNavOpen((open) => !open);
-  const closeNav = () => setIsNavOpen(false);
-  const navClass = isNavDark ? ' nav-dark' : '';
-  const navLinks = Array.isArray(nav) ? nav : [];
+  const siteName = site.name || 'Gabrial Deora';
+  const shortName = siteName.split(' ')[0] || 'Gabrial';
+
+  const defaultLinks = [
+    { label: 'About', href: '#about' },
+    { label: 'Projects', href: '#projects' },
+    { label: 'Experience', href: '#experience' },
+    { label: 'Skills', href: '#skills' },
+    { label: 'Hackathons', href: '#hackathons' },
+    { label: 'Contact', href: '#contact' },
+  ];
+
+  const links = Array.isArray(nav) && nav.length > 0 ? nav : defaultLinks;
+
+  useEffect(() => {
+    const handleScrollSpy = () => {
+      const sections = links.map((l) => l.href.replace('#', '')).filter(Boolean);
+      const scrollPos = window.scrollY + 200;
+
+      for (const sectionId of sections) {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(sectionId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScrollSpy, { passive: true });
+    return () => window.removeEventListener('scroll', handleScrollSpy);
+  }, [links]);
+
+  const scrollTo = (e, href) => {
+    e.preventDefault();
+    setDrawerOpen(false);
+    if (href.startsWith('#')) {
+      const target = document.getElementById(href.replace('#', ''));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      window.location.href = href;
+    }
+  };
 
   return (
     <>
-      <header className={`header${navClass}`}>
-        <div className="content-wrapper header-content">
-          <div className={`logo${navClass}`}>{site.name || 'Gabrial Deora'}</div>
-          <button
-            className={`menu-btn${navClass}`}
-            onClick={toggleNav}
-            aria-label="Open navigation menu"
-            type="button"
-          >
-            <span />
-            <span />
-          </button>
+      <header className={`floating-nav-header ${isScrolled ? 'scrolled-island' : ''}`}>
+        <div className="nav-island-container">
+          <div className="nav-island-inner">
+            {/* Brand */}
+            <a
+              href="#"
+              className="nav-brand-logo"
+              data-cursor="TOP"
+              onClick={(e) => scrollTo(e, '#hero')}
+            >
+              <span className="brand-dot" />
+              <span className="brand-name-full">{isScrolled ? shortName : siteName}</span>
+            </a>
+
+            {/* Desktop Navigation Links */}
+            <nav className="nav-desktop-links" aria-label="Main Navigation">
+              {links.map((link) => {
+                const isActive = activeSection === link.href.replace('#', '');
+                return (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    className={`nav-link-item ${isActive ? 'active' : ''}`}
+                    data-cursor="NAV"
+                    onClick={(e) => scrollTo(e, link.href)}
+                  >
+                    <span>{link.label}</span>
+                    <span className="nav-link-indicator" />
+                  </a>
+                );
+              })}
+            </nav>
+
+            {/* CTA / Action button */}
+            <div className="nav-action-wrapper">
+              <a
+                href="#contact"
+                className="nav-cta-btn"
+                data-cursor="TALK"
+                onClick={(e) => scrollTo(e, '#contact')}
+              >
+                <span>Let&apos;s Talk</span>
+                <ArrowUpRight size={14} />
+              </a>
+
+              {/* Mobile Hamburger Toggle */}
+              <button
+                type="button"
+                className="nav-mobile-toggle"
+                onClick={() => setDrawerOpen(!drawerOpen)}
+                aria-label="Toggle Menu"
+              >
+                {drawerOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
-      <div className={`nav-drawer ${isNavOpen ? 'open' : ''}`}>
-        <button
-          className="nav-drawer-close"
-          onClick={toggleNav}
-          aria-label="Close navigation menu"
-          type="button"
-        >
-          <X size={32} />
-        </button>
+      {/* Mobile Drawer Navigation */}
+      <div className={`mobile-nav-overlay ${drawerOpen ? 'open' : ''}`}>
+        <div className="mobile-drawer-content">
+          <div className="mobile-drawer-header">
+            <span className="mobile-brand-title">{siteName}</span>
+            <button
+              type="button"
+              className="mobile-close-btn"
+              onClick={() => setDrawerOpen(false)}
+              aria-label="Close Menu"
+            >
+              <X size={22} />
+            </button>
+          </div>
 
-        <nav className="nav-drawer-links">
-          {navLinks.map((link, i) => (
-            <a key={link.href || i} href={link.href} onClick={closeNav}>
-              {link.label}
+          <div className="mobile-drawer-links">
+            {links.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="mobile-nav-link"
+                onClick={(e) => scrollTo(e, link.href)}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+
+          <div className="mobile-drawer-footer">
+            <a
+              href="#contact"
+              className="btn-primary"
+              style={{ width: '100%', justifyContent: 'center' }}
+              onClick={(e) => scrollTo(e, '#contact')}
+            >
+              Start a Conversation <ArrowUpRight size={16} />
             </a>
-          ))}
-        </nav>
-
-        <div className="nav-drawer-footer">
-          <p>{site.copyright || `© ${new Date().getFullYear()} ${site.name || 'Gabrial Deora'}. All Rights Reserved.`}</p>
+          </div>
         </div>
       </div>
-      {isNavOpen && <div className="nav-backdrop" onClick={closeNav} />}
     </>
   );
 }
