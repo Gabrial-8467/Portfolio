@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useToast } from '../../admin/components/useToast';
+import { useAuth } from '../../admin/useAuth';
 import { api, resolveAssetUrl } from '../../api/client';
 import {
   UploadCloud,
@@ -12,11 +13,13 @@ import {
 
 export default function Media() {
   const { addToast } = useToast();
+  const { activePortfolio } = useAuth();
   const fileInputRef = useRef(null);
+  const cacheKey = `portfolio_media_cache_${activePortfolio?._id || 'none'}`;
   const [uploading, setUploading] = useState(false);
   const [uploads, setUploads] = useState(() => {
     try {
-      const saved = localStorage.getItem('portfolio_media_cache');
+      const saved = localStorage.getItem(cacheKey);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -24,10 +27,23 @@ export default function Media() {
   });
   const [copiedUrl, setCopiedUrl] = useState(null);
 
+  useEffect(() => {
+    // Reload cached uploads when the active portfolio changes
+    // eslint-disable-next-line react/set-state-in-effect
+    setUploads(() => {
+      try {
+        const saved = localStorage.getItem(cacheKey);
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
+    });
+  }, [cacheKey]);
+
   const saveUploads = (list) => {
     setUploads(list);
     try {
-      localStorage.setItem('portfolio_media_cache', JSON.stringify(list));
+      localStorage.setItem(cacheKey, JSON.stringify(list));
     } catch {
       /* ignore storage errors */
     }

@@ -1,7 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { useScrollProgress } from '../hooks/useScrollProgress';
 import ThemeToggle from './ThemeToggle';
+
+const DEFAULT_LINKS = [
+  { label: 'About', href: '#about' },
+  { label: 'Projects', href: '#projects' },
+  { label: 'Experience', href: '#experience' },
+  { label: 'Skills', href: '#skills' },
+  { label: 'Hackathons', href: '#hackathons' },
+  { label: 'Contact', href: '#contact' },
+];
 
 export default function Navbar({ site = {}, nav = [] }) {
   const { isScrolled } = useScrollProgress();
@@ -11,40 +20,42 @@ export default function Navbar({ site = {}, nav = [] }) {
   const siteName = site.name || 'Gabrial Deora';
   const shortName = siteName.split(' ')[0] || 'Gabrial';
 
-  const defaultLinks = [
-    { label: 'About', href: '#about' },
-    { label: 'Projects', href: '#projects' },
-    { label: 'Experience', href: '#experience' },
-    { label: 'Skills', href: '#skills' },
-    { label: 'Hackathons', href: '#hackathons' },
-    { label: 'Contact', href: '#contact' },
-  ];
+  const links = useMemo(
+    () =>
+      (Array.isArray(nav) && nav.length > 0 ? nav : DEFAULT_LINKS).filter(
+        (l) => l && typeof l.href === 'string' && l.href
+      ),
+    [nav]
+  );
 
-  const links = (Array.isArray(nav) && nav.length > 0 ? nav : defaultLinks).filter(
-    (l) => l && typeof l.href === 'string' && l.href
+  const sectionIds = useMemo(
+    () => links.map((l) => l.href.replace('#', '')).filter(Boolean),
+    [links]
   );
 
   useEffect(() => {
     const handleScrollSpy = () => {
-      const sections = links.map((l) => l.href.replace('#', '')).filter(Boolean);
       const scrollPos = window.scrollY + 200;
+      let current = '';
 
-      for (const sectionId of sections) {
+      for (const sectionId of sectionIds) {
         const el = document.getElementById(sectionId);
         if (el) {
           const top = el.offsetTop;
           const height = el.offsetHeight;
           if (scrollPos >= top && scrollPos < top + height) {
-            setActiveSection(sectionId);
+            current = sectionId;
             break;
           }
         }
       }
+
+      setActiveSection(current || 'hero');
     };
 
     window.addEventListener('scroll', handleScrollSpy, { passive: true });
     return () => window.removeEventListener('scroll', handleScrollSpy);
-  }, [links]);
+  }, [sectionIds]);
 
   const scrollTo = (e, href) => {
     e.preventDefault();

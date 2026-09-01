@@ -13,4 +13,6 @@ const ApiKeySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+ApiKeySchema.index({ owner: 1, createdAt: -1 });
+
 export const ApiKey = mongoose.model('ApiKey', ApiKeySchema);

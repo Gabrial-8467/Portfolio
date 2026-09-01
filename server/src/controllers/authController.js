@@ -5,6 +5,7 @@ import { signToken } from '../middleware/auth.js';
 import { generateApiKey } from '../utils/apiKey.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 import { slugify } from '../utils/slugify.js';
+import { logger } from '../utils/logger.js';
 
 async function createUniqueSlug(base) {
   const slug = slugify(base) || 'portfolio';
@@ -30,6 +31,8 @@ export const login = asyncHandler(async (req, res) => {
   user.lastLogin = new Date();
   await user.save();
 
+  logger.auth(`User logged in: ${user.email} (${user.name})`);
+
   const portfolios = await Portfolio.find({ owner: user._id }).sort({ createdAt: 1 }).lean();
   const token = signToken(user);
   return res.json({
@@ -49,32 +52,43 @@ export const register = asyncHandler(async (req, res) => {
 
   const user = await User.create({ email, password, name, role: 'admin' });
 
-  const slug = await createUniqueSlug(portfolioName || name);
-  const portfolio = await Portfolio.create({
-    slug,
-    name: (portfolioName || name).trim(),
-    owner: user._id,
-  });
+  try {
+    const slug = await createUniqueSlug(portfolioName || name);
+    const portfolio = await Portfolio.create({
+      slug,
+      name: (portfolioName || name).trim(),
+      owner: user._id,
+    });
 
-  const { key, prefix, keyHash } = generateApiKey();
-  await ApiKey.create({
-    owner: user._id,
-    portfolio: portfolio._id,
-    name: `${portfolio.name} key`,
-    prefix,
-    keyHash,
-  });
+    const { key, prefix, keyHash } = generateApiKey();
+    await ApiKey.create({
+      owner: user._id,
+      portfolio: portfolio._id,
+      name: `${portfolio.name} key`,
+      prefix,
+      keyHash,
+    });
 
-  const token = signToken(user);
-  return res.status(201).json({
-    success: true,
-    data: {
-      token,
-      user: user.toSafeObject(),
-      portfolios: [portfolio],
-      apiKey: key,
-    },
-  });
+    logger.auth(`New user registered: ${user.email} -> Portfolio: "${portfolio.name}" (${slug})`);
+
+    const token = signToken(user);
+    return res.status(201).json({
+      success: true,
+      data: {
+        token,
+        user: user.toSafeObject(),
+        portfolios: [portfolio],
+        apiKey: key,
+      },
+    });
+  } catch (err) {
+    await Promise.allSettled([
+      ApiKey.deleteMany({ owner: user._id }),
+      Portfolio.deleteMany({ owner: user._id }),
+      User.findByIdAndDelete(user._id),
+    ]);
+    throw err;
+  }
 });
 
 export const me = asyncHandler(async (req, res) => {

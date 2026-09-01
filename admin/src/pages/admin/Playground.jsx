@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../admin/useAuth';
 import { api } from '../../api/client';
 import {
@@ -23,6 +23,18 @@ export default function Playground() {
   const [statusCode, setStatusCode] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    // Reset the playground when the active portfolio changes
+    // eslint-disable-next-line react/set-state-in-effect
+    setEndpoint(`/api/p/${slug}`);
+    // eslint-disable-next-line react/set-state-in-effect
+    setStatusCode(null);
+    // eslint-disable-next-line react/set-state-in-effect
+    setResponse(null);
+    // eslint-disable-next-line react/set-state-in-effect
+    setError(null);
+  }, [slug]);
+
   const handleSend = async () => {
     setLoading(true);
     setError(null);
@@ -45,6 +57,13 @@ export default function Playground() {
         res = await api.get(`/api/v1/section/${sectionKey || 'projects'}`, { headers: { Authorization: `Bearer ${apiKey}` } });
       } else if (endpoint === '/health') {
         res = await api.get('/health');
+      }
+
+      if (res === undefined) {
+        setStatusCode(null);
+        setResponse(null);
+        setError('No matching endpoint — select a valid endpoint first');
+        return;
       }
 
       setLatency(Math.round(performance.now() - startTime));

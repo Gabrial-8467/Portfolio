@@ -1,6 +1,6 @@
 import { Pencil, Trash2, X } from 'lucide-react';
 
-export function ConfirmDialog({ title, message, onConfirm, onCancel }) {
+export function ConfirmDialog({ title, message, confirmLabel = 'Delete', onConfirm, onCancel }) {
   if (!message) return null;
 
   return (
@@ -16,7 +16,7 @@ export function ConfirmDialog({ title, message, onConfirm, onCancel }) {
             Cancel
           </button>
           <button type="button" className="admin-btn admin-btn-danger" onClick={onConfirm}>
-            Delete
+            {confirmLabel}
           </button>
         </div>
       </div>

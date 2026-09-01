@@ -44,7 +44,9 @@ const errorHandler = (err, req, res, _next) => {
   const details = error.details;
 
   if (status >= 500) {
-    console.error('Server error:', err);
+    console.error(`\x1b[31m[ERROR ${status}]\x1b[0m ${req.method} ${req.originalUrl}:`, err);
+  } else if (process.env.NODE_ENV !== 'production') {
+    console.warn(`\x1b[33m[WARN ${status}]\x1b[0m ${req.method} ${req.originalUrl}: ${message}`);
   }
 
   return res.status(status).json({

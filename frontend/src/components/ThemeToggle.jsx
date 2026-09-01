@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useLayoutEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle({ className = '' }) {
@@ -14,7 +14,7 @@ export default function ThemeToggle({ className = '' }) {
     return 'light';
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');

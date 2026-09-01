@@ -21,17 +21,20 @@ export default function Settings() {
   const [error, setError] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
+  const activePortfolioId = activePortfolio?._id;
+  const activePortfolioName = activePortfolio?.name;
+
   useEffect(() => {
     let cancelled = false;
-    if (!activePortfolio) {
+    if (!activePortfolioId) {
       // eslint-disable-next-line react/set-state-in-effect
       setLoading(false);
       return undefined;
     }
-    const portfolioId = activePortfolio._id;
+    const portfolioId = activePortfolioId;
     // eslint-disable-next-line react/set-state-in-effect
     setLoading(true);
-    setName(activePortfolio.name);
+    setName(activePortfolioName || '');
     async function load() {
       try {
         const data = await api.portfolios.getSettings(portfolioId);
@@ -46,7 +49,7 @@ export default function Settings() {
     return () => {
       cancelled = true;
     };
-  }, [activePortfolio]);
+  }, [activePortfolioId, activePortfolioName]);
 
   const submit = async (e) => {
     e.preventDefault();

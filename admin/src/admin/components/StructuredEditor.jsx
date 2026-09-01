@@ -380,7 +380,7 @@ function ObjectEditor({ schema, value, onChange }) {
           <div className="struct-card-body">
             <LinksEditor
               fields={list.fields}
-              label=""
+              label={list.label}
               value={value[list.name]}
               onChange={(val) => onChange({ ...value, [list.name]: val })}
             />

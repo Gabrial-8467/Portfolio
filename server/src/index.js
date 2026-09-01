@@ -7,6 +7,8 @@ import { connectDB } from './config/db.js';
 import { uploadsDir } from './config/uploads.js';
 import { authRequired } from './middleware/auth.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
+import { requestLogger } from './middleware/logger.js';
+import { logger } from './utils/logger.js';
 
 import authRoutes from './routes/authRoutes.js';
 import publicRoutes from './routes/publicRoutes.js';
@@ -49,6 +51,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
+app.use(requestLogger);
 
 app.use('/uploads', express.static(uploadsDir, { maxAge: '7d' }));
 
@@ -113,18 +116,49 @@ app.get('/health', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
+let server;
+
 async function start() {
-  await connectDB();
-  app.listen(config.port, () => {
-    const url = `http://localhost:${config.port}`;
-    console.log('');
-    console.log(`  Server running in ${config.nodeEnv} mode`);
-    console.log(`  Backend API     ${url}`);
-    console.log(`  Health check    ${url}/health`);
-    console.log(`  Landing (signup) http://localhost:5176  |  Admin panel http://localhost:5174`);
-    console.log('  Public data     GET /api/p/:slug  |  GET /api/v1/portfolio (API key)');
-    console.log('');
-  });
+  try {
+    await connectDB();
+    server = app.listen(config.port, () => {
+      const url = `http://localhost:${config.port}`;
+      logger.success(`Portfolio CMS Server active on ${url} [${config.nodeEnv}]`);
+      logger.info(`Health check: ${url}/health | Public API: ${url}/api/p/:slug`);
+    });
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        logger.error(`Port ${config.port} is already in use by another process. Run: npx kill-port ${config.port}`);
+      } else {
+        logger.error('Server error:', err);
+      }
+      process.exit(1);
+    });
+  } catch (err) {
+    logger.error('Failed to start server:', err);
+    process.exit(1);
+  }
 }
+
+function gracefulShutdown(signal) {
+  logger.info(`Received ${signal} — shutting down server gracefully...`);
+  if (server) {
+    server.close(() => {
+      logger.success('HTTP server closed successfully');
+      process.exit(0);
+    });
+  } else {
+    process.exit(0);
+  }
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGUSR2', () => gracefulShutdown('SIGUSR2'));
+
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled Promise Rejection:', reason);
+});
 
 start();

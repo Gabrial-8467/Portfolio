@@ -148,7 +148,7 @@ export const api = {
         throw new ApiError(payload?.error || `Upload failed (${response.status})`, response.status);
       }
 
-      return payload?.data;
+      return payload?.data ?? payload;
     },
   },
 
