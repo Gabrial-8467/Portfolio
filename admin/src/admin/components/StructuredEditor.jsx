@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, ImageIcon, Loader2, Plus, Trash2, X } from 'lucide-react';
-import { api } from '../../api/client';
+import { api, resolveAssetUrl } from '../../api/client';
 import { blankItem } from '../structuredSchemas';
 import { useToast } from './useToast';
 
@@ -161,7 +161,7 @@ function ImageField({ field = {}, value, onChange }) {
       </div>
       <div className="img-preview">
         {value ? (
-          <img src={value} alt="Preview" onError={(e) => {
+          <img src={resolveAssetUrl(value)} alt="Preview" onError={(e) => {
             e.currentTarget.style.display = 'none';
           }} />
         ) : (

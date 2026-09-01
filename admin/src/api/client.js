@@ -1,8 +1,25 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const PORTFOLIO_SLUG = import.meta.env.VITE_PORTFOLIO_SLUG || 'gabrial-deora';
 
 export const FRONTEND_URL = (import.meta.env.VITE_FRONTEND_URL || import.meta.env.VITE_PORTFOLIO_URL || 'http://localhost:3000').replace(/\/$/, '');
+
+export function resolveAssetUrl(url) {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  if (url.startsWith('/uploads/')) {
+    return `${API_URL}${url}`;
+  }
+  if (url.startsWith('uploads/')) {
+    return `${API_URL}/${url}`;
+  }
+  if (url.startsWith('/')) {
+    return `${API_URL}${url}`;
+  }
+  return `${API_URL}/${url}`;
+}
 
 export function getPublicPortfolioUrl(slug) {
   if (!slug) return FRONTEND_URL;

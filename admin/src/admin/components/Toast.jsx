@@ -23,7 +23,7 @@ export default function ToastProvider({ children }) {
     [dismiss],
   );
 
-  const value = useMemo(() => ({ toast }), [toast]);
+  const value = useMemo(() => ({ toast, addToast: toast }), [toast]);
 
   return (
     <ToastContext.Provider value={value}>

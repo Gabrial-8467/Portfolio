@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useToast } from '../../admin/components/useToast';
-import { api } from '../../api/client';
+import { api, resolveAssetUrl } from '../../api/client';
 import {
   UploadCloud,
   Copy,
@@ -176,7 +176,7 @@ export default function Media() {
                   }}
                 >
                   <img
-                    src={item.url}
+                    src={resolveAssetUrl(item.url)}
                     alt={item.name}
                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     onError={(e) => {
@@ -200,13 +200,13 @@ export default function Media() {
                       type="button"
                       className="admin-btn admin-btn-secondary"
                       style={{ flex: 1, fontSize: 12, padding: '6px 10px' }}
-                      onClick={() => copyToClipboard(item.url)}
+                      onClick={() => copyToClipboard(resolveAssetUrl(item.url))}
                     >
-                      {copiedUrl === item.url ? <Check size={13} color="#16a34a" /> : <Copy size={13} />}
-                      <span>{copiedUrl === item.url ? 'Copied' : 'Copy URL'}</span>
+                      {copiedUrl === resolveAssetUrl(item.url) ? <Check size={13} color="#16a34a" /> : <Copy size={13} />}
+                      <span>{copiedUrl === resolveAssetUrl(item.url) ? 'Copied' : 'Copy URL'}</span>
                     </button>
                     <a
-                      href={item.url}
+                      href={resolveAssetUrl(item.url)}
                       target="_blank"
                       rel="noreferrer"
                       className="admin-btn admin-btn-secondary"
