@@ -27,14 +27,46 @@ export function getPublicPortfolioUrl(slug) {
 }
 
 const TOKEN_KEY = 'portfolio_admin_token';
+const AUTH_CHANNEL = 'portfolio_auth_sync';
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  if (typeof window === 'undefined') return null;
+  const local = localStorage.getItem(TOKEN_KEY);
+  if (local) return local;
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(new RegExp('(^| )' + TOKEN_KEY + '=([^;]+)'));
+    if (match) return decodeURIComponent(match[2]);
+  }
+  return null;
 }
 
 export function setToken(token) {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
+  if (typeof window === 'undefined') return;
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`;
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel(AUTH_CHANNEL);
+        bc.postMessage({ type: 'AUTH_CHANGE', token });
+        bc.close();
+      } catch {
+        /* ignore */
+      }
+    }
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+    document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel(AUTH_CHANNEL);
+        bc.postMessage({ type: 'AUTH_CHANGE', token: null });
+        bc.close();
+      } catch {
+        /* ignore */
+      }
+    }
+  }
 }
 
 class ApiError extends Error {

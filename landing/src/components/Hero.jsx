@@ -1,15 +1,18 @@
 import React, { useState, useRef } from 'react';
 import {
   ArrowRight,
+  ArrowUpRight,
   BookOpen,
   Copy,
   Check,
   Sparkles,
 } from 'lucide-react';
-import { PORTFOLIO_SLUG } from '../api/client';
+import { PORTFOLIO_SLUG, ADMIN_URL } from '../api/client';
+import { useLandingAuth } from '../hooks/useLandingAuth';
 import MagneticButton from './MagneticButton';
 
 export default function Hero({ onOpenRegister }) {
+  const { isAuthenticated } = useLandingAuth();
   const [activeTab, setActiveTab] = useState('response');
   const [copied, setCopied] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
@@ -99,15 +102,28 @@ Accept: application/json`;
             </p>
 
             <div className="hero-actions">
-              <MagneticButton
-                as="button"
-                type="button"
-                className="btn btn-primary btn-lg"
-                onClick={onOpenRegister}
-                data-cursor="START"
-              >
-                <span>Start Building — Free</span> <ArrowRight size={17} />
-              </MagneticButton>
+              {isAuthenticated ? (
+                <MagneticButton
+                  as="a"
+                  href={`${ADMIN_URL}/admin`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-primary btn-lg"
+                  data-cursor="DASHBOARD"
+                >
+                  <span>Go to Dashboard</span> <ArrowUpRight size={17} />
+                </MagneticButton>
+              ) : (
+                <MagneticButton
+                  as="button"
+                  type="button"
+                  className="btn btn-primary btn-lg"
+                  onClick={onOpenRegister}
+                  data-cursor="START"
+                >
+                  <span>Start Building — Free</span> <ArrowRight size={17} />
+                </MagneticButton>
+              )}
               <MagneticButton
                 as="a"
                 href="#docs"

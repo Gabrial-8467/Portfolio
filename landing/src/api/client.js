@@ -42,9 +42,42 @@ async function request(path, { method = 'GET', headers = {}, body } = {}) {
   return { data: payload?.data ?? payload, status: response.status, latency, payload };
 }
 
+export const TOKEN_KEY = 'portfolio_admin_token';
+export const AUTH_CHANNEL = 'portfolio_auth_sync';
+
+export function getStoredToken() {
+  if (typeof window === 'undefined') return null;
+  const local = localStorage.getItem(TOKEN_KEY);
+  if (local) return local;
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(new RegExp('(^| )' + TOKEN_KEY + '=([^;]+)'));
+    if (match) return decodeURIComponent(match[2]);
+  }
+  return null;
+}
+
+export function setStoredToken(token) {
+  if (typeof window === 'undefined') return;
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`;
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+    document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
+  }
+}
+
 export const api = {
   register: async (data) => {
     const res = await request('/api/auth/register', { method: 'POST', body: data });
+    return res.data;
+  },
+  getMe: async (token) => {
+    const reqToken = token || getStoredToken();
+    if (!reqToken) return null;
+    const res = await request('/api/auth/me', {
+      headers: { Authorization: `Bearer ${reqToken}` },
+    });
     return res.data;
   },
   getHealth: async () => {

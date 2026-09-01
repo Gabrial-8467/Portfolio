@@ -426,6 +426,39 @@ input, textarea, select {
   gap: 12px;
 }
 
+.nav-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--saas-bg-alt);
+  border: 1px solid var(--saas-border);
+  border-radius: var(--saas-radius-full);
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--saas-text);
+  transition: all 0.15s ease;
+  text-decoration: none !important;
+}
+
+.nav-user-chip:hover {
+  border-color: var(--saas-primary);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.nav-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+.nav-user-label {
+  letter-spacing: -0.01em;
+}
+
 /* ---------- Hero Section ---------- */
 .saas-hero {
   padding: 88px 0 72px;

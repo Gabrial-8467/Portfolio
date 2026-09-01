@@ -8,6 +8,7 @@ import {
   Play,
   Sparkles,
   ArrowRight,
+  ArrowUpRight,
   BookOpen,
   HelpCircle,
   Cpu,
@@ -16,9 +17,11 @@ import {
 } from 'lucide-react';
 import MagneticButton from './MagneticButton';
 import { ADMIN_URL } from '../api/client';
+import { useLandingAuth } from '../hooks/useLandingAuth';
 
 export default function Navbar({ onOpenRegister, onSelectTab }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated } = useLandingAuth();
 
   return (
     <nav className="saas-nav" aria-label="Main navigation">
@@ -99,23 +102,52 @@ export default function Navbar({ onOpenRegister, onSelectTab }) {
 
           {/* Nav Actions */}
           <div className="saas-nav-actions">
-            <a
-              href={`${ADMIN_URL}/admin/login`}
-              className="btn btn-secondary"
-              target="_blank"
-              rel="noreferrer"
-              data-cursor="SIGNIN"
-            >
-              Sign In
-            </a>
-            <MagneticButton
-              type="button"
-              className="btn btn-primary"
-              onClick={onOpenRegister}
-              data-cursor="START"
-            >
-              <span>Get Started</span> <ArrowRight size={15} />
-            </MagneticButton>
+            {isAuthenticated ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <a
+                  href={`${ADMIN_URL}/admin`}
+                  className="nav-user-chip"
+                  target="_blank"
+                  rel="noreferrer"
+                  title={`Signed in as ${user?.name || user?.email}`}
+                >
+                  <span className="nav-live-dot" />
+                  <span className="nav-user-label">{user?.name?.split(' ')[0] || 'Admin'}</span>
+                </a>
+                <MagneticButton
+                  as="a"
+                  href={`${ADMIN_URL}/admin`}
+                  className="btn btn-primary"
+                  target="_blank"
+                  rel="noreferrer"
+                  data-cursor="DASHBOARD"
+                >
+                  <span>Dashboard</span>
+                  <ArrowUpRight size={15} />
+                </MagneticButton>
+              </div>
+            ) : (
+              <>
+                <a
+                  href={`${ADMIN_URL}/admin/login`}
+                  className="btn btn-secondary"
+                  target="_blank"
+                  rel="noreferrer"
+                  data-cursor="SIGNIN"
+                >
+                  Sign In
+                </a>
+                <MagneticButton
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={onOpenRegister}
+                  data-cursor="START"
+                >
+                  <span>Get Started</span> <ArrowRight size={15} />
+                </MagneticButton>
+              </>
+            )}
+
             <button
               type="button"
               className="mobile-menu-btn"
