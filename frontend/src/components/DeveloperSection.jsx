@@ -18,7 +18,7 @@ export default function DeveloperSection({ site = {} }) {
       <div className="section-container">
         <div className={`dev-cta-card ${isInView ? 'in-view' : ''}`}>
           <div className="dev-card-left">
-            <div className="card-badge" style={{ background: 'rgba(255,255,255,0.1)', color: '#ffffff', borderColor: 'rgba(255,255,255,0.15)' }}>
+            <div className="card-badge" style={{ background: 'rgba(255,255,255,0.08)', color: '#ffffff', borderColor: 'rgba(255,255,255,0.15)' }}>
               <Terminal size={14} color="#38bdf8" /> Open Source &amp; Engineering
             </div>
             <h2 className="dev-card-heading">Explore what I&apos;m building.</h2>
