@@ -7,6 +7,7 @@ import JsonEditor from '../../admin/components/JsonEditor';
 import Field, { TextInput } from '../../admin/components/Field';
 import { Save, ArrowUpRight, Trash2, AlertTriangle, User } from 'lucide-react';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
+import AdminLoader from '../../admin/components/AdminLoader';
 
 export default function Settings() {
   const { user, activePortfolio, refreshPortfolios } = useAuth();
@@ -85,10 +86,12 @@ export default function Settings() {
     }
   };
 
-  if (loading) return <div className="admin-loading">Loading settings…</div>;
+  if (loading) {
+    return <AdminLoader message="Loading workspace settings…" subtext="Fetching portfolio configurations" />;
+  }
 
   if (!activePortfolio) {
-    return <div className="admin-loading">No portfolio selected. Create one first.</div>;
+    return <AdminLoader message="No portfolio selected" subtext="Please select or create a workspace first" />;
   }
 
   return (

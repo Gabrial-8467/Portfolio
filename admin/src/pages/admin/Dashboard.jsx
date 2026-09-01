@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../admin/useAuth';
 import { useToast } from '../../admin/components/useToast';
 import { api, getPublicPortfolioUrl, API_URL } from '../../api/client';
+import AdminLoader from '../../admin/components/AdminLoader';
 import {
   Layers,
   Plus,
@@ -364,7 +365,7 @@ export default function Dashboard() {
 
       {/* Sections Table View */}
       {loading ? (
-        <div className="admin-loading">Loading portfolio content…</div>
+        <AdminLoader message="Loading portfolio overview…" subtext="Aggregating metrics and section payloads" />
       ) : (
         <div>
           <div className="admin-toolbar">

@@ -9,6 +9,7 @@ import { useToast } from '../../admin/components/useToast';
 import Field, { TextInput, Toggle } from '../../admin/components/Field';
 import { Save, Trash2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
+import AdminLoader from '../../admin/components/AdminLoader';
 
 export default function SectionEditor() {
   const { sectionId } = useParams();
@@ -111,10 +112,12 @@ export default function SectionEditor() {
     }
   };
 
-  if (loading) return <div className="admin-loading">Loading section content…</div>;
+  if (loading) {
+    return <AdminLoader message="Loading section editor…" subtext="Parsing schema attributes and JSON payload" />;
+  }
 
   if (!activePortfolio) {
-    return <div className="admin-loading">No portfolio selected. Create one first.</div>;
+    return <AdminLoader message="No portfolio selected" subtext="Please select or create a workspace first" />;
   }
 
   return (

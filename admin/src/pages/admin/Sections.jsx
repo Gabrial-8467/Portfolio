@@ -6,6 +6,7 @@ import { useToast } from '../../admin/components/useToast';
 import ItemModal from '../../admin/components/ItemModal';
 import Field, { TextInput, Toggle } from '../../admin/components/Field';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
+import AdminLoader from '../../admin/components/AdminLoader';
 import {
   ArrowUp,
   ArrowDown,
@@ -137,7 +138,9 @@ export default function Sections() {
     }
   };
 
-  if (loading) return <div className="admin-loading">Loading sections…</div>;
+  if (loading) {
+    return <AdminLoader message="Loading portfolio sections…" subtext="Fetching layout schemas and publication status" />;
+  }
 
   return (
     <div className="admin-page">

@@ -986,11 +986,186 @@ html, body {
   margin: 0 auto 20px;
 }
 
+/* ============================================================
+   Attractive Admin Loader System
+   ============================================================ */
 .admin-loading {
-  padding: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: 48px 24px;
+}
+
+.admin-loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  width: 100%;
+  padding: 32px 20px;
+  animation: adminFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-loader-container.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(248, 250, 252, 0.85);
+  backdrop-filter: blur(12px);
+  min-height: 100vh;
+}
+
+.admin-loader-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
+  padding: 36px 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  max-width: 360px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Orbital Rings & Icon */
+.admin-loader-orbit {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbit-ring-outer {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--admin-primary);
+  border-right-color: #38bdf8;
+  animation: orbitRotate 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.orbit-ring-inner {
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-bottom-color: #818cf8;
+  border-left-color: #34d399;
+  animation: orbitRotateReverse 0.9s linear infinite;
+}
+
+.orbit-center-core {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--admin-primary-light);
+  border: 1px solid var(--admin-primary-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--admin-primary);
+  box-shadow: 0 0 16px rgba(79, 70, 229, 0.25);
+  animation: orbitPulse 2s ease-in-out infinite;
+}
+
+.orbit-icon {
+  animation: iconWiggle 2s ease-in-out infinite;
+}
+
+@keyframes orbitRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbitRotateReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes orbitPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 16px rgba(79, 70, 229, 0.2); }
+  50% { transform: scale(1.08); box-shadow: 0 0 24px rgba(79, 70, 229, 0.4); }
+}
+
+@keyframes iconWiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+.admin-loader-meta {
+  margin-bottom: 20px;
+}
+
+.admin-loader-title {
+  font-size: 15px;
+  font-weight: 750;
+  color: var(--admin-text);
+  letter-spacing: -0.01em;
+  margin: 0 0 4px 0;
+}
+
+.admin-loader-subtext {
+  font-size: 12px;
   color: var(--admin-text-muted);
-  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.admin-loader-progress-track {
+  width: 100%;
+  height: 3px;
+  background: var(--admin-surface-subtle);
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.admin-loader-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, #4f46e5, #38bdf8, #34d399);
+  border-radius: 9999px;
+  animation: loaderProgress 1.4s ease-in-out infinite;
+}
+
+@keyframes loaderProgress {
+  0% { left: -40%; width: 40%; }
+  50% { width: 60%; }
+  100% { left: 100%; width: 40%; }
+}
+
+/* Compact Inline Loader */
+.admin-loader-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--admin-text-muted);
+  padding: 8px 12px;
+}
+
+.admin-spinner-ring {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--admin-border);
+  border-top-color: var(--admin-primary);
+  animation: orbitRotate 0.75s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 /* ============================================================

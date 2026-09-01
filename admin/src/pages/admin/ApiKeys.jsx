@@ -4,6 +4,7 @@ import { api } from '../../api/client';
 import { useAuth } from '../../admin/useAuth';
 import ItemModal from '../../admin/components/ItemModal';
 import { useToast } from '../../admin/components/useToast';
+import AdminLoader from '../../admin/components/AdminLoader';
 
 const SNIPPET = (apiUrl) => `// Consume portfolio content with your API key
 const res = await fetch('${apiUrl}/api/v1/portfolio', {
@@ -165,7 +166,7 @@ export default function ApiKeys() {
         </div>
 
         {loading ? (
-          <div className="admin-loading">Loading credentials…</div>
+          <AdminLoader message="Loading API credentials…" subtext="Retrieving SHA-256 key records" />
         ) : keys.length === 0 ? (
           <div className="admin-empty-state">
             <div className="admin-empty-icon"><KeyRound size={24} /></div>
