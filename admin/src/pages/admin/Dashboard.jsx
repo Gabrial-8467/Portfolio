@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../admin/useAuth';
-import { api } from '../../api/client';
+import { api, getPublicPortfolioUrl } from '../../api/client';
 import {
   Layers,
   Plus,
@@ -117,7 +117,7 @@ export default function Dashboard() {
         </div>
         <a
           className="admin-card admin-card-accent amber"
-          href={`/?preview=${activePortfolio.slug}`}
+          href={getPublicPortfolioUrl(activePortfolio.slug)}
           target="_blank"
           rel="noopener noreferrer"
         >

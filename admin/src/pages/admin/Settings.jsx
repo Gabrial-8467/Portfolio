@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../admin/useAuth';
-import { api } from '../../api/client';
+import { api, getPublicPortfolioUrl } from '../../api/client';
 import JsonEditor from '../../admin/components/JsonEditor';
 import Field, { TextInput } from '../../admin/components/Field';
 import { Save, ExternalLink } from 'lucide-react';
@@ -76,7 +76,7 @@ export default function Settings() {
         </div>
         <a
           className="admin-btn admin-btn-ghost"
-          href={`/?preview=${activePortfolio.slug}`}
+          href={getPublicPortfolioUrl(activePortfolio.slug)}
           target="_blank"
           rel="noopener noreferrer"
         >

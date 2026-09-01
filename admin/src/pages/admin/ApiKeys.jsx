@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Copy, KeyRound, Plus, Trash2, CheckCircle2 } from 'lucide-react';
-import { api } from '../../api/client';
+import { api, getPublicPortfolioUrl } from '../../api/client';
 import { useAuth } from '../../admin/useAuth';
 import ItemModal from '../../admin/components/ItemModal';
 import { useToast } from '../../admin/components/useToast';
@@ -103,7 +103,8 @@ export default function ApiKeys() {
   };
 
   const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
-  const portfolioUrl = activePortfolio?.slug ? `${apiUrl}/api/p/${activePortfolio.slug}` : null;
+  const publicSiteUrl = getPublicPortfolioUrl(activePortfolio?.slug);
+  const apiEndpointUrl = activePortfolio?.slug ? `${apiUrl}/api/p/${activePortfolio.slug}` : null;
 
   return (
     <div className="admin-page">
@@ -130,12 +131,22 @@ export default function ApiKeys() {
           <span className="kv-label">Dev server</span>
           <span className="kv-value">{apiUrl}</span>
         </div>
-        {portfolioUrl && (
+        {publicSiteUrl && (
           <div className="kv-row">
-            <span className="kv-label">Portfolio URL</span>
+            <span className="kv-label">Public Portfolio</span>
             <span className="kv-value">
-              <a className="admin-portfolio-link" href={portfolioUrl} target="_blank" rel="noreferrer">
-                {portfolioUrl}
+              <a className="admin-portfolio-link" href={publicSiteUrl} target="_blank" rel="noreferrer">
+                {publicSiteUrl}
+              </a>
+            </span>
+          </div>
+        )}
+        {apiEndpointUrl && (
+          <div className="kv-row">
+            <span className="kv-label">JSON API Endpoint</span>
+            <span className="kv-value">
+              <a className="admin-portfolio-link" href={apiEndpointUrl} target="_blank" rel="noreferrer">
+                {apiEndpointUrl}
               </a>
             </span>
           </div>

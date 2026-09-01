@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from './useAuth';
+import { getPublicPortfolioUrl } from '../api/client';
 import {
   LayoutDashboard,
   Layers,
@@ -67,7 +68,7 @@ export default function AdminLayout() {
             {activePortfolio?.slug && (
               <a
                 className="admin-portfolio-link"
-                href={`/?preview=${activePortfolio.slug}`}
+                href={getPublicPortfolioUrl(activePortfolio.slug)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
