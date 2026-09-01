@@ -169,6 +169,7 @@ input, textarea, select {
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
+  box-shadow: 0 0 0 1.5px #ffffff, 0 0 8px rgba(79, 70, 229, 0.6);
   transition: opacity 0.15s ease;
 }
 
@@ -178,8 +179,9 @@ input, textarea, select {
   left: -20px;
   width: 40px;
   height: 40px;
-  border: 1.5px solid rgba(79, 70, 229, 0.45);
-  background: rgba(79, 70, 229, 0.04);
+  border: 1.5px solid rgba(79, 70, 229, 0.6);
+  background: rgba(79, 70, 229, 0.06);
+  box-shadow: 0 0 12px rgba(79, 70, 229, 0.15);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9998;
@@ -198,8 +200,8 @@ input, textarea, select {
   top: -34px;
   left: -34px;
   background: #0f172a;
-  border-color: #0f172a;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.35);
 }
 
 .cursor-text {
