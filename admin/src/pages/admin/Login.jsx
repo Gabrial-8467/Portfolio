@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Copy, CheckCircle2, KeyRound } from 'lucide-react';
+import { CheckCircle2, Copy, KeyRound, Zap } from 'lucide-react';
 import { useAuth } from '../../admin/useAuth';
 import Field, { TextInput } from '../../admin/components/Field';
 import ItemModal from '../../admin/components/ItemModal';
@@ -68,7 +68,10 @@ export default function Login() {
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
-        <div className="admin-login-brand">Portfolio CMS</div>
+        <div className="admin-login-brand">
+          <span className="admin-brand-mark"><Zap size={17} /></span>
+          <span className="admin-brand-text">Portfolio CMS</span>
+        </div>
         <h1 className="admin-login-title">{mode === 'login' ? 'Sign in' : 'Create account'}</h1>
 
         <form onSubmit={handleSubmit} className="admin-login-form">

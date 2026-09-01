@@ -7,6 +7,7 @@ import {
   LogOut,
   ExternalLink,
   KeyRound,
+  Zap,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -15,6 +16,15 @@ const NAV_ITEMS = [
   { to: '/admin/apikeys', label: 'API Keys', icon: KeyRound },
   { to: '/admin/settings', label: 'Portfolio Settings', icon: Settings },
 ];
+
+function initials(name) {
+  return (name || 'A')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join('');
+}
 
 export default function AdminLayout() {
   const { user, portfolios, activePortfolio, selectPortfolio, logout } = useAuth();
@@ -32,7 +42,10 @@ export default function AdminLayout() {
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="admin-brand">Portfolio CMS</div>
+        <div className="admin-brand">
+          <span className="admin-brand-mark"><Zap size={17} /></span>
+          <span className="admin-brand-text">Portfolio CMS</span>
+        </div>
 
         {portfolios.length > 0 && (
           <div className="admin-portfolio-switcher">
@@ -81,8 +94,13 @@ export default function AdminLayout() {
 
         <div className="admin-sidebar-footer">
           <div className="admin-user">
-            <div className="admin-user-name">{user?.name || 'Admin'}</div>
-            <div className="admin-user-email">{user?.email}</div>
+            <div className="admin-user-row">
+              <span className="admin-avatar">{initials(user?.name)}</span>
+              <div>
+                <div className="admin-user-name">{user?.name || 'Admin'}</div>
+                <div className="admin-user-email">{user?.email}</div>
+              </div>
+            </div>
           </div>
           <button type="button" onClick={handleLogout} className="admin-logout-btn">
             <LogOut size={16} />

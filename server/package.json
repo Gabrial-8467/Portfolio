@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "seed": "node src/seed.js",
+    "seed:user": "node src/seedToUser.js",
     "postinstall": "find node_modules -name 'tsconfig.json' -delete 2>/dev/null || true"
   },
   "engines": {
@@ -21,7 +22,8 @@
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.5.0"
+    "mongoose": "^8.5.0",
+    "multer": "^2.3.0"
   },
   "devDependencies": {
     "@types/node": "^26.4.0"

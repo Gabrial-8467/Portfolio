@@ -2,6 +2,13 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const PORTFOLIO_SLUG = import.meta.env.VITE_PORTFOLIO_SLUG || 'gabrial-deora';
 
+export const FRONTEND_URL = (import.meta.env.VITE_FRONTEND_URL || import.meta.env.VITE_PORTFOLIO_URL || 'http://localhost:3000').replace(/\/$/, '');
+
+export function getPublicPortfolioUrl(slug) {
+  if (!slug) return FRONTEND_URL;
+  return `${FRONTEND_URL}/?preview=${slug}`;
+}
+
 const TOKEN_KEY = 'portfolio_admin_token';
 
 export function getToken() {
@@ -96,6 +103,36 @@ export const api = {
     list: () => api.get('/api/api-keys', { auth: true }),
     create: (portfolioId, name) => api.post('/api/api-keys', { portfolioId, name }, { auth: true }),
     revoke: (id) => api.del(`/api/api-keys/${id}`, { auth: true }),
+  },
+
+  uploads: {
+    uploadFile: async (file) => {
+      const form = new FormData();
+      form.append('file', file);
+      const headers = { Accept: 'application/json' };
+      const token = getToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      let response;
+      try {
+        response = await fetch(`${API_URL}/api/uploads`, { method: 'POST', headers, body: form });
+      } catch {
+        throw new ApiError('Network error — could not reach the API', 0);
+      }
+
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch {
+        payload = null;
+      }
+
+      if (!response.ok) {
+        throw new ApiError(payload?.error || `Upload failed (${response.status})`, response.status);
+      }
+
+      return payload?.data;
+    },
   },
 
   admin: {

@@ -33,7 +33,8 @@ const initialState = {
 
 function sectionValue(sections, key, fallback) {
   if (!Array.isArray(sections)) return fallback;
-  const found = sections.find((s) => s.key === key);
+  const lower = key.toLowerCase();
+  const found = sections.find((s) => s.key?.toLowerCase() === lower);
   return found && found.content !== null && found.content !== undefined ? found.content : fallback;
 }
 

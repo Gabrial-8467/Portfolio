@@ -22,6 +22,13 @@ npm run seed             # creates the superadmin + a demo portfolio (gabrial-de
 npm run dev              # or npm start
 ```
 
+Copy the demo portfolio content into a registered user's account:
+
+```bash
+EMAIL=you@example.com npm run seed:user   # add the seed sections to their first portfolio
+EMAIL=you@example.com FORCE=1 npm run seed:user   # replace existing sections
+```
+
 Requirements: Node.js >= 18, and a MongoDB database (local or Atlas).
 
 ## Environment variables
@@ -98,6 +105,11 @@ API key routes: `/api/api-keys`
 - `GET /` — list your keys (full key is never returned; only the `prefix`).
 - `POST /` — `{ portfolioId, name? }` → `{ key, apiKey }` where `key` is the full plaintext key (shown this one time only).
 - `DELETE /:id` — revoke (immediate, irreversible).
+
+Image uploads: `POST /api/uploads`
+- Multipart form field `file`, image types only (jpg/png/webp/gif/svg/avif), max 5 MB.
+- Returns `{ url }` (e.g. `/uploads/1234-abcd.png`), served statically from `GET /uploads/:file`.
+- `uploads/` is gitignored. Note: on ephemeral hosts (Render free tier) files wipe on redeploy — for production attach object storage (S3/Cloudinary) and keep the URL in section content.
 
 ### Superadmin (Bearer token, role `superadmin`)
 

@@ -1,6 +1,8 @@
-import { useId, useState } from 'react';
-import { ChevronDown, ChevronUp, ImageIcon, Plus, Trash2, X } from 'lucide-react';
+import { useId, useRef, useState } from 'react';
+import { ChevronDown, ChevronUp, ImageIcon, Loader2, Plus, Trash2, X } from 'lucide-react';
+import { api } from '../../api/client';
 import { blankItem } from '../structuredSchemas';
+import { useToast } from './useToast';
 
 function StringTagsEditor({ value, onChange, placeholder }) {
   const [draft, setDraft] = useState('');
@@ -103,6 +105,73 @@ function LinksEditor({ fields = [], value, onChange, label }) {
   );
 }
 
+function ImageField({ field = {}, value, onChange }) {
+  const inputId = useId();
+  const fileRef = useRef(null);
+  const { toast } = useToast();
+  const [uploading, setUploading] = useState(false);
+  const [name, setName] = useState('');
+
+  const upload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    setName(file.name);
+    try {
+      const data = await api.uploads.uploadFile(file);
+      onChange(data.url);
+      toast('Image uploaded', 'success');
+    } catch (err) {
+      toast(err.message || 'Upload failed', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="admin-field">
+      <label className="admin-field-label" htmlFor={inputId}>
+        {field.label || 'Image'}
+        <span className="admin-field-hint" style={{ textTransform: 'none', fontWeight: 400, marginTop: 2 }}>
+          Upload a file or paste a URL.
+        </span>
+      </label>
+      <div className="img-upload-row">
+        <input
+          className="admin-input"
+          value={typeof value === 'string' ? value : ''}
+          placeholder="https://… or upload below"
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={(e) => upload(e.target.files?.[0])}
+        />
+        <button
+          type="button"
+          className="admin-btn admin-btn-ghost admin-btn-sm"
+          disabled={uploading}
+          onClick={() => fileRef.current?.click()}
+        >
+          {uploading ? <Loader2 size={14} className="spin" /> : <Plus size={14} />}
+          {uploading ? `${name}…` : 'Upload'}
+        </button>
+      </div>
+      <div className="img-preview">
+        {value ? (
+          <img src={value} alt="Preview" onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }} />
+        ) : (
+          <ImageIcon size={18} />
+        )}
+      </div>
+    </div>
+  );
+}
+
 function FieldRenderer({ field, value, onChange }) {
   const inputId = useId();
   const style = field.inline ? { gridColumn: '1 / -1' } : undefined;
@@ -144,28 +213,7 @@ function FieldRenderer({ field, value, onChange }) {
         </div>
       );
     case 'image':
-      return (
-        <div className="admin-field" style={style}>
-          {label}
-          <input
-            id={inputId}
-            type="url"
-            className="admin-input"
-            value={value || ''}
-            placeholder="https://…"
-            onChange={(e) => onChange(e.target.value)}
-          />
-          <div className="img-preview">
-            {value ? (
-              <img src={value} alt="Preview" onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }} />
-            ) : (
-              <ImageIcon size={18} />
-            )}
-          </div>
-        </div>
-      );
+      return <ImageField field={field} value={value} onChange={onChange} />;
     case 'number':
       return (
         <div className="admin-field" style={style}>

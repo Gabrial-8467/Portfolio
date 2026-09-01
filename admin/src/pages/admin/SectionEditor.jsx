@@ -145,16 +145,18 @@ export default function SectionEditor() {
           submit();
         }}
       >
-        <div className="admin-form-grid">
-          <Field label="Key" hint="Lowercase letters and hyphens only.">
-            <TextInput value={form.key} onChange={(v) => set('key')(v.toLowerCase())} placeholder="projects" />
-          </Field>
-          <Field label="Label" hint="Display name shown in this admin panel.">
-            <TextInput value={form.label} onChange={set('label')} placeholder="Projects" />
-          </Field>
-          <Field label="Visibility">
-            <Toggle checked={form.isPublished} onChange={set('isPublished')} label={form.isPublished ? 'Published' : 'Draft'} />
-          </Field>
+        <div className="admin-section-meta-card">
+          <div className="admin-form-grid">
+            <Field label="Key" hint="Lowercase letters and hyphens only.">
+              <TextInput value={form.key} onChange={(v) => set('key')(v.toLowerCase())} placeholder="projects" />
+            </Field>
+            <Field label="Label" hint="Display name shown in this admin panel.">
+              <TextInput value={form.label} onChange={set('label')} placeholder="Projects" />
+            </Field>
+            <Field label="Visibility">
+              <Toggle checked={form.isPublished} onChange={set('isPublished')} label={form.isPublished ? 'Published' : 'Draft'} />
+            </Field>
+          </div>
         </div>
 
         <h2 className="admin-form-section">Content</h2>

@@ -2,7 +2,20 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../admin/useAuth';
 import { api } from '../../api/client';
-import { Layers, Plus, ExternalLink, RefreshCw } from 'lucide-react';
+import {
+  Layers,
+  Plus,
+  RefreshCw,
+  Globe,
+  FileCheck2,
+  FilePenLine,
+  SquareCheckBig,
+  ArrowUpRight,
+} from 'lucide-react';
+
+function firstWord(name) {
+  return (name || '').split(/\s+/)[0] || 'there';
+}
 
 export default function Dashboard() {
   const { user, activePortfolio, refreshPortfolios, selectPortfolio } = useAuth();
@@ -48,10 +61,10 @@ export default function Dashboard() {
   if (!activePortfolio) {
     return (
       <div className="admin-page">
-        <div className="admin-page-header">
+        <div className="admin-hero">
           <div>
-            <h1 className="admin-page-title">Welcome</h1>
-            <p className="admin-page-subtitle">Create your first portfolio to get started.</p>
+            <h1>Welcome, {firstWord(user?.name)}!</h1>
+            <p>Let&apos;s set up your first portfolio — it takes seconds.</p>
           </div>
         </div>
         <button type="button" className="admin-btn admin-btn-primary" onClick={handleCreatePortfolio} disabled={creating}>
@@ -63,22 +76,23 @@ export default function Dashboard() {
   }
 
   const published = sections.filter((s) => s.isPublished).length;
+  const drafts = sections.length - published;
 
   return (
     <div className="admin-page">
-      <div className="admin-page-header">
+      <div className="admin-hero">
         <div>
-          <h1 className="admin-page-title">Dashboard</h1>
-          <p className="admin-page-subtitle">
-            Welcome back, {user?.name || user?.email}. Editing <strong>{activePortfolio.name}</strong>.
+          <h1>Welcome back, {firstWord(user?.name)}</h1>
+          <p>
+            Editing <strong>{activePortfolio.name}</strong> — push content to your portfolio from here.
           </p>
         </div>
-        <div className="admin-page-actions">
-          <button type="button" className="admin-btn admin-btn-ghost" onClick={loadSections}>
+        <div className="admin-hero-actions">
+          <button type="button" className="admin-btn admin-btn-hero" onClick={loadSections}>
             <RefreshCw size={16} />
             Refresh
           </button>
-          <Link to="/admin/sections/new" className="admin-btn admin-btn-primary">
+          <Link to="/admin/sections/new" className="admin-btn admin-btn-hero-solid">
             <Plus size={16} />
             New Section
           </Link>
@@ -86,25 +100,32 @@ export default function Dashboard() {
       </div>
 
       <div className="admin-cards-grid">
-        <div className="admin-card">
-          <div className="admin-card-icon"><Layers size={22} /></div>
-          <div className="admin-card-label">Sections</div>
+        <div className="admin-card admin-card-accent blue">
+          <div className="admin-card-icon blue"><Layers size={22} /></div>
+          <div className="admin-card-label">Total sections</div>
           <div className="admin-card-count">{sections.length}</div>
         </div>
-        <div className="admin-card">
-          <div className="admin-card-icon"><Layers size={22} /></div>
+        <div className="admin-card admin-card-accent green">
+          <div className="admin-card-icon green"><FileCheck2 size={22} /></div>
           <div className="admin-card-label">Published</div>
           <div className="admin-card-count">{published}</div>
         </div>
+        <div className="admin-card admin-card-accent violet">
+          <div className="admin-card-icon violet"><FilePenLine size={22} /></div>
+          <div className="admin-card-label">Drafts</div>
+          <div className="admin-card-count">{drafts}</div>
+        </div>
         <a
-          className="admin-card"
+          className="admin-card admin-card-accent amber"
           href={`/?preview=${activePortfolio.slug}`}
           target="_blank"
           rel="noopener noreferrer"
         >
-          <div className="admin-card-icon"><ExternalLink size={22} /></div>
+          <div className="admin-card-icon amber"><Globe size={22} /></div>
           <div className="admin-card-label">Public URL</div>
-          <div className="admin-card-count">/{activePortfolio.slug}</div>
+          <div className="admin-card-count">
+            /{activePortfolio.slug} <ArrowUpRight size={16} style={{ verticalAlign: '-2px', opacity: 0.7 }} />
+          </div>
         </a>
       </div>
 
@@ -112,10 +133,18 @@ export default function Dashboard() {
         <div className="admin-loading">Loading…</div>
       ) : (
         <div className="admin-section-list">
-          <h2 className="admin-form-section">Sections</h2>
+          <div className="admin-toolbar">
+            <h2 className="admin-form-section" style={{ margin: 0, border: 'none', padding: 0 }}>
+              Your sections
+            </h2>
+            <span className="struct-intro">{sections.length} total · {published} live</span>
+          </div>
           {sections.length === 0 && (
             <div className="admin-empty-state">
               <p>No sections yet. Create one to start publishing content.</p>
+              <Link to="/admin/sections/new" className="admin-btn admin-btn-primary">
+                <Plus size={15} /> Create a section
+              </Link>
             </div>
           )}
           <div className="admin-table-wrap">
@@ -137,7 +166,10 @@ export default function Dashboard() {
                     <td>{section.order}</td>
                     <td>
                       {section.isPublished ? (
-                        <span className="admin-badge admin-badge-green">Published</span>
+                        <span className="admin-badge admin-badge-green">
+                          <SquareCheckBig size={12} style={{ verticalAlign: '-2px', marginRight: 4 }} />
+                          Published
+                        </span>
                       ) : (
                         <span className="admin-badge admin-badge-red">Draft</span>
                       )}

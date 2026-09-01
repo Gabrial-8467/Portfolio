@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { config } from './config/env.js';
 import { connectDB } from './config/db.js';
+import { uploadsDir } from './config/uploads.js';
 import { authRequired } from './middleware/auth.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
@@ -12,6 +13,7 @@ import publicRoutes from './routes/publicRoutes.js';
 import publicApiKeyRoutes from './routes/publicApiKeyRoutes.js';
 import portfolioRoutes from './routes/portfolioRoutes.js';
 import apiKeyRoutes from './routes/apiKeyRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 import superadminRoutes from './routes/superadminRoutes.js';
 
 const app = express();
@@ -47,6 +49,8 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 
+app.use('/uploads', express.static(uploadsDir, { maxAge: '7d' }));
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -70,7 +74,25 @@ app.use('/api/p', cors({ origin: true }), publicRoutes);
 app.use('/api/v1', cors({ origin: true }), publicApiKeyRoutes);
 app.use('/api/portfolios', authRequired, portfolioRoutes);
 app.use('/api/api-keys', authRequired, apiKeyRoutes);
+app.use('/api/uploads', authRequired, uploadRoutes);
 app.use('/api/admin', authRequired, superadminRoutes);
+
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Portfolio CMS API',
+    version: '1.0.0',
+    baseUrl: `http://localhost:${config.port}`,
+    endpoints: {
+      health: '/health',
+      portfolioBySlug: '/api/p/:slug',
+      sectionBySlug: '/api/p/:slug/section/:key',
+      portfolioByKey: 'GET /api/v1/portfolio  (Authorization: Bearer <apiKey>)',
+      sectionByKey: '/api/v1/section/:key  (Authorization: Bearer <apiKey>)',
+      auth: ['POST /api/auth/register', 'POST /api/auth/login', 'GET /api/auth/me'],
+      ownerApi: ['/api/portfolios', '/api/api-keys', '...'],
+    },
+  });
+});
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
@@ -82,7 +104,14 @@ app.use(errorHandler);
 async function start() {
   await connectDB();
   app.listen(config.port, () => {
-    console.log(`Server running on port ${config.port} in ${config.nodeEnv} mode`);
+    const url = `http://localhost:${config.port}`;
+    console.log('');
+    console.log(`  Server running in ${config.nodeEnv} mode`);
+    console.log(`  Backend API     ${url}`);
+    console.log(`  Health check    ${url}/health`);
+    console.log(`  Landing (signup) http://localhost:5176  |  Admin panel http://localhost:5174`);
+    console.log('  Public data     GET /api/p/:slug  |  GET /api/v1/portfolio (API key)');
+    console.log('');
   });
 }
 
