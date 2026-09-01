@@ -9,30 +9,36 @@ import Sections from './pages/admin/Sections';
 import SectionEditor from './pages/admin/SectionEditor';
 import Settings from './pages/admin/Settings';
 import ApiKeys from './pages/admin/ApiKeys';
+import Media from './pages/admin/Media';
+import ApiDocs from './pages/admin/ApiDocs';
+import Playground from './pages/admin/Playground';
 
 function App() {
   return (
     <AuthProvider>
       <ToastProvider>
         <Routes>
-        <Route path="/admin/login" element={<Login />} />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="sections" element={<Sections />} />
-          <Route path="sections/new" element={<SectionEditor />} />
-          <Route path="sections/:sectionId" element={<SectionEditor />} />
-          <Route path="apikeys" element={<ApiKeys />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-        <Route path="*" element={<Navigate to="/admin" replace />} />
+          <Route path="/admin/login" element={<Login />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="sections" element={<Sections />} />
+            <Route path="sections/new" element={<SectionEditor />} />
+            <Route path="sections/:sectionId" element={<SectionEditor />} />
+            <Route path="media" element={<Media />} />
+            <Route path="apikeys" element={<ApiKeys />} />
+            <Route path="docs" element={<ApiDocs />} />
+            <Route path="playground" element={<Playground />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+          <Route path="/" element={<Navigate to="/admin" replace />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </ToastProvider>
     </AuthProvider>
