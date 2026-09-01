@@ -38,7 +38,7 @@ export default function RegisterModal({ isOpen, onClose }) {
       });
 
       setRevealedKey(res.apiKey);
-      setCreatedPortfolio(res.portfolio);
+      setCreatedPortfolio(res.portfolios?.[0] || res.portfolio);
       setPassword('');
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
