@@ -15,7 +15,6 @@ const ALLOWED = {
   'image/png': '.png',
   'image/webp': '.webp',
   'image/gif': '.gif',
-  'image/svg+xml': '.svg',
   'image/avif': '.avif',
 };
 
@@ -33,7 +32,7 @@ export const uploadImage = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (!ALLOWED[file.mimetype]) {
-      return cb(new Error('Only image files are allowed (jpg, png, webp, gif, svg, avif)'));
+      return cb(new Error('Only image files are allowed (jpg, png, webp, gif, avif)'));
     }
     return cb(null, true);
   },

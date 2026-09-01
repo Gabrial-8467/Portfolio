@@ -76,7 +76,10 @@ export default function ApiKeys() {
     setCreatingError('');
     try {
       const result = await api.apiKeys.create(activePortfolio._id, createName.trim() || 'Main key');
-      setKeys((current) => [result.apiKey, ...current]);
+      setKeys((current) => [
+        { ...result.apiKey, portfolioName: activePortfolio?.name || '' },
+        ...current,
+      ]);
       setCreateOpen(false);
       setCreateName('');
       setRevealedKey(result.key);

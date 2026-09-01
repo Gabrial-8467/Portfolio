@@ -17,6 +17,7 @@ export default function Settings() {
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
@@ -190,9 +191,10 @@ export default function Settings() {
           type="button"
           className="admin-btn admin-btn-danger"
           onClick={() => setDeleteConfirmOpen(true)}
+          disabled={deleting}
         >
           <Trash2 size={15} />
-          <span>Delete Portfolio Workspace</span>
+          <span>{deleting ? 'Deleting…' : 'Delete Portfolio Workspace'}</span>
         </button>
       </div>
 

@@ -40,17 +40,19 @@ export const createSection = asyncHandler(async (req, res) => {
   });
   if (existing) throw new ApiError(409, `Section "${key}" already exists`);
 
-  const count = await Section.countDocuments({ portfolio: req.portfolio._id });
+  const maxOrder = await Section.findOne({ portfolio: req.portfolio._id })
+    .sort({ order: -1 })
+    .select('order')
+    .lean();
   const section = await Section.create({
     portfolio: req.portfolio._id,
     key: key.toLowerCase(),
     label: label || '',
     content: content ?? null,
     isPublished: isPublished ?? true,
-    order: count + 1,
+    order: (maxOrder?.order ?? 0) + 1,
   });
 
-  await section.save();
   return res.status(201).json({ success: true, data: baseSection(section) });
 });
 
@@ -93,7 +95,7 @@ export const updateSectionsOrder = asyncHandler(async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || !ids.length) throw new ApiError(400, 'ids array is required');
 
-  const owned = await Section.find({ portfolio: req.portfolio._id }).select('_id').lean();
+  const owned = await Section.find({ portfolio: req.portfolio._id }).sort({ order: 1 }).lean();
   const ownedIds = new Set(owned.map((s) => String(s._id)));
   const validIds = ids.map((id) => String(id));
 
@@ -101,7 +103,12 @@ export const updateSectionsOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Cannot reorder sections you do not own');
   }
 
-  const ops = validIds.map((id, index) => ({
+  const normalized = [
+    ...validIds,
+    ...owned.map((s) => String(s._id)).filter((id) => !validIds.includes(id)),
+  ];
+
+  const ops = normalized.map((id, index) => ({
     updateOne: { filter: { _id: id, portfolio: req.portfolio._id }, update: { $set: { order: index + 1 } } },
   }));
 

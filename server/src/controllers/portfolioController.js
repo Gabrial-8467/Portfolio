@@ -1,5 +1,6 @@
 import { Portfolio } from '../models/Portfolio.js';
 import { Section } from '../models/Section.js';
+import { ApiKey } from '../models/ApiKey.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 import { slugify } from '../utils/slugify.js';
 
@@ -48,15 +49,28 @@ export const createPortfolio = asyncHandler(async (req, res) => {
 });
 
 export const updatePortfolio = asyncHandler(async (req, res) => {
-  const { name, isActive } = req.body;
+  const { name, isActive, slug } = req.body;
   if (name !== undefined) req.portfolio.name = name.trim();
+
+  if (slug !== undefined && slug !== req.portfolio.slug) {
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
+      throw new ApiError(400, 'Slug may only contain lowercase letters, numbers, and hyphens');
+    }
+    const conflict = await Portfolio.findOne({ slug, _id: { $ne: req.portfolio._id } });
+    if (conflict) throw new ApiError(409, `Slug "${slug}" is already in use`);
+    req.portfolio.slug = slug;
+  }
+
   if (isActive !== undefined) req.portfolio.isActive = isActive;
   await req.portfolio.save();
   return res.json({ success: true, data: basePortfolio(req.portfolio) });
 });
 
 export const deletePortfolio = asyncHandler(async (req, res) => {
-  await Section.deleteMany({ portfolio: req.portfolio._id });
+  await Promise.all([
+    Section.deleteMany({ portfolio: req.portfolio._id }),
+    ApiKey.deleteMany({ portfolio: req.portfolio._id }),
+  ]);
   await Portfolio.findByIdAndDelete(req.portfolio._id);
   return res.json({ success: true, data: { id: req.portfolio._id } });
 });

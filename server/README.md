@@ -71,7 +71,6 @@ Use these when integrating your own portfolio frontend. Authenticate with the AP
 
 - `Authorization: Bearer <key>`
 - `x-api-key: <key>`
-- `?api_key=<key>`
 
 | Method | Path                     | Description                                    |
 | ------ | ------------------------ | ---------------------------------------------- |
@@ -107,7 +106,7 @@ API key routes: `/api/api-keys`
 - `DELETE /:id` — revoke (immediate, irreversible).
 
 Image uploads: `POST /api/uploads`
-- Multipart form field `file`, image types only (jpg/png/webp/gif/svg/avif), max 5 MB.
+- Multipart form field `file`, image types only (jpg/png/webp/gif/avif), max 5 MB.
 - Returns `{ url }` (e.g. `/uploads/1234-abcd.png`), served statically from `GET /uploads/:file`.
 - `uploads/` is gitignored. Note: on ephemeral hosts (Render free tier) files wipe on redeploy — for production attach object storage (S3/Cloudinary) and keep the URL in section content.
 

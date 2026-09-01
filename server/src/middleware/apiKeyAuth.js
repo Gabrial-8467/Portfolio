@@ -8,7 +8,6 @@ export async function requireApiKey(req, res, next) {
     const header = req.headers.authorization || '';
     let key = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
     if (!key) key = req.headers['x-api-key'];
-    if (!key && typeof req.query.api_key === 'string') key = req.query.api_key;
     if (!key) throw new ApiError(401, 'API key required');
 
     const apiKey = await ApiKey.findOne({

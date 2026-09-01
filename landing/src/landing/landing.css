@@ -315,6 +315,11 @@ input, textarea, select {
   font-weight: 800;
   color: var(--saas-text);
   letter-spacing: -0.02em;
+  text-decoration: none !important;
+}
+
+.saas-logo:hover {
+  text-decoration: none !important;
 }
 
 .saas-logo-icon {
@@ -343,6 +348,7 @@ input, textarea, select {
   font-size: 14px;
   font-weight: 500;
   color: var(--saas-text-secondary);
+  text-decoration: none !important;
   padding: 8px 14px;
   border-radius: var(--saas-radius-sm);
   display: flex;
@@ -354,6 +360,7 @@ input, textarea, select {
 .nav-link:hover, .nav-link.active {
   color: var(--saas-text);
   background-color: var(--saas-bg-alt);
+  text-decoration: none !important;
 }
 
 .nav-dropdown {
@@ -388,11 +395,13 @@ input, textarea, select {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  text-decoration: none !important;
   transition: background 0.15s;
 }
 
 .dropdown-item:hover {
   background: var(--saas-bg-alt);
+  text-decoration: none !important;
 }
 
 .dropdown-title {
