@@ -92,6 +92,12 @@ export const api = {
     reorder: (portfolioId, ids) => api.put(`/api/portfolios/${portfolioId}/sections/order/reorder`, { ids }, { auth: true }),
   },
 
+  apiKeys: {
+    list: () => api.get('/api/api-keys', { auth: true }),
+    create: (portfolioId, name) => api.post('/api/api-keys', { portfolioId, name }, { auth: true }),
+    revoke: (id) => api.del(`/api/api-keys/${id}`, { auth: true }),
+  },
+
   admin: {
     portfolios: () => api.get('/api/admin/portfolios', { auth: true }),
     users: () => api.get('/api/admin/users', { auth: true }),

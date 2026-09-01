@@ -42,6 +42,7 @@ Requirements: Node.js >= 18, and a MongoDB database (local or Atlas).
 - **User** — `email`, `password` (bcrypt), `name`, `role` (`admin` | `superadmin`), `isActive`, `lastLogin`.
 - **Portfolio** — `slug` (unique), `name`, `owner` (User), `settings` (free-form JSON for design config), `isActive`.
 - **Section** — `portfolio` (ref), `key` (unique per portfolio), `label`, `content` (free-form JSON), `order`, `isPublished`.
+- **ApiKey** — `owner` (User), `portfolio` (ref), `name`, `prefix`, `keyHash` (sha256, unique). The full key is stored **hashed** and shown in plaintext only once, at creation.
 
 Ownership is enforced on every portfolio/section route via `loadPortfolio` middleware.
 
@@ -57,11 +58,26 @@ All JSON. Responses are wrapped as `{ success, data }`; errors as `{ success: fa
 | GET    | `/api/p/:slug/section/:key`   | One published section by key.                 |
 | GET    | `/health`                     | Liveness check.                               |
 
+### Public (API key auth)
+
+Use these when integrating your own portfolio frontend. Authenticate with the API key via any of:
+
+- `Authorization: Bearer <key>`
+- `x-api-key: <key>`
+- `?api_key=<key>`
+
+| Method | Path                     | Description                                    |
+| ------ | ------------------------ | ---------------------------------------------- |
+| GET    | `/api/v1/portfolio`      | Portfolio config + all published sections.     |
+| GET    | `/api/v1/section/:key`   | One published section by key.                  |
+
+`/api/v1` (like `/api/p`) is open to any origin — no CORS restrictions — so external developers can call it directly from the browser.
+
 ### Auth
 
 | Method | Path                | Body                                              |
 | ------ | ------------------- | ------------------------------------------------- |
-| POST   | `/api/auth/register`| `{ email, password, name, portfolioName? }` — creates the user **and** a portfolio. |
+| POST   | `/api/auth/register`| `{ email, password, name, portfolioName? }` — creates the user **and** a portfolio **and** an API key. The response includes the plaintext `apiKey` (shown only once). |
 | POST   | `/api/auth/login`   | `{ email, password }`                             |
 | GET    | `/api/auth/me`      | Authenticated — returns the user + their portfolios. |
 
@@ -77,6 +93,11 @@ Section routes: `/api/portfolios/:portfolioId/sections`
 
 Create/update sections accept `key`, `label`, `content`, `isPublished`, `order`.
 Keys must be unique per portfolio and are lowercased automatically.
+
+API key routes: `/api/api-keys`
+- `GET /` — list your keys (full key is never returned; only the `prefix`).
+- `POST /` — `{ portfolioId, name? }` → `{ key, apiKey }` where `key` is the full plaintext key (shown this one time only).
+- `DELETE /:id` — revoke (immediate, irreversible).
 
 ### Superadmin (Bearer token, role `superadmin`)
 
@@ -110,6 +131,17 @@ If you use the dashboard-style admin panel, set:
 - `VITE_API_URL` — backend base URL (e.g. `https://your-api.onrender.com`)
 - `VITE_PORTFOLIO_SLUG` — the slug to render by default
 
+Alternatively, authenticate with an API key so no slug is needed:
+
+```js
+const res = await fetch(`${VITE_API_URL}/api/v1/portfolio`, {
+  headers: { Authorization: `Bearer ${API_KEY}` },
+});
+const { data } = await res.json();
+```
+
+Set `VITE_API_KEY` on your frontend build and it will call `/api/v1/portfolio` instead of the slug route.
+
 ## Deployment (Render + MongoDB Atlas)
 
 1. Create a free cluster on MongoDB Atlas and copy the connection string into `MONGODB_URI`.
@@ -123,12 +155,12 @@ If you use the dashboard-style admin panel, set:
 ```
 src/
   config/       env loading + db connection
-  middleware/   auth (JWT + role), validation, error handler
-  models/       User, Portfolio, Section
-  controllers/  auth, portfolio, section, public, superadmin
+  middleware/   auth (JWT + role), api key auth, validation, error handler
+  models/       User, Portfolio, Section, ApiKey
+  controllers/  auth, portfolio, section, public, api keys, superadmin
   routes/       matching route groups
   data/         seed data for the demo portfolio
-  utils/        slugify
+  utils/        slugify, api key generation/hashing
   index.js      app entry
   seed.js       seed script
 ```

@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Copy, CheckCircle2, KeyRound } from 'lucide-react';
 import { useAuth } from '../../admin/useAuth';
 import Field, { TextInput } from '../../admin/components/Field';
+import ItemModal from '../../admin/components/ItemModal';
+import { useToast } from '../../admin/components/useToast';
 
 export default function Login() {
   const { login, register } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [mode, setMode] = useState('login');
@@ -15,8 +19,12 @@ export default function Login() {
   const [portfolioName, setPortfolioName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [revealedKey, setRevealedKey] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const from = location.state?.from?.pathname || '/admin';
+
+  const finish = () => navigate(from, { replace: true });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,15 +33,36 @@ export default function Login() {
     try {
       if (mode === 'login') {
         await login(email, password);
+        finish();
       } else {
-        await register({ email, password, name, portfolioName });
+        const result = await register({ email, password, name, portfolioName });
+        if (result?.apiKey) {
+          setRevealedKey(result.apiKey);
+        } else {
+          finish();
+        }
       }
-      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
+  };
+
+  const copyKey = async () => {
+    try {
+      await navigator.clipboard.writeText(revealedKey);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = revealedKey;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      el.remove();
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1600);
+    toast('API key copied', 'success');
   };
 
   return (
@@ -102,6 +131,30 @@ export default function Login() {
           ← Back to portfolio
         </Link>
       </div>
+
+      <ItemModal
+        title="Your API key — save it now"
+        open={Boolean(revealedKey)}
+        onClose={() => { setRevealedKey(null); finish(); }}
+        onSubmit={finish}
+        loading={false}
+      >
+        <p className="admin-modal-message">
+          <KeyRound size={14} style={{ verticalAlign: '-2px', marginRight: 4 }} />
+          Your portfolio and API key are ready. This is the <strong>only time</strong> the full key is shown — you can revoke it anytime from the API Keys page.
+        </p>
+        <div className="copy-row">
+          <div className="key-mono key-reveal">{revealedKey}</div>
+          <button type="button" className="admin-btn admin-btn-ghost" onClick={copyKey}>
+            {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
+        <p className="admin-field-hint">
+          Add <code className="prefix-chip">VITE_API_KEY</code> to your site&apos;s build env so it can fetch live content from{' '}
+          <code className="prefix-chip">/api/v1/portfolio</code>.
+        </p>
+      </ItemModal>
     </div>
   );
 }

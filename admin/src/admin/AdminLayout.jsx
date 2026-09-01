@@ -6,11 +6,13 @@ import {
   Settings,
   LogOut,
   ExternalLink,
+  KeyRound,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/sections', label: 'Sections', icon: Layers },
+  { to: '/admin/apikeys', label: 'API Keys', icon: KeyRound },
   { to: '/admin/settings', label: 'Portfolio Settings', icon: Settings },
 ];
 

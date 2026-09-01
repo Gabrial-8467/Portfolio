@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react';
-import { api, PORTFOLIO_SLUG } from '../api/client';
+import { api, API_KEY, PORTFOLIO_SLUG } from '../api/client';
 import {
   SITE,
   STATS,
@@ -59,7 +59,7 @@ export function usePortfolioData(slug = PORTFOLIO_SLUG) {
     async function load() {
       dispatch({ type: 'FETCH_START' });
       try {
-        const portfolio = await api.public.getPortfolio(slug);
+        const portfolio = API_KEY ? await api.public.getPortfolioByKey() : await api.public.getPortfolio(slug);
         if (cancelled) return;
 
         const sections = portfolio?.sections || [];

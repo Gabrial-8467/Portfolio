@@ -8,18 +8,18 @@ import { demoPortfolio, sections } from './data/seedData.js';
 async function seed() {
   await connectDB();
 
-  const superadmin = await User.findOneAndUpdate(
-    { email: config.seedAdminEmail },
-    {
-      $setOnInsert: {
-        password: config.seedAdminPassword,
-        name: 'Super Admin',
-        role: 'superadmin',
-      },
-    },
-    { new: true, upsert: true }
-  );
-  console.log(`Super admin ready: ${superadmin.email}`);
+  let superadmin = await User.findOne({ email: config.seedAdminEmail });
+  if (!superadmin) {
+    superadmin = await User.create({
+      email: config.seedAdminEmail,
+      password: config.seedAdminPassword,
+      name: 'Super Admin',
+      role: 'superadmin',
+    });
+    console.log(`Super admin created: ${superadmin.email}`);
+  } else {
+    console.log(`Super admin ready: ${superadmin.email}`);
+  }
 
   let demo = await Portfolio.findOne({ slug: demoPortfolio.slug });
   if (demo) {

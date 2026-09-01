@@ -9,7 +9,9 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 
 import authRoutes from './routes/authRoutes.js';
 import publicRoutes from './routes/publicRoutes.js';
+import publicApiKeyRoutes from './routes/publicApiKeyRoutes.js';
 import portfolioRoutes from './routes/portfolioRoutes.js';
+import apiKeyRoutes from './routes/apiKeyRoutes.js';
 import superadminRoutes from './routes/superadminRoutes.js';
 
 const app = express();
@@ -64,8 +66,10 @@ const apiLimiter = rateLimit({
 app.use('/api', apiLimiter);
 app.use('/api/auth', authLimiter, authRoutes);
 
-app.use('/api/p', publicRoutes);
+app.use('/api/p', cors({ origin: true }), publicRoutes);
+app.use('/api/v1', cors({ origin: true }), publicApiKeyRoutes);
 app.use('/api/portfolios', authRequired, portfolioRoutes);
+app.use('/api/api-keys', authRequired, apiKeyRoutes);
 app.use('/api/admin', authRequired, superadminRoutes);
 
 app.get('/health', (req, res) => {

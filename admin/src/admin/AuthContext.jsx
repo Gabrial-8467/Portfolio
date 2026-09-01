@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
     async (data) => {
       const result = await api.auth.register(data);
       applyAuthResult(result);
-      return result.user;
+      return result;
     },
     [applyAuthResult]
   );

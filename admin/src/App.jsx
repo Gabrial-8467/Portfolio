@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './admin/AuthContext';
+import ToastProvider from './admin/components/Toast';
 import ProtectedRoute from './admin/ProtectedRoute';
 import AdminLayout from './admin/AdminLayout';
 import Login from './pages/admin/Login';
@@ -7,11 +8,13 @@ import Dashboard from './pages/admin/Dashboard';
 import Sections from './pages/admin/Sections';
 import SectionEditor from './pages/admin/SectionEditor';
 import Settings from './pages/admin/Settings';
+import ApiKeys from './pages/admin/ApiKeys';
 
 function App() {
   return (
     <AuthProvider>
-      <Routes>
+      <ToastProvider>
+        <Routes>
         <Route path="/admin/login" element={<Login />} />
         <Route
           path="/admin"
@@ -25,11 +28,13 @@ function App() {
           <Route path="sections" element={<Sections />} />
           <Route path="sections/new" element={<SectionEditor />} />
           <Route path="sections/:sectionId" element={<SectionEditor />} />
+          <Route path="apikeys" element={<ApiKeys />} />
           <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
-      </Routes>
+        </Routes>
+      </ToastProvider>
     </AuthProvider>
   );
 }

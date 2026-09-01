@@ -3,6 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../admin/useAuth';
 import { api } from '../../api/client';
 import JsonEditor from '../../admin/components/JsonEditor';
+import StructuredEditor from '../../admin/components/StructuredEditor';
+import { getSchemaForKey } from '../../admin/structuredSchemas';
+import { useToast } from '../../admin/components/useToast';
 import Field, { TextInput, Toggle } from '../../admin/components/Field';
 import { Save, Trash2, ArrowLeft } from 'lucide-react';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
@@ -11,6 +14,7 @@ export default function SectionEditor() {
   const { sectionId } = useParams();
   const navigate = useNavigate();
   const { activePortfolio } = useAuth();
+  const { toast } = useToast();
 
   const [section, setSection] = useState(null);
   const [form, setForm] = useState({ key: '', label: '', isPublished: true, content: null });
@@ -19,8 +23,16 @@ export default function SectionEditor() {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [mode, setMode] = useState('structured');
 
   const isNew = sectionId === 'new' || !sectionId;
+
+  const schema = getSchemaForKey(form.key);
+
+  useEffect(() => {
+    setMode(schema ? 'structured' : 'json');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.key]);
 
   const set = (key) => (value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -61,7 +73,12 @@ export default function SectionEditor() {
     setSaved(false);
     try {
       if (isNew) {
-        const created = await api.sections.create(activePortfolio._id, form);
+        const payload = {
+          ...form,
+          content:
+            form.content ?? (schema ? (schema.kind === 'list' ? [] : {}) : null),
+        };
+        const created = await api.sections.create(activePortfolio._id, payload);
         navigate(`/admin/sections/${created._id}`, { replace: true });
       } else {
         const updated = await api.sections.update(activePortfolio._id, sectionId, form);
@@ -72,6 +89,7 @@ export default function SectionEditor() {
           content: updated.content,
         });
         setSaved(true);
+        toast('Section saved', 'success');
       }
     } catch (err) {
       setError(err.message || 'Failed to save section');
@@ -140,8 +158,28 @@ export default function SectionEditor() {
         </div>
 
         <h2 className="admin-form-section">Content</h2>
+
+        <div className="admin-toolbar">
+          {schema ? (
+            <div className="admin-seg">
+              <button type="button" className={mode === 'structured' ? 'active' : ''} onClick={() => setMode('structured')}>
+                Form
+              </button>
+              <button type="button" className={mode === 'json' ? 'active' : ''} onClick={() => setMode('json')}>
+                Raw JSON
+              </button>
+            </div>
+          ) : (
+            <p className="struct-intro">No form template for this key — editing as raw JSON.</p>
+          )}
+        </div>
+
         <div className="admin-content-editor">
-          <JsonEditor value={form.content} onChange={set('content')} />
+          {schema && mode === 'structured' ? (
+            <StructuredEditor schema={schema} value={form.content} onChange={set('content')} />
+          ) : (
+            <JsonEditor value={form.content} onChange={set('content')} />
+          )}
         </div>
 
         <div className="admin-form-actions">

@@ -1,6 +1,8 @@
 import { User } from '../models/User.js';
 import { Portfolio } from '../models/Portfolio.js';
+import { ApiKey } from '../models/ApiKey.js';
 import { signToken } from '../middleware/auth.js';
+import { generateApiKey } from '../utils/apiKey.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 import { slugify } from '../utils/slugify.js';
 
@@ -54,10 +56,24 @@ export const register = asyncHandler(async (req, res) => {
     owner: user._id,
   });
 
+  const { key, prefix, keyHash } = generateApiKey();
+  await ApiKey.create({
+    owner: user._id,
+    portfolio: portfolio._id,
+    name: `${portfolio.name} key`,
+    prefix,
+    keyHash,
+  });
+
   const token = signToken(user);
   return res.status(201).json({
     success: true,
-    data: { token, user: user.toSafeObject(), portfolios: [portfolio] },
+    data: {
+      token,
+      user: user.toSafeObject(),
+      portfolios: [portfolio],
+      apiKey: key,
+    },
   });
 });
 
