@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowUpRight, ArrowDownRight, Sparkles, Terminal } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import MagneticButton from './MagneticButton';
+import { resolveAssetUrl } from '../api/client';
+import heroFallback from '../assets/hero.png';
 
 export default function Hero({ site = {} }) {
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
@@ -11,7 +13,8 @@ export default function Hero({ site = {} }) {
   const heroTitle = site.heroTitle || 'Building Web Apps That Actually Perform';
   const heroBio = site.heroBio || site.bio || 'Full Stack Developer with hands-on experience building responsive, high-performance web applications with React, Node.js, and MongoDB.';
   const heroBgText = site.heroBgText || 'DEVELOPER';
-  const avatarUrl = site.avatarUrl || '/hero.png';
+  const rawAvatarUrl = site.avatarUrl || '/hero.png';
+  const avatarSrc = resolveAssetUrl(rawAvatarUrl);
 
   useEffect(() => {
     // Only desktop parallax
@@ -124,11 +127,13 @@ export default function Hero({ site = {} }) {
               <div className="hero-avatar-card" data-cursor="GABRIAL">
                 <div className="avatar-img-frame">
                   <img
-                    src={avatarUrl}
+                    src={avatarSrc}
                     alt={name}
                     className="avatar-photo"
                     onError={(e) => {
-                      e.currentTarget.style.display = 'none';
+                      if (e.currentTarget.src !== heroFallback) {
+                        e.currentTarget.src = heroFallback;
+                      }
                     }}
                   />
                   <div className="avatar-overlay-gradient" />
@@ -141,27 +146,6 @@ export default function Hero({ site = {} }) {
                   </div>
                   <span className="avatar-online-indicator">Online</span>
                 </div>
-              </div>
-
-              {/* Floating Orbit Badges */}
-              <div
-                className="floating-orbit-pill pill-top-right"
-                style={{
-                  transform: `translate3d(${-mouseOffset.x * 8}px, ${-mouseOffset.y * 8}px, 0)`,
-                }}
-              >
-                <Sparkles size={14} color="#4f46e5" />
-                <span>React 19 &amp; Vite 8</span>
-              </div>
-
-              <div
-                className="floating-orbit-pill pill-bottom-left"
-                style={{
-                  transform: `translate3d(${mouseOffset.x * 10}px, ${mouseOffset.y * 10}px, 0)`,
-                }}
-              >
-                <Terminal size={14} color="#10b981" />
-                <span>MERN &amp; Headless APIs</span>
               </div>
             </div>
           </div>

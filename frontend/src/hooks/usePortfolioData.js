@@ -51,8 +51,10 @@ function reducer(state, action) {
   }
 }
 
-export function usePortfolioData(slug = PORTFOLIO_SLUG) {
-  const [state, dispatch] = useReducer(reducer, initialState);
+export function usePortfolioData(slug, customApiKey) {
+  const targetSlug = slug || PORTFOLIO_SLUG;
+  const effectiveApiKey = customApiKey || API_KEY;
+  const [state, dispatch] = useReducer(reducer, { ...initialState, slug: targetSlug });
 
   useEffect(() => {
     let cancelled = false;
@@ -60,27 +62,31 @@ export function usePortfolioData(slug = PORTFOLIO_SLUG) {
     async function load() {
       dispatch({ type: 'FETCH_START' });
       try {
-        const portfolio = API_KEY ? await api.public.getPortfolioByKey() : await api.public.getPortfolio(slug);
+        const portfolio = effectiveApiKey
+          ? await api.public.getPortfolioByKey(effectiveApiKey)
+          : await api.public.getPortfolio(targetSlug);
+
         if (cancelled) return;
 
         const sections = portfolio?.sections || [];
-        const site = { ...SITE, ...sectionValue(sections, 'site', {}) };
+        const siteContent = sectionValue(sections, 'site', {});
+        const site = { ...SITE, ...siteContent };
 
         dispatch({
           type: 'FETCH_SUCCESS',
           payload: {
-            slug: portfolio?.slug || slug,
+            slug: portfolio?.slug || targetSlug,
             site,
             socials: sectionValue(sections, 'socials', []),
             navLinks: sectionValue(
               sections,
               'navLinks',
-              sectionValue(sections, 'site', {})?.navLinks || []
+              siteContent?.navLinks || []
             ),
             footerNav: sectionValue(
               sections,
               'footerNav',
-              sectionValue(sections, 'site', {})?.footerNav || []
+              siteContent?.footerNav || []
             ),
             stats: sectionValue(sections, 'stats', STATS),
             processSteps: sectionValue(sections, 'processSteps', PROCESS_STEPS),
@@ -96,16 +102,17 @@ export function usePortfolioData(slug = PORTFOLIO_SLUG) {
         if (cancelled) return;
         dispatch({
           type: 'FETCH_ERROR',
-          error: `Could not reach the API — showing local content for "${slug}".`,
+          error: `Could not reach the API — showing local content for "${targetSlug}".`,
         });
       }
     }
 
     load();
+
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [targetSlug, effectiveApiKey]);
 
   return state;
 }

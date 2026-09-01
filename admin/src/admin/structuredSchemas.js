@@ -32,6 +32,33 @@ export const SECTION_SCHEMAS = {
       ] },
     ],
   },
+  navlinks: {
+    kind: 'list',
+    title: 'Navbar Links',
+    description: 'Navigation items shown in the floating header navbar.',
+    fields: [
+      { name: 'label', label: 'Link Label', type: 'text', placeholder: 'Projects', required: true },
+      { name: 'href', label: 'Link Target / URL', type: 'text', placeholder: '#projects', required: true },
+    ],
+  },
+  nav: {
+    kind: 'list',
+    title: 'Navigation Links',
+    description: 'Navigation items shown in the floating header navbar.',
+    fields: [
+      { name: 'label', label: 'Link Label', type: 'text', placeholder: 'Projects', required: true },
+      { name: 'href', label: 'Link Target / URL', type: 'text', placeholder: '#projects', required: true },
+    ],
+  },
+  footernav: {
+    kind: 'list',
+    title: 'Footer Links',
+    description: 'Navigation links shown in the footer.',
+    fields: [
+      { name: 'label', label: 'Link Label', type: 'text', placeholder: 'About', required: true },
+      { name: 'href', label: 'Link Target / URL', type: 'text', placeholder: '#about', required: true },
+    ],
+  },
   projects: {
     kind: 'list',
     title: 'Projects',
@@ -120,8 +147,10 @@ export const SECTION_SCHEMAS = {
 };
 
 export function getSchemaForKey(key) {
-  if (key === 'site') return SECTION_SCHEMAS.site;
-  return SECTION_SCHEMAS[key] || null;
+  if (!key) return null;
+  const lower = String(key).toLowerCase();
+  if (lower === 'site') return SECTION_SCHEMAS.site;
+  return SECTION_SCHEMAS[lower] || null;
 }
 
 export function blankItem(schema) {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import '../App.css';
 import '../animations.css';
@@ -21,8 +22,39 @@ import Footer from '../components/Footer';
 
 export default function Home() {
   const [searchParams] = useSearchParams();
-  const previewSlug = searchParams.get('preview');
-  const data = usePortfolioData(previewSlug);
+  const querySlug = searchParams.get('preview');
+  const queryApiKey = searchParams.get('apiKey');
+
+  useEffect(() => {
+    if (querySlug) {
+      try {
+        localStorage.setItem('last_portfolio_slug', querySlug);
+      } catch {
+        /* ignore storage error */
+      }
+    }
+    if (queryApiKey) {
+      try {
+        localStorage.setItem('portfolio_api_key', queryApiKey);
+      } catch {
+        /* ignore storage error */
+      }
+    }
+  }, [querySlug, queryApiKey]);
+
+  let storedSlug = null;
+  let storedApiKey = null;
+  try {
+    storedSlug = typeof localStorage !== 'undefined' ? localStorage.getItem('last_portfolio_slug') : null;
+    storedApiKey = typeof localStorage !== 'undefined' ? localStorage.getItem('portfolio_api_key') : null;
+  } catch {
+    storedSlug = null;
+    storedApiKey = null;
+  }
+
+  const activeSlug = querySlug || storedSlug || undefined;
+  const activeApiKey = queryApiKey || storedApiKey || undefined;
+  const data = usePortfolioData(activeSlug, activeApiKey);
 
   const navLinks = Array.isArray(data.navLinks) && data.navLinks.length ? data.navLinks : NAV_LINKS;
   const footerNav = Array.isArray(data.footerNav) && data.footerNav.length ? data.footerNav : FOOTER_NAV;

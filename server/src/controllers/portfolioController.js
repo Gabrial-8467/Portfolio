@@ -68,6 +68,7 @@ export const getSettings = asyncHandler(async (req, res) => {
 export const updateSettings = asyncHandler(async (req, res) => {
   const { settings } = req.body;
   req.portfolio.settings = settings || {};
+  req.portfolio.markModified('settings');
   await req.portfolio.save();
   return res.json({ success: true, data: req.portfolio.settings });
 });

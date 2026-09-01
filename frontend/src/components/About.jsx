@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
+import { resolveAssetUrl } from '../api/client';
+import heroFallback from '../assets/hero.png';
 
 export default function About({ site = {}, socials = [], stats = [] }) {
   const [sectionRef, isInView] = useInView();
@@ -10,9 +12,12 @@ export default function About({ site = {}, socials = [], stats = [] }) {
   const statement = 'I build digital products where clean engineering meets thoughtful interaction design.';
   const words = statement.split(' ');
 
+  const name = site.name || 'Gabrial Deora';
   const aboutTitle = site.aboutTitle || 'The Developer Shaping Modern Web Experiences';
   const aboutDesc1 = site.aboutDesc1 || "I'm a dynamic Full Stack Web Developer with strong internship experience crafting responsive, high-performance web applications using React.js, Node.js, and MongoDB.";
   const aboutDesc2 = site.aboutDesc2 || "My commitment is to enhancing user experience through clean, scalable architecture and modern design systems. I specialize in turning complex requirements into seamless digital products.";
+  const rawAvatarUrl = site.avatarUrl || '/hero.png';
+  const avatarSrc = resolveAssetUrl(rawAvatarUrl);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,7 +26,6 @@ export default function About({ site = {}, socials = [], stats = [] }) {
       const rect = node.getBoundingClientRect();
       const windowHeight = window.innerHeight;
 
-      // Calculate how far the statement has entered the viewport
       const start = windowHeight * 0.85;
       const end = windowHeight * 0.25;
 
@@ -58,11 +62,28 @@ export default function About({ site = {}, socials = [], stats = [] }) {
 
         {/* Narrative & Highlights Grid */}
         <div className={`about-detail-grid ${isInView ? 'in-view' : ''}`}>
-          {/* Left Narrative Column */}
+          {/* Left Narrative Card with Mini Author Badge */}
           <div className="about-narrative-card">
-            <div className="card-badge">
-              <Sparkles size={14} /> Philosophy &amp; Experience
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+              <div className="card-badge">
+                <Sparkles size={14} /> Philosophy &amp; Experience
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <img
+                  src={avatarSrc}
+                  alt={name}
+                  style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--color-primary)' }}
+                  onError={(e) => {
+                    if (e.currentTarget.src !== heroFallback) {
+                      e.currentTarget.src = heroFallback;
+                    }
+                  }}
+                />
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-main)' }}>{name}</span>
+              </div>
             </div>
+
             <h3 className="about-narrative-title">{aboutTitle}</h3>
             <p className="about-narrative-body">{aboutDesc1}</p>
             <p className="about-narrative-body">{aboutDesc2}</p>

@@ -69,7 +69,10 @@ export const updateSection = asyncHandler(async (req, res) => {
     section.key = key.toLowerCase();
   }
   if (label !== undefined) section.label = label;
-  if (content !== undefined) section.content = content;
+  if (content !== undefined) {
+    section.content = content;
+    section.markModified('content');
+  }
   if (isPublished !== undefined) section.isPublished = isPublished;
   if (order !== undefined) section.order = order;
 
