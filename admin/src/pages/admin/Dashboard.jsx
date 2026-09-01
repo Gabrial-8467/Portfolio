@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../admin/useAuth';
-import { api, getPublicPortfolioUrl } from '../../api/client';
+import { api, getPublicPortfolioUrl, API_URL } from '../../api/client';
 import {
   Layers,
   Plus,
@@ -89,7 +89,7 @@ export default function Dashboard() {
 
   const published = sections.filter((s) => s.isPublished).length;
   const drafts = sections.length - published;
-  const curlSnippet = `curl -X GET "http://localhost:5000/api/p/${activePortfolio.slug}"`;
+  const curlSnippet = `curl -X GET "${API_URL.replace(/\/+$/, '')}/api/p/${activePortfolio.slug}"`;
 
   const copyCurl = () => {
     navigator.clipboard.writeText(curlSnippet);

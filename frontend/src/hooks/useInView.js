@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 
-export function useInView(options = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }) {
+export function useInView(options) {
   const [isInView, setIsInView] = useState(false);
   const ref = useRef(null);
+  const optionsRef = useRef(options);
+
+  optionsRef.current = options;
 
   useEffect(() => {
     const node = ref.current;
@@ -14,19 +17,20 @@ export function useInView(options = { threshold: 0.15, rootMargin: '0px 0px -50p
       return undefined;
     }
 
+    const currentOptions = optionsRef.current;
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsInView(true);
         observer.unobserve(entry.target);
       }
-    }, options);
+    }, currentOptions || { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
     observer.observe(node);
 
     return () => {
       if (node) observer.unobserve(node);
     };
-  }, [options]);
+  }, []);
 
   return [ref, isInView];
 }

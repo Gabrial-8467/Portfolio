@@ -1,4 +1,5 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const baseApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+export const API_URL = baseApiUrl.replace(/\/+$/, '');
 export const API_KEY = import.meta.env.VITE_API_KEY || '';
 
 export const PORTFOLIO_SLUG = import.meta.env.VITE_PORTFOLIO_SLUG || 'gabrial-deora';

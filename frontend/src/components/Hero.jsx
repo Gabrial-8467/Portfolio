@@ -69,7 +69,7 @@ export default function Hero({ site = {} }) {
         {/* Main Giant Name Heading with Staggered Reveal */}
         <div className="hero-display-heading">
           {nameParts.map((word, wIdx) => (
-            <div key={word} className="hero-name-word">
+            <div key={`${word}-${wIdx}`} className="hero-name-word">
               {word.split('').map((char, cIdx) => (
                 <span
                   key={`${word}-${char}-${cIdx}`}

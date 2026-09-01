@@ -223,7 +223,12 @@ function FieldRenderer({ field, value, onChange }) {
             type="number"
             className="admin-input"
             value={value ?? ''}
-            onChange={(e) => onChange(Number(e.target.value))}
+            onChange={(e) => {
+              const next = e.target.value;
+              if (next === '') return onChange('');
+              const num = Number(next);
+              if (!Number.isNaN(num)) onChange(num);
+            }}
           />
         </div>
       );

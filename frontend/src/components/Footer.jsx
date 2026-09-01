@@ -15,7 +15,7 @@ const LinkedinIcon = ({ size = 16 }) => (
   </svg>
 );
 
-export default function Footer({ site = {} }) {
+export default function Footer({ site = {}, nav = [] }) {
   const name = site.name || 'Gabrial Deora';
   const copyright = site.copyright || `© ${new Date().getFullYear()} ${name}. All Rights Reserved.`;
 
@@ -77,6 +77,16 @@ export default function Footer({ site = {} }) {
             <ArrowUp size={15} />
           </button>
         </div>
+
+        {Array.isArray(nav) && nav.length > 0 && (
+          <nav className="footer-nav-links" aria-label="Footer navigation">
+            {nav.map((link) => (
+              <a key={link.label || link.href} href={link.href} data-cursor="LINK">
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        )}
 
         <div className="footer-copyright-row">
           <span>{copyright}</span>

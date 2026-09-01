@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import '../App.css';
 import '../animations.css';
@@ -25,6 +25,21 @@ export default function Home() {
   const querySlug = searchParams.get('preview');
   const queryApiKey = searchParams.get('apiKey');
 
+  const [storedSlug] = useState(() => {
+    try {
+      return typeof localStorage !== 'undefined' ? localStorage.getItem('last_portfolio_slug') : null;
+    } catch {
+      return null;
+    }
+  });
+  const [storedApiKey] = useState(() => {
+    try {
+      return typeof localStorage !== 'undefined' ? localStorage.getItem('portfolio_api_key') : null;
+    } catch {
+      return null;
+    }
+  });
+
   useEffect(() => {
     if (querySlug) {
       try {
@@ -41,16 +56,6 @@ export default function Home() {
       }
     }
   }, [querySlug, queryApiKey]);
-
-  let storedSlug = null;
-  let storedApiKey = null;
-  try {
-    storedSlug = typeof localStorage !== 'undefined' ? localStorage.getItem('last_portfolio_slug') : null;
-    storedApiKey = typeof localStorage !== 'undefined' ? localStorage.getItem('portfolio_api_key') : null;
-  } catch {
-    storedSlug = null;
-    storedApiKey = null;
-  }
 
   const activeSlug = querySlug || storedSlug || undefined;
   const activeApiKey = queryApiKey || storedApiKey || undefined;

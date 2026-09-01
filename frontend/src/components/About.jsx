@@ -90,9 +90,9 @@ export default function About({ site = {}, socials = [], stats = [] }) {
 
             {/* Social Proof Pills */}
             <div className="about-socials-row">
-              {Array.isArray(socials) && socials.map((s) => (
+              {Array.isArray(socials) && socials.map((s, idx) => (
                 <a
-                  key={s.label}
+                  key={s.key || s.label || idx}
                   href={s.href}
                   target="_blank"
                   rel="noreferrer"

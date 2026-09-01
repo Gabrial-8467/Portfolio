@@ -12,8 +12,17 @@ export default function Contact({ site = {} }) {
   const phone = site.phone || '+91 7888695062';
   const phoneHref = site.phoneHref || 'tel:+917888695062';
 
-  const copyEmail = () => {
-    navigator.clipboard.writeText(email);
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(email);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = email;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      el.remove();
+    }
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
   };

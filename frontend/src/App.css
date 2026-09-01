@@ -1573,6 +1573,24 @@ a:active {
   gap: 12px;
 }
 
+.footer-nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 20px 0 8px;
+}
+
+.footer-nav-links a {
+  font-size: 13px;
+  color: var(--color-text-light);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-nav-links a:hover {
+  color: var(--color-text-main);
+}
+
 /* ============================================================
    Responsive Design Breakpoints
    ============================================================ */
