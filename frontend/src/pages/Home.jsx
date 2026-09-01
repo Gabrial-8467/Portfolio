@@ -9,6 +9,7 @@ import { usePortfolioData } from '../hooks/usePortfolioData';
 import CustomCursor from '../components/CustomCursor';
 import ScrollProgress from '../components/ScrollProgress';
 import Navbar from '../components/Navbar';
+import SideRails from '../components/SideRails';
 import Hero from '../components/Hero';
 import About from '../components/About';
 import Projects from '../components/Projects';
@@ -56,6 +57,9 @@ export default function Home() {
 
       {/* Floating Island Navigation */}
       <Navbar site={appData.site} nav={appData.nav} />
+
+      {/* Floating Left & Right Side Rails */}
+      <SideRails site={appData.site} socials={appData.socials} />
 
       {/* Main Content Flow */}
       <main>
