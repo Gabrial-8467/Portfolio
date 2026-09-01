@@ -5,7 +5,7 @@ import { api, getPublicPortfolioUrl } from '../../api/client';
 import { useToast } from '../../admin/components/useToast';
 import JsonEditor from '../../admin/components/JsonEditor';
 import Field, { TextInput } from '../../admin/components/Field';
-import { Save, ExternalLink, Trash2, AlertTriangle, User } from 'lucide-react';
+import { Save, ArrowUpRight, Trash2, AlertTriangle, User } from 'lucide-react';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
 
 export default function Settings() {
@@ -95,51 +95,44 @@ export default function Settings() {
     <div className="admin-page">
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-title">Workspace & Portfolio Settings</h1>
-          <p className="admin-page-subtitle">Configure portfolio metadata, custom design preferences, and workspace access.</p>
+          <h1 className="admin-page-title">Workspace Settings</h1>
+          <p className="admin-page-subtitle">Configure portfolio metadata, theme preferences, and access permissions.</p>
         </div>
         <a
-          className="admin-btn admin-btn-ghost"
+          className="admin-btn admin-btn-secondary admin-btn-sm"
           href={getPublicPortfolioUrl(activePortfolio.slug)}
           target="_blank"
           rel="noopener noreferrer"
         >
-          <ExternalLink size={16} />
-          View /{activePortfolio.slug}
+          <span>View Live Site</span>
+          <ArrowUpRight size={13} />
         </a>
       </div>
 
       {error && <div className="admin-form-error">{error}</div>}
 
       {/* User Account Info Box */}
-      <div
-        style={{
-          background: '#ffffff',
-          border: '1px solid var(--admin-border)',
-          borderRadius: 'var(--admin-radius)',
-          padding: 24,
-          marginBottom: 32,
-          boxShadow: 'var(--admin-shadow-sm)',
-        }}
-      >
+      <div className="admin-form" style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <User size={18} color="var(--admin-blue)" />
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--admin-text)', margin: 0 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--admin-primary-light)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <User size={16} />
+          </div>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', margin: 0 }}>
             Account Profile
           </h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Name</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--admin-text)', marginTop: 2 }}>{user?.name}</div>
+            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Name</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-text)', marginTop: 4 }}>{user?.name || 'Administrator'}</div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Email</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--admin-text)', marginTop: 2 }}>{user?.email}</div>
+            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Email</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-text)', marginTop: 4 }}>{user?.email}</div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Role</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--admin-blue)', marginTop: 2, textTransform: 'capitalize' }}>
+            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Role</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-primary)', marginTop: 4, textTransform: 'capitalize' }}>
               {user?.role || 'Admin'}
             </div>
           </div>
@@ -148,27 +141,32 @@ export default function Settings() {
 
       {/* Portfolio Config Form */}
       <form className="admin-form" onSubmit={submit}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 16 }}>
+          Portfolio Metadata
+        </div>
         <div className="admin-form-grid">
           <Field label="Portfolio Name">
             <TextInput value={name} onChange={setName} placeholder="My Portfolio" />
           </Field>
-          <Field label="Public Slug" hint="Identifier for the public API and URL /?preview=<slug>.">
+          <Field label="Public Slug" hint="Unique slug in the public API URL /api/p/:slug.">
             <TextInput value={activePortfolio.slug} onChange={() => {}} disabled />
           </Field>
         </div>
 
-        <h2 className="admin-form-section">Custom Settings & Theme JSON</h2>
-        <p className="admin-form-hint">
-          Free-form JSON delivered under <code>portfolio.settings</code>. Configure color themes, font preferences, or social defaults.
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', margin: '24px 0 6px' }}>
+          Custom Settings & Theme JSON
+        </div>
+        <p className="admin-field-hint" style={{ marginBottom: 14 }}>
+          Arbitrary JSON payload delivered under <code>portfolio.settings</code>. Configure color accents, theme preferences, or analytics IDs.
         </p>
-        <div className="admin-content-editor">
+        <div style={{ minHeight: 240 }}>
           <JsonEditor value={settings} onChange={setSettings} />
         </div>
 
         <div className="admin-form-actions">
           <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
-            <Save size={16} />
-            {saving ? 'Saving…' : 'Save Changes'}
+            <Save size={15} />
+            <span>{saving ? 'Saving…' : 'Save Changes'}</span>
           </button>
         </div>
       </form>
@@ -176,19 +174,19 @@ export default function Settings() {
       {/* Danger Zone */}
       <div
         style={{
-          marginTop: 48,
-          border: '1px solid #fecdd3',
-          background: '#fff1f2',
+          border: '1px solid var(--admin-danger-border)',
+          background: 'var(--admin-danger-light)',
           borderRadius: 'var(--admin-radius)',
-          padding: 24,
+          padding: 22,
+          marginTop: 32,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#be123c', marginBottom: 8 }}>
-          <AlertTriangle size={18} />
-          <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Danger Zone</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--admin-danger)', marginBottom: 6 }}>
+          <AlertTriangle size={16} />
+          <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>Danger Zone</h3>
         </div>
-        <p style={{ fontSize: 13, color: '#9f1239', margin: '0 0 16px 0' }}>
-          Deleting a portfolio workspace removes all associated sections, configurations, and API keys permanently.
+        <p style={{ fontSize: 13, color: '#991b1b', margin: '0 0 16px 0' }}>
+          Deleting this portfolio workspace permanently deletes all of its content sections, media mappings, and API keys.
         </p>
         <button
           type="button"
@@ -196,7 +194,7 @@ export default function Settings() {
           onClick={() => setDeleteConfirmOpen(true)}
           disabled={deleting}
         >
-          <Trash2 size={15} />
+          <Trash2 size={14} />
           <span>{deleting ? 'Deleting…' : 'Delete Portfolio Workspace'}</span>
         </button>
       </div>
@@ -204,7 +202,7 @@ export default function Settings() {
       {deleteConfirmOpen && (
         <ConfirmDialog
           title="Delete Portfolio Workspace"
-          message={`Are you absolutely sure you want to delete "${activePortfolio.name}" (${activePortfolio.slug})? All section data and API keys will be removed.`}
+          message={`Are you sure you want to delete "${activePortfolio.name}" (${activePortfolio.slug})? All section data and API keys will be permanently removed.`}
           onConfirm={handleDeletePortfolio}
           onCancel={() => setDeleteConfirmOpen(false)}
         />

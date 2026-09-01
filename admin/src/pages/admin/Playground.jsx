@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../admin/useAuth';
-import { api } from '../../api/client';
+import { api, API_URL } from '../../api/client';
 import {
   Send,
   RefreshCw,
   Copy,
   Check,
   Clock,
+  Terminal,
 } from 'lucide-react';
 
 export default function Playground() {
   const { activePortfolio } = useAuth();
-  const slug = activePortfolio?.slug || 'gabrial-deora';
+  const slug = activePortfolio?.slug || 'my-portfolio';
 
   const [endpoint, setEndpoint] = useState(`/api/p/${slug}`);
   const [sectionKey, setSectionKey] = useState('projects');
@@ -22,9 +23,9 @@ export default function Playground() {
   const [latency, setLatency] = useState(null);
   const [statusCode, setStatusCode] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [copiedCurl, setCopiedCurl] = useState(false);
 
   useEffect(() => {
-    // Reset the playground when the active portfolio changes
     // eslint-disable-next-line react/set-state-in-effect
     setEndpoint(`/api/p/${slug}`);
     // eslint-disable-next-line react/set-state-in-effect
@@ -86,31 +87,47 @@ export default function Playground() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const getCurlPreview = () => {
+    const base = API_URL.replace(/\/+$/, '');
+    let target = endpoint.replace(':key', sectionKey || 'projects');
+    if (target.startsWith('/api/v1')) {
+      return `curl -X GET "${base}${target}" \\\n  -H "Authorization: Bearer ${apiKey || 'YOUR_API_KEY'}" \\\n  -H "Accept: application/json"`;
+    }
+    return `curl -X GET "${base}${target}" \\\n  -H "Accept: application/json"`;
+  };
+
+  const copyCurl = () => {
+    navigator.clipboard.writeText(getCurlPreview());
+    setCopiedCurl(true);
+    setTimeout(() => setCopiedCurl(false), 2000);
+  };
+
   return (
     <div className="admin-page">
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">API Playground</h1>
-          <p className="admin-page-desc">
-            Test and inspect live API payloads directly against your active portfolio (<code>{slug}</code>).
+          <p className="admin-page-subtitle">
+            Execute live test requests and inspect JSON response trees for workspace <strong>{slug}</strong>.
           </p>
         </div>
       </div>
 
       <div
         style={{
-          background: '#ffffff',
+          background: 'var(--admin-surface)',
           border: '1px solid var(--admin-border)',
           borderRadius: 'var(--admin-radius)',
           boxShadow: 'var(--admin-shadow-sm)',
           overflow: 'hidden',
+          marginBottom: 24,
         }}
       >
-        {/* Controls Bar */}
+        {/* Controls Header */}
         <div
           style={{
             padding: 16,
-            background: '#f8fafc',
+            background: 'var(--admin-surface-subtle)',
             borderBottom: '1px solid var(--admin-border)',
             display: 'flex',
             gap: 12,
@@ -118,13 +135,13 @@ export default function Playground() {
             flexWrap: 'wrap',
           }}
         >
-          <span style={{ background: '#0284c7', color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 4 }}>
+          <span className="admin-badge admin-badge-blue" style={{ fontWeight: 700 }}>
             GET
           </span>
 
           <select
             className="admin-select"
-            style={{ width: 320, background: '#ffffff' }}
+            style={{ width: 300 }}
             value={endpoint}
             onChange={(e) => setEndpoint(e.target.value)}
           >
@@ -164,44 +181,36 @@ export default function Playground() {
             disabled={loading}
           >
             {loading ? <RefreshCw size={14} className="spin" /> : <Send size={14} />}
-            <span>{loading ? 'Sending...' : 'Send Request'}</span>
+            <span>{loading ? 'Executing…' : 'Send Request'}</span>
           </button>
         </div>
 
-        {/* Response Panel */}
+        {/* Response Viewport */}
         <div style={{ padding: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--admin-text-muted)' }}>
-              Live JSON Response
+            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--admin-text-muted)', letterSpacing: '0.04em' }}>
+              HTTP Response
             </div>
 
             {statusCode && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: 4,
-                    background: statusCode === 200 ? '#dcfce7' : '#fee2e2',
-                    color: statusCode === 200 ? '#15803d' : '#b91c1c',
-                  }}
+                  className={statusCode === 200 ? 'admin-badge admin-badge-green' : 'admin-badge admin-badge-red'}
                 >
-                  {statusCode} {statusCode === 200 ? 'OK' : ''}
+                  {statusCode} {statusCode === 200 ? 'OK' : 'Error'}
                 </span>
                 {latency && (
-                  <span style={{ fontSize: 11, color: 'var(--admin-text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Clock size={11} /> {latency}ms
+                  <span style={{ fontSize: 12, color: 'var(--admin-text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Clock size={12} /> {latency}ms
                   </span>
                 )}
                 <button
                   type="button"
-                  className="admin-btn admin-btn-secondary"
+                  className="admin-btn admin-btn-secondary admin-btn-sm"
                   onClick={copyResponse}
-                  style={{ fontSize: 11, padding: '3px 8px' }}
                 >
-                  {copied ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
-                  <span>{copied ? 'Copied' : 'Copy'}</span>
+                  {copied ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
+                  <span>{copied ? 'Copied' : 'Copy JSON'}</span>
                 </button>
               </div>
             )}
@@ -210,19 +219,19 @@ export default function Playground() {
           <div
             style={{
               background: '#0f172a',
-              borderRadius: 8,
-              padding: 16,
-              color: '#f1f5f9',
+              borderRadius: 'var(--admin-radius-sm)',
+              padding: 18,
+              color: '#f8fafc',
               fontFamily: 'var(--admin-mono)',
               fontSize: 13,
-              minHeight: 320,
-              maxHeight: 500,
+              minHeight: 300,
+              maxHeight: 520,
               overflowY: 'auto',
             }}
           >
             {loading ? (
               <div style={{ color: '#94a3b8', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <RefreshCw size={14} className="spin" /> Executing request...
+                <RefreshCw size={14} className="spin" /> Executing request against server…
               </div>
             ) : error ? (
               <div style={{ color: '#f87171' }}>
@@ -232,10 +241,39 @@ export default function Playground() {
               <pre style={{ margin: 0 }}>{JSON.stringify(response, null, 2)}</pre>
             ) : (
               <div style={{ color: '#64748b', fontStyle: 'italic' }}>
-                Click &quot;Send Request&quot; above to test this endpoint live.
+                Click &quot;Send Request&quot; above to execute a real test call.
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Generated cURL Section */}
+      <div
+        style={{
+          background: 'var(--admin-surface)',
+          border: '1px solid var(--admin-border)',
+          borderRadius: 'var(--admin-radius)',
+          padding: 18,
+          boxShadow: 'var(--admin-shadow-xs)',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: 'var(--admin-text)' }}>
+            <Terminal size={15} color="#4f46e5" />
+            <span>Generated cURL Command</span>
+          </div>
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary admin-btn-sm"
+            onClick={copyCurl}
+          >
+            {copiedCurl ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
+            <span>{copiedCurl ? 'Copied' : 'Copy cURL'}</span>
+          </button>
+        </div>
+        <div style={{ background: '#0f172a', borderRadius: 'var(--admin-radius-sm)', padding: 14, color: '#38bdf8', fontFamily: 'var(--admin-mono)', fontSize: 12, lineHeight: 1.6 }}>
+          <pre style={{ margin: 0 }}><code>{getCurlPreview()}</code></pre>
         </div>
       </div>
     </div>

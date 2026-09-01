@@ -7,7 +7,7 @@ import StructuredEditor from '../../admin/components/StructuredEditor';
 import { getSchemaForKey } from '../../admin/structuredSchemas';
 import { useToast } from '../../admin/components/useToast';
 import Field, { TextInput, Toggle } from '../../admin/components/Field';
-import { Save, Trash2, ArrowLeft } from 'lucide-react';
+import { Save, Trash2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
 
 export default function SectionEditor() {
@@ -26,7 +26,6 @@ export default function SectionEditor() {
   const [mode, setMode] = useState('structured');
 
   const isNew = sectionId === 'new' || !sectionId;
-
   const schema = getSchemaForKey(form.key);
 
   useEffect(() => {
@@ -79,6 +78,7 @@ export default function SectionEditor() {
             form.content ?? (schema ? (schema.kind === 'list' ? [] : {}) : null),
         };
         const created = await api.sections.create(activePortfolio._id, payload);
+        toast('Section created successfully', 'success');
         navigate(`/admin/sections/${created._id}`, { replace: true });
       } else {
         const updated = await api.sections.update(activePortfolio._id, sectionId, form);
@@ -89,10 +89,11 @@ export default function SectionEditor() {
           content: updated.content,
         });
         setSaved(true);
-        toast('Section saved', 'success');
+        toast('Section saved successfully', 'success');
       }
     } catch (err) {
       setError(err.message || 'Failed to save section');
+      toast(err.message || 'Failed to save section', 'error');
     } finally {
       setSaving(false);
     }
@@ -102,6 +103,7 @@ export default function SectionEditor() {
     if (!activePortfolio || isNew) return;
     try {
       await api.sections.remove(activePortfolio._id, sectionId);
+      toast('Section deleted', 'info');
       navigate('/admin/sections');
     } catch (err) {
       setError(err.message || 'Failed to delete section');
@@ -109,7 +111,7 @@ export default function SectionEditor() {
     }
   };
 
-  if (loading) return <div className="admin-loading">Loading…</div>;
+  if (loading) return <div className="admin-loading">Loading section content…</div>;
 
   if (!activePortfolio) {
     return <div className="admin-loading">No portfolio selected. Create one first.</div>;
@@ -117,66 +119,120 @@ export default function SectionEditor() {
 
   return (
     <div className="admin-page">
+      {/* Top Header */}
       <div className="admin-page-header">
-        <div className="admin-editor-heading">
-          <LinkBack onClick={() => navigate('/admin/sections')} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary admin-btn-icon-only"
+            onClick={() => navigate('/admin/sections')}
+            title="Back to Sections"
+            aria-label="Back to Sections"
+          >
+            <ArrowLeft size={16} />
+          </button>
           <div>
-            <h1 className="admin-page-title">{isNew ? 'New Section' : `Editing: ${section?.key || form.key}`}</h1>
+            <h1 className="admin-page-title">{isNew ? 'New Section' : `Edit: ${section?.key || form.key}`}</h1>
             <p className="admin-page-subtitle">
-              Make changes below — your portfolio frontend will pick them up automatically.
+              Changes update your live portfolio REST API immediately upon saving.
             </p>
           </div>
         </div>
-        {!isNew && (
-          <button type="button" className="admin-btn admin-btn-danger" onClick={() => setDeleteOpen(true)}>
-            <Trash2 size={16} />
-            Delete
+
+        <div className="admin-page-actions">
+          {!isNew && (
+            <button
+              type="button"
+              className="admin-btn admin-btn-danger-ghost"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash2 size={15} />
+              <span>Delete</span>
+            </button>
+          )}
+          <button
+            type="button"
+            className="admin-btn admin-btn-primary"
+            onClick={submit}
+            disabled={saving}
+          >
+            <Save size={15} />
+            <span>{saving ? 'Saving…' : 'Save Changes'}</span>
           </button>
-        )}
+        </div>
       </div>
 
       {error && <div className="admin-form-error">{error}</div>}
-      {saved && <div className="admin-form-success">Saved successfully.</div>}
-
-      <form
-        className="admin-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit();
-        }}
-      >
-        <div className="admin-section-meta-card">
-          <div className="admin-form-grid">
-            <Field label="Key" hint="Lowercase letters and hyphens only.">
-              <TextInput value={form.key} onChange={(v) => set('key')(v.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="projects" />
-            </Field>
-            <Field label="Label" hint="Display name shown in this admin panel.">
-              <TextInput value={form.label} onChange={set('label')} placeholder="Projects" />
-            </Field>
-            <Field label="Visibility">
-              <Toggle checked={form.isPublished} onChange={set('isPublished')} label={form.isPublished ? 'Published' : 'Draft'} />
-            </Field>
-          </div>
+      {saved && (
+        <div className="admin-form-success" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <CheckCircle2 size={16} color="#10b981" />
+          <span>All changes saved successfully to portfolio database.</span>
         </div>
+      )}
 
-        <h2 className="admin-form-section">Content</h2>
+      {/* Section Metadata Card */}
+      <div className="admin-form" style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 16 }}>
+          General Section Settings
+        </div>
+        <div className="admin-form-grid">
+          <Field label="Section Key" hint="Unique identifier in API responses (lowercase, hyphens).">
+            <TextInput
+              value={form.key}
+              onChange={(v) => set('key')(v.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+              placeholder="e.g. projects"
+              disabled={!isNew}
+            />
+          </Field>
+          <Field label="Display Label" hint="Human-friendly name shown in dashboards.">
+            <TextInput
+              value={form.label}
+              onChange={set('label')}
+              placeholder="e.g. Featured Projects"
+            />
+          </Field>
+          <Field label="API Visibility">
+            <Toggle
+              checked={form.isPublished}
+              onChange={set('isPublished')}
+              label={form.isPublished ? 'Published to API' : 'Saved as Draft'}
+            />
+          </Field>
+        </div>
+      </div>
 
-        <div className="admin-toolbar">
+      {/* Editor Content Area */}
+      <div className="admin-form">
+        <div className="admin-toolbar" style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)' }}>
+            Section Content Payload
+          </div>
+
           {schema ? (
             <div className="admin-seg">
-              <button type="button" className={mode === 'structured' ? 'active' : ''} onClick={() => setMode('structured')}>
-                Form
+              <button
+                type="button"
+                className={mode === 'structured' ? 'active' : ''}
+                onClick={() => setMode('structured')}
+              >
+                Structured Form
               </button>
-              <button type="button" className={mode === 'json' ? 'active' : ''} onClick={() => setMode('json')}>
+              <button
+                type="button"
+                className={mode === 'json' ? 'active' : ''}
+                onClick={() => setMode('json')}
+              >
                 Raw JSON
               </button>
             </div>
           ) : (
-            <p className="struct-intro">No form template for this key — editing as raw JSON.</p>
+            <span style={{ fontSize: 12, color: 'var(--admin-text-muted)', fontStyle: 'italic' }}>
+              Custom key — editing as raw JSON schema.
+            </span>
           )}
         </div>
 
-        <div className="admin-content-editor">
+        <div style={{ minHeight: 320 }}>
           {schema && mode === 'structured' ? (
             <StructuredEditor schema={schema} value={form.content} onChange={set('content')} />
           ) : (
@@ -185,29 +241,26 @@ export default function SectionEditor() {
         </div>
 
         <div className="admin-form-actions">
-          <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
-            <Save size={16} />
-            {saving ? 'Saving…' : 'Save Section'}
+          <button
+            type="button"
+            className="admin-btn admin-btn-primary"
+            onClick={submit}
+            disabled={saving}
+          >
+            <Save size={15} />
+            <span>{saving ? 'Saving…' : 'Save Changes'}</span>
           </button>
         </div>
-      </form>
+      </div>
 
       {deleteOpen && (
         <ConfirmDialog
-          title="Delete section"
-          message={`Delete section "${form.key}"? All of its content will be removed. This cannot be undone.`}
+          title="Delete Section"
+          message={`Are you sure you want to delete section "${form.key}"? All associated content will be permanently removed.`}
           onConfirm={confirmDelete}
           onCancel={() => setDeleteOpen(false)}
         />
       )}
     </div>
-  );
-}
-
-function LinkBack({ onClick }) {
-  return (
-    <button type="button" className="admin-btn admin-btn-ghost admin-btn-icon-only" onClick={onClick} aria-label="Back to sections">
-      <ArrowLeft size={16} />
-    </button>
   );
 }

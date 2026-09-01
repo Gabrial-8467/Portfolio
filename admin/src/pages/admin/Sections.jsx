@@ -5,13 +5,15 @@ import { api } from '../../api/client';
 import { useToast } from '../../admin/components/useToast';
 import ItemModal from '../../admin/components/ItemModal';
 import Field, { TextInput, Toggle } from '../../admin/components/Field';
-import { ConfirmDialog, ItemsToolbar } from '../../admin/components/ConfirmDialog';
+import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
 import {
   ArrowUp,
   ArrowDown,
   Trash2,
   Edit,
   SquareCheckBig,
+  Plus,
+  Layers,
 } from 'lucide-react';
 
 const SUGGESTED_TEMPLATES = [
@@ -135,30 +137,39 @@ export default function Sections() {
     <div className="admin-page">
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-title">Sections Management</h1>
+          <h1 className="admin-page-title">Sections</h1>
           <p className="admin-page-subtitle">
-            Manage, publish, and order content sections for <strong>{activePortfolio?.name}</strong>.
+            Manage, publish, and reorder content sections for <strong>{activePortfolio?.name}</strong>.
           </p>
         </div>
+        <div className="admin-page-actions">
+          <button type="button" className="admin-btn admin-btn-primary" onClick={() => setModalOpen(true)}>
+            <Plus size={15} />
+            <span>Add Section</span>
+          </button>
+        </div>
       </div>
-
-      <ItemsToolbar onAdd={() => setModalOpen(true)} addLabel="Section" />
 
       {error && <div className="admin-form-error">{error}</div>}
 
       {sections.length === 0 ? (
         <div className="admin-empty-state">
-          <p>No sections yet. Create one to start publishing content.</p>
+          <div className="admin-empty-icon"><Layers size={24} /></div>
+          <div className="admin-empty-title">No content sections yet</div>
+          <div className="admin-empty-desc">Create your first section using templates or custom JSON schemas.</div>
+          <button type="button" className="admin-btn admin-btn-primary" onClick={() => setModalOpen(true)}>
+            <Plus size={15} /> Create a Section
+          </button>
         </div>
       ) : (
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
               <tr>
-                <th style={{ width: 80 }}>Order</th>
+                <th style={{ width: 90 }}>Order</th>
                 <th>Section Key</th>
                 <th>Display Label</th>
-                <th>Visibility</th>
+                <th>Status</th>
                 <th className="admin-table-actions-head">Actions</th>
               </tr>
             </thead>
@@ -170,7 +181,7 @@ export default function Sections() {
                       <button
                         type="button"
                         className="admin-btn admin-btn-ghost admin-btn-sm"
-                        style={{ padding: '2px 6px' }}
+                        style={{ padding: '3px 6px' }}
                         disabled={idx === 0}
                         onClick={() => moveOrder(idx, -1)}
                         title="Move Up"
@@ -180,7 +191,7 @@ export default function Sections() {
                       <button
                         type="button"
                         className="admin-btn admin-btn-ghost admin-btn-sm"
-                        style={{ padding: '2px 6px' }}
+                        style={{ padding: '3px 6px' }}
                         disabled={idx === sections.length - 1}
                         onClick={() => moveOrder(idx, 1)}
                         title="Move Down"
@@ -190,7 +201,7 @@ export default function Sections() {
                     </div>
                   </td>
                   <td>
-                    <span style={{ fontFamily: 'var(--admin-mono)', fontWeight: 700, color: 'var(--admin-text)' }}>
+                    <span style={{ fontFamily: 'var(--admin-mono)', fontWeight: 600, color: 'var(--admin-text)' }}>
                       {section.key}
                     </span>
                   </td>
@@ -223,7 +234,6 @@ export default function Sections() {
                       <Link
                         to={`/admin/sections/${section._id}`}
                         className="admin-btn admin-btn-secondary admin-btn-sm"
-                        style={{ padding: '4px 10px', fontSize: 12 }}
                       >
                         <Edit size={13} />
                         <span>Edit</span>
@@ -231,7 +241,6 @@ export default function Sections() {
                       <button
                         type="button"
                         className="admin-btn admin-btn-danger-ghost admin-btn-sm"
-                        style={{ padding: '4px 8px' }}
                         onClick={() => setDeleteTarget(section)}
                         title="Delete section"
                       >
@@ -257,7 +266,7 @@ export default function Sections() {
         <div className="admin-form-grid">
           {/* Quick Template Suggestions */}
           <div>
-            <label className="struct-label" style={{ marginBottom: 8, display: 'block' }}>
+            <label className="admin-field-label" style={{ marginBottom: 8, display: 'block' }}>
               Quick Templates
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -271,9 +280,11 @@ export default function Sections() {
                     borderRadius: 4,
                     fontSize: 12,
                     fontWeight: 600,
-                    background: form.key === tmpl.key ? 'var(--admin-blue)' : '#f1f5f9',
+                    background: form.key === tmpl.key ? 'var(--admin-primary)' : 'var(--admin-surface-subtle)',
                     color: form.key === tmpl.key ? '#ffffff' : 'var(--admin-text)',
                     border: '1px solid var(--admin-border)',
+                    cursor: 'pointer',
+                    transition: 'var(--admin-transition)',
                   }}
                 >
                   {tmpl.label}

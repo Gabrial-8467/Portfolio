@@ -17,6 +17,7 @@ export default function Media() {
   const fileInputRef = useRef(null);
   const cacheKey = `portfolio_media_cache_${activePortfolio?._id || 'none'}`;
   const [uploading, setUploading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const [uploads, setUploads] = useState(() => {
     try {
       const saved = localStorage.getItem(cacheKey);
@@ -45,14 +46,12 @@ export default function Media() {
     try {
       localStorage.setItem(cacheKey, JSON.stringify(list));
     } catch {
-      /* ignore storage errors */
+      /* ignore */
     }
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
+  const uploadSingleFile = async (file) => {
     if (!file) return;
-
     if (file.size > 5 * 1024 * 1024) {
       addToast('File size must be under 5MB', 'error');
       return;
@@ -78,6 +77,18 @@ export default function Media() {
     }
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) uploadSingleFile(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) uploadSingleFile(file);
+  };
+
   const copyToClipboard = (url) => {
     navigator.clipboard.writeText(url);
     setCopiedUrl(url);
@@ -88,11 +99,11 @@ export default function Media() {
   const removeMedia = (url) => {
     const updated = uploads.filter((u) => u.url !== url);
     saveUploads(updated);
-    addToast('Removed from local gallery', 'info');
+    addToast('Removed from media gallery', 'info');
   };
 
   const formatSize = (bytes) => {
-    if (!bytes) return 'Unknown size';
+    if (!bytes) return '—';
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -102,82 +113,110 @@ export default function Media() {
     <div className="admin-page">
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-title">Media Library</h1>
-          <p className="admin-page-desc">
-            Upload images, avatars, and project screenshots to host them directly on your server.
+          <h1 className="admin-page-title">Media Assets</h1>
+          <p className="admin-page-subtitle">
+            Upload and manage images, project banners, and avatars hosted directly on your server.
           </p>
         </div>
+        <button
+          type="button"
+          className="admin-btn admin-btn-primary"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+        >
+          <UploadCloud size={15} />
+          <span>Upload Image</span>
+        </button>
       </div>
 
       {/* Upload Zone */}
       <div
         style={{
-          background: '#ffffff',
-          border: '2px dashed var(--admin-border)',
+          background: isDragOver ? 'var(--admin-primary-light)' : 'var(--admin-surface)',
+          border: isDragOver ? '2px dashed var(--admin-primary)' : '2px dashed var(--admin-border)',
           borderRadius: 'var(--admin-radius)',
-          padding: '40px 24px',
+          padding: '36px 24px',
           textAlign: 'center',
           marginBottom: 32,
           cursor: 'pointer',
-          transition: 'border-color 0.2s',
+          transition: 'var(--admin-transition)',
+          boxShadow: 'var(--admin-shadow-xs)',
         }}
         onClick={() => fileInputRef.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragOver(true);
+        }}
+        onDragLeave={() => setIsDragOver(false)}
+        onDrop={handleDrop}
       >
         <input
           type="file"
           ref={fileInputRef}
           onChange={handleFileUpload}
-          accept="image/png, image/jpeg, image/webp, image/svg+xml"
+          accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif, image/avif"
           style={{ display: 'none' }}
         />
         <div
           style={{
-            width: 48,
-            height: 48,
-            borderRadius: '50%',
-            background: 'var(--admin-blue-soft)',
-            color: 'var(--admin-blue)',
+            width: 44,
+            height: 44,
+            borderRadius: 10,
+            background: 'var(--admin-primary-light)',
+            color: 'var(--admin-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 16px',
+            margin: '0 auto 12px',
           }}
         >
-          <UploadCloud size={24} />
+          <UploadCloud size={22} />
         </div>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 6 }}>
-          {uploading ? 'Uploading asset to server...' : 'Click or drop image to upload'}
-        </h3>
-        <p style={{ fontSize: 13, color: 'var(--admin-text-muted)' }}>
-          Supports PNG, JPG, WEBP, SVG up to 5MB
-        </p>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 4 }}>
+          {uploading ? 'Uploading asset to server…' : 'Drop images here, or click to browse'}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--admin-text-muted)' }}>
+          PNG, JPG, WEBP, GIF, SVG or AVIF up to 5MB
+        </div>
       </div>
 
       {/* Gallery Grid */}
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 16 }}>
-          Uploaded Assets ({uploads.length})
-        </h2>
+      <div>
+        <div className="admin-toolbar" style={{ marginBottom: 16 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--admin-text)', margin: 0 }}>
+            Uploaded Assets ({uploads.length})
+          </h2>
+        </div>
 
         {uploads.length === 0 ? (
-          <div className="admin-empty" style={{ background: '#ffffff', border: '1px solid var(--admin-border)', borderRadius: 'var(--admin-radius)', padding: 48 }}>
-            <div className="admin-empty-icon"><ImageIcon size={32} /></div>
-            <div className="admin-empty-title">No uploaded images yet</div>
-            <div className="admin-empty-desc">Upload your first image above to get a permanent URL for your projects or avatar.</div>
+          <div className="admin-empty-state">
+            <div className="admin-empty-icon"><ImageIcon size={24} /></div>
+            <div className="admin-empty-title">No uploaded assets</div>
+            <div className="admin-empty-desc">
+              Upload project mockups, avatars, or certificates to generate permanent asset URLs.
+            </div>
+            <button
+              type="button"
+              className="admin-btn admin-btn-primary"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <UploadCloud size={15} /> Upload First Image
+            </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 18 }}>
             {uploads.map((item) => (
               <div
                 key={item.url}
                 style={{
-                  background: '#ffffff',
+                  background: 'var(--admin-surface)',
                   border: '1px solid var(--admin-border)',
                   borderRadius: 'var(--admin-radius)',
                   overflow: 'hidden',
-                  boxShadow: 'var(--admin-shadow-sm)',
+                  boxShadow: 'var(--admin-shadow-xs)',
                   display: 'flex',
                   flexDirection: 'column',
+                  transition: 'var(--admin-transition)',
                 }}
               >
                 <div
@@ -188,13 +227,14 @@ export default function Media() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     overflow: 'hidden',
-                    borderBottom: '1px solid var(--admin-border)',
+                    borderBottom: '1px solid var(--admin-border-subtle)',
+                    padding: 8,
                   }}
                 >
                   <img
                     src={resolveAssetUrl(item.url)}
                     alt={item.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
@@ -211,30 +251,28 @@ export default function Media() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 6 }}>
                     <button
                       type="button"
-                      className="admin-btn admin-btn-secondary"
-                      style={{ flex: 1, fontSize: 12, padding: '6px 10px' }}
+                      className="admin-btn admin-btn-secondary admin-btn-sm"
+                      style={{ flex: 1 }}
                       onClick={() => copyToClipboard(resolveAssetUrl(item.url))}
                     >
-                      {copiedUrl === resolveAssetUrl(item.url) ? <Check size={13} color="#16a34a" /> : <Copy size={13} />}
+                      {copiedUrl === resolveAssetUrl(item.url) ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
                       <span>{copiedUrl === resolveAssetUrl(item.url) ? 'Copied' : 'Copy URL'}</span>
                     </button>
                     <a
                       href={resolveAssetUrl(item.url)}
                       target="_blank"
                       rel="noreferrer"
-                      className="admin-btn admin-btn-secondary"
-                      style={{ padding: '6px 10px' }}
+                      className="admin-btn admin-btn-secondary admin-btn-sm"
                       title="Open in new tab"
                     >
                       <ExternalLink size={13} />
                     </a>
                     <button
                       type="button"
-                      className="admin-btn admin-btn-danger-ghost"
-                      style={{ padding: '6px 10px' }}
+                      className="admin-btn admin-btn-danger-ghost admin-btn-sm"
                       onClick={() => removeMedia(item.url)}
                       title="Remove"
                     >
