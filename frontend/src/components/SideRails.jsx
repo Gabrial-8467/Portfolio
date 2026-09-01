@@ -4,10 +4,10 @@ export default function SideRails({ site = {}, socials = [] }) {
   const email = site.email || 'gabrialdeora@gmail.com';
 
   const socialLinks = socials.length > 0 ? socials : [
-    { label: 'GitHub', url: site.github || 'https://github.com/gabrialdeora' },
-    { label: 'LinkedIn', url: site.linkedin || 'https://linkedin.com/in/gabrialdeora' },
-    { label: 'Twitter', url: site.twitter || 'https://twitter.com' },
-    { label: 'Instagram', url: site.instagram || 'https://instagram.com' },
+    { label: 'GitHub', href: site.github || 'https://github.com/gabrialdeora' },
+    { label: 'LinkedIn', href: site.linkedin || 'https://linkedin.com/in/gabrialdeora' },
+    { label: 'Twitter', href: site.twitter || 'https://twitter.com' },
+    { label: 'Instagram', href: site.instagram || 'https://instagram.com' },
   ];
 
   const getSocialIcon = (label = '') => {
@@ -27,7 +27,7 @@ export default function SideRails({ site = {}, socials = [] }) {
           {socialLinks.map((item, idx) => (
             <li key={item.label || idx} className="side-rail-item">
               <a
-                href={item.url}
+                href={item.href || item.url || '#'}
                 target="_blank"
                 rel="noreferrer"
                 className="side-rail-link"

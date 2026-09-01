@@ -150,6 +150,7 @@ export const api = {
 
       return payload?.data ?? payload;
     },
+    deleteFile: (filename) => api.del(`/api/uploads/${encodeURIComponent(filename)}`, { auth: true }),
   },
 
   admin: {

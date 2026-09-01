@@ -35,12 +35,13 @@ export const getPublicSection = asyncHandler(async (req, res) => {
   const portfolio = await Portfolio.findOne({ slug: req.params.slug, isActive: true }).lean();
   if (!portfolio) throw new ApiError(404, 'Portfolio not found');
 
+  const key = String(req.params.key || '').toLowerCase();
   const section = await Section.findOne({
     portfolio: portfolio._id,
-    key: req.params.key,
+    key,
     isPublished: true,
   }).lean();
-  if (!section) throw new ApiError(404, `Section "${req.params.key}" not found`);
+  if (!section) throw new ApiError(404, `Section "${key}" not found`);
 
   return res.json({
     success: true,
@@ -71,12 +72,13 @@ export const getPortfolioByKey = asyncHandler(async (req, res) => {
 });
 
 export const getSectionByKey = asyncHandler(async (req, res) => {
+  const key = String(req.params.key || '').toLowerCase();
   const section = await Section.findOne({
     portfolio: req.portfolio._id,
-    key: req.params.key,
+    key,
     isPublished: true,
   }).lean();
-  if (!section) throw new ApiError(404, `Section "${req.params.key}" not found`);
+  if (!section) throw new ApiError(404, `Section "${key}" not found`);
 
   return res.json({
     success: true,

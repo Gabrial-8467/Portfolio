@@ -31,7 +31,7 @@ export const getSection = asyncHandler(async (req, res) => {
 });
 
 export const createSection = asyncHandler(async (req, res) => {
-  const { key, label, content, isPublished } = req.body;
+  const { key, label, content, isPublished, order } = req.body;
   if (!key) throw new ApiError(400, 'Section key is required');
 
   const normalizedKey = key.toLowerCase();
@@ -45,13 +45,15 @@ export const createSection = asyncHandler(async (req, res) => {
     .sort({ order: -1 })
     .select('order')
     .lean();
+  const orderNum = Number(order);
+  const nextOrder = (maxOrder?.order ?? 0) + 1;
   const section = await Section.create({
     portfolio: req.portfolio._id,
     key: normalizedKey,
     label: label || '',
     content: content ?? null,
     isPublished: isPublished ?? true,
-    order: (maxOrder?.order ?? 0) + 1,
+    order: Number.isFinite(orderNum) ? orderNum : nextOrder,
   });
 
   return res.status(201).json({ success: true, data: baseSection(section) });

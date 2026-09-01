@@ -131,9 +131,12 @@ export default function Hero({ site = {} }) {
                     alt={name}
                     className="avatar-photo"
                     onError={(e) => {
-                      if (e.currentTarget.src !== heroFallback) {
-                        e.currentTarget.src = heroFallback;
+                      if (e.currentTarget.dataset.fallbackSet) {
+                        e.currentTarget.style.visibility = 'hidden';
+                        return;
                       }
+                      e.currentTarget.src = heroFallback;
+                      e.currentTarget.dataset.fallbackSet = 'true';
                     }}
                   />
                   <div className="avatar-overlay-gradient" />

@@ -26,10 +26,17 @@ export default function Playground() {
   const [copiedCurl, setCopiedCurl] = useState(false);
 
   useEffect(() => {
+    // Reset the playground when the active portfolio changes
     // eslint-disable-next-line react/set-state-in-effect
     setEndpoint(`/api/p/${slug}`);
     // eslint-disable-next-line react/set-state-in-effect
+    setSectionKey('projects');
+    // eslint-disable-next-line react/set-state-in-effect
+    setApiKey('');
+    // eslint-disable-next-line react/set-state-in-effect
     setStatusCode(null);
+    // eslint-disable-next-line react/set-state-in-effect
+    setLatency(null);
     // eslint-disable-next-line react/set-state-in-effect
     setResponse(null);
     // eslint-disable-next-line react/set-state-in-effect

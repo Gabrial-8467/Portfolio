@@ -48,7 +48,10 @@ export function AuthProvider({ children }) {
     setPortfolios(list);
     const savedId = localStorage.getItem(ACTIVE_KEY);
     const stillExists = savedId && list.some((p) => String(p._id) === savedId);
-    setActivePortfolioId(stillExists ? savedId : list.length ? String(list[0]._id) : null);
+    const nextId = stillExists ? savedId : list.length ? String(list[0]._id) : null;
+    setActivePortfolioId(nextId);
+    if (nextId) localStorage.setItem(ACTIVE_KEY, nextId);
+    else localStorage.removeItem(ACTIVE_KEY);
   }, []);
 
   const login = useCallback(

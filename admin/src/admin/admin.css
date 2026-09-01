@@ -1129,3 +1129,443 @@ html, body {
     padding: 0 16px;
   }
 }
+
+/* ============================================================
+   Section Editor & Structured / JSON Form Styles
+   ============================================================ */
+
+/* Structured Editor Container */
+.struct-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: adminFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.struct-intro {
+  font-size: 13px;
+  color: var(--admin-text-muted);
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+  padding: 10px 14px;
+  background: var(--admin-surface-subtle);
+  border: 1px solid var(--admin-border-subtle);
+  border-radius: var(--admin-radius-sm);
+}
+
+/* Structured Cards */
+.struct-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  overflow: hidden;
+  box-shadow: var(--admin-shadow-xs);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.struct-card:hover {
+  border-color: var(--admin-border-hover);
+  box-shadow: var(--admin-shadow-sm);
+}
+
+.struct-card-header {
+  padding: 14px 18px;
+  background: var(--admin-surface-subtle);
+  border-bottom: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.struct-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-text);
+  letter-spacing: -0.01em;
+}
+
+.struct-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.struct-card-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  padding: 2px;
+}
+
+.struct-card-sort .admin-icon-btn {
+  border: none;
+  width: 24px;
+  height: 24px;
+}
+
+.struct-card-body {
+  padding: 20px 18px;
+}
+
+.struct-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.struct-empty {
+  text-align: center;
+  padding: 36px 20px;
+  background: var(--admin-surface-subtle);
+  border: 1px dashed var(--admin-border);
+  border-radius: var(--admin-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.struct-empty p {
+  font-size: 13px;
+  color: var(--admin-text-muted);
+  margin: 0;
+}
+
+.struct-add {
+  margin-top: 12px;
+  border: 1px dashed var(--admin-border);
+  padding: 10px;
+  width: 100%;
+  justify-content: center;
+  background: var(--admin-surface-subtle);
+  font-weight: 600;
+}
+
+.struct-add:hover {
+  background: var(--admin-primary-light);
+  color: var(--admin-primary);
+  border-color: var(--admin-primary-border);
+}
+
+/* Icon Buttons */
+.admin-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--admin-radius-sm);
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  color: var(--admin-text-muted);
+  cursor: pointer;
+  transition: var(--admin-transition);
+}
+
+.admin-icon-btn:hover:not(:disabled) {
+  background: var(--admin-surface-hover);
+  color: var(--admin-text);
+  border-color: var(--admin-border-hover);
+}
+
+.admin-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.admin-icon-btn-danger:hover:not(:disabled) {
+  background: var(--admin-danger-light);
+  color: var(--admin-danger);
+  border-color: var(--admin-danger-border);
+}
+
+/* Tags / Multi-Item Strings Editor */
+.tags-input {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 10px;
+  min-height: 42px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  transition: var(--admin-transition);
+}
+
+.tags-input:focus-within {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.tags-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background: var(--admin-primary-light);
+  color: var(--admin-primary);
+  border: 1px solid var(--admin-primary-border);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tags-chip-remove {
+  background: transparent;
+  border: none;
+  color: var(--admin-primary);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.tags-chip-remove:hover {
+  opacity: 1;
+}
+
+.tags-add-inline {
+  flex: 1;
+  min-width: 120px;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--admin-text);
+  padding: 4px 0;
+}
+
+.tags-add {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--admin-surface-subtle);
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+  color: var(--admin-text);
+  cursor: pointer;
+  transition: var(--admin-transition);
+}
+
+.tags-add:hover {
+  background: var(--admin-surface-hover);
+  border-color: var(--admin-border-hover);
+}
+
+/* Links List Editor */
+.links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.links-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-input-small,
+.admin-input-sm {
+  padding: 7px 10px;
+  font-size: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  outline: none;
+  font-family: inherit;
+}
+
+.admin-input-small:focus,
+.admin-input-sm:focus {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.12);
+}
+
+.admin-select-sm {
+  padding: 5px 8px;
+  font-size: 12px;
+  height: 30px;
+}
+
+/* Image Upload Field in Structured Editor */
+.img-upload-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.img-preview {
+  width: 100%;
+  height: 120px;
+  background: var(--admin-surface-subtle);
+  border: 1px solid var(--admin-border-subtle);
+  border-radius: var(--admin-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--admin-text-subtle);
+  position: relative;
+}
+
+.img-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Toggle Switch Slider */
+.admin-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-toggle-track {
+  width: 40px;
+  height: 22px;
+  background: #cbd5e1;
+  border-radius: 9999px;
+  position: relative;
+  transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.admin-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-toggle input:checked + .admin-toggle-track {
+  background: var(--admin-primary);
+}
+
+.admin-toggle input:checked + .admin-toggle-track::after {
+  transform: translateX(18px);
+}
+
+.admin-toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+/* ============================================================
+   JSON Tree Editor
+   ============================================================ */
+.json-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  padding: 18px;
+  font-family: inherit;
+}
+
+.json-object,
+.json-list,
+.json-primitives {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.json-nested {
+  border-left: 2px solid var(--admin-border);
+  padding-left: 14px;
+  margin-left: 6px;
+  margin-top: 8px;
+}
+
+.json-field {
+  background: var(--admin-surface-subtle);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.json-field-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.json-value {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.json-value-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.json-list-item {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  padding: 12px;
+}
+
+.json-list-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.json-primitive-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.json-empty {
+  padding: 16px;
+  text-align: center;
+  background: var(--admin-surface-subtle);
+  border: 1px dashed var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  color: var(--admin-text-muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

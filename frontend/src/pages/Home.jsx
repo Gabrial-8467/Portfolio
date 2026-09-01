@@ -22,15 +22,17 @@ import Footer from '../components/Footer';
 
 export default function Home() {
   const [searchParams] = useSearchParams();
+  const previewSlug = searchParams.get('preview');
+  const previewApiKey = searchParams.get('apiKey');
 
-  const data = usePortfolioData(
-    searchParams.get('preview') || undefined,
-    searchParams.get('apiKey') || undefined,
-  );
+  const data = usePortfolioData(previewSlug || undefined, previewApiKey || undefined);
 
   const navLinks = Array.isArray(data.navLinks) && data.navLinks.length ? data.navLinks : NAV_LINKS;
   const footerNav = Array.isArray(data.footerNav) && data.footerNav.length ? data.footerNav : FOOTER_NAV;
   const socials = Array.isArray(data.socials) && data.socials.length ? data.socials : SOCIALS;
+
+  const isPreview = Boolean(previewSlug || previewApiKey);
+  const previewFailed = isPreview && data.source === 'local' && Boolean(data.error);
 
   const appData = {
     site: data.site,
@@ -49,6 +51,28 @@ export default function Home() {
 
   return (
     <div className="portfolio-app-root">
+      {previewFailed && (
+        <div
+          role="alert"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 2000,
+            background: '#fee2e2',
+            color: '#b91c1c',
+            borderBottom: '1px solid #fecaca',
+            padding: '10px 16px',
+            fontSize: 13,
+            textAlign: 'center',
+            fontWeight: 600,
+          }}
+        >
+          {data.error}
+        </div>
+      )}
+
       {/* Custom Desktop Cursor */}
       <CustomCursor />
 
@@ -74,7 +98,7 @@ export default function Home() {
       </main>
 
       {/* Minimal Footer */}
-      <Footer site={appData.site} nav={appData.footerNav} />
+      <Footer site={appData.site} socials={appData.socials} nav={appData.footerNav} />
     </div>
   );
 }

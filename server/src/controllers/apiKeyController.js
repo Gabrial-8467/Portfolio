@@ -33,11 +33,12 @@ export const createKey = asyncHandler(async (req, res) => {
   const portfolio = await Portfolio.findOne({ _id: portfolioId, owner: req.user._id });
   if (!portfolio) throw new ApiError(403, 'You do not have access to this portfolio');
 
+  const keyName = typeof name === 'string' ? name.trim() : '';
   const { key, prefix, keyHash } = generateApiKey();
   const doc = await ApiKey.create({
     owner: req.user._id,
     portfolio: portfolio._id,
-    name: name?.trim() || `${portfolio.name} key`,
+    name: keyName || `${portfolio.name} key`,
     prefix,
     keyHash,
   });

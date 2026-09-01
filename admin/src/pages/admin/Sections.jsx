@@ -55,6 +55,12 @@ export default function Sections() {
 
   useEffect(() => {
     setSections([]);
+    if (!activePortfolio) {
+      // eslint-disable-next-line react/set-state-in-effect
+      setLoading(false);
+      return undefined;
+    }
+    // eslint-disable-next-line react/set-state-in-effect
     setLoading(true);
     load().catch(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps

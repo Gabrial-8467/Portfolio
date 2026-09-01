@@ -96,10 +96,23 @@ export default function Media() {
     setTimeout(() => setCopiedUrl(null), 2000);
   };
 
-  const removeMedia = (url) => {
-    const updated = uploads.filter((u) => u.url !== url);
-    saveUploads(updated);
-    addToast('Removed from media gallery', 'info');
+const removeMedia = async (url) => {
+    const filename = (url.split('/').pop() || '').split('?')[0];
+    if (!filename) {
+      addToast('Could not resolve file name', 'error');
+      return;
+    }
+    setUploading(true);
+    try {
+      await api.uploads.deleteFile(filename);
+      const updated = uploads.filter((u) => u.url !== url);
+      saveUploads(updated);
+      addToast('Image deleted from server', 'info');
+    } catch (err) {
+      addToast(err.message || 'Could not delete file', 'error');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const formatSize = (bytes) => {

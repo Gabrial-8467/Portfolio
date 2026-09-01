@@ -18,7 +18,14 @@ async function seed() {
     });
     console.log(`Super admin created: ${superadmin.email}`);
   } else {
-    console.log(`Super admin ready: ${superadmin.email}`);
+    if (superadmin.role !== 'superadmin' || !superadmin.isActive) {
+      superadmin.role = 'superadmin';
+      superadmin.isActive = true;
+      await superadmin.save();
+      console.log(`Upgraded existing user "${superadmin.email}" to superadmin`);
+    } else {
+      console.log(`Super admin ready: ${superadmin.email}`);
+    }
   }
 
   let demo = await Portfolio.findOne({ slug: demoPortfolio.slug });

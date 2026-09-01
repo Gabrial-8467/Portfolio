@@ -15,9 +15,13 @@ const LinkedinIcon = ({ size = 16 }) => (
   </svg>
 );
 
-export default function Footer({ site = {}, nav = [] }) {
+export default function Footer({ site = {}, socials = [], nav = [] }) {
   const name = site.name || 'Gabrial Deora';
   const copyright = site.copyright || `© ${new Date().getFullYear()} ${name}. All Rights Reserved.`;
+
+  const linkedin =
+    site.linkedin ||
+    (Array.isArray(socials) ? socials.find((s) => String(s.label || '').toLowerCase().includes('linkedin'))?.href : '');
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -45,16 +49,18 @@ export default function Footer({ site = {}, nav = [] }) {
                 <span>GitHub</span>
               </a>
             )}
-            <a
-              href="https://linkedin.com/in/gabrial-deora"
-              target="_blank"
-              rel="noreferrer"
-              className="footer-social-pill"
-              data-cursor="LINKEDIN"
-            >
-              <LinkedinIcon size={15} />
-              <span>LinkedIn</span>
-            </a>
+            {linkedin && (
+              <a
+                href={linkedin}
+                target="_blank"
+                rel="noreferrer"
+                className="footer-social-pill"
+                data-cursor="LINKEDIN"
+              >
+                <LinkedinIcon size={15} />
+                <span>LinkedIn</span>
+              </a>
+            )}
             {site.email && (
               <a
                 href={site.emailHref || `mailto:${site.email}`}

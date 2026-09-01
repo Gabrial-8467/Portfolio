@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Sparkles,
@@ -21,6 +21,20 @@ export default function RegisterModal({ isOpen, onClose }) {
   const [revealedKey, setRevealedKey] = useState(null);
   const [createdPortfolio, setCreatedPortfolio] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    // eslint-disable-next-line react/set-state-in-effect
+    setName('');
+    setEmail('');
+    setPassword('');
+    setPortfolioName('');
+    setLoading(false);
+    setError('');
+    setRevealedKey(null);
+    setCreatedPortfolio(null);
+    setCopied(false);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -47,9 +61,20 @@ export default function RegisterModal({ isOpen, onClose }) {
     }
   };
 
-  const copyKey = () => {
+  const copyKey = async () => {
     if (!revealedKey) return;
-    navigator.clipboard.writeText(revealedKey);
+    try {
+      await navigator.clipboard.writeText(revealedKey);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = revealedKey;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      el.remove();
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

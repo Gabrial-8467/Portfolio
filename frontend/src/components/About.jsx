@@ -75,9 +75,12 @@ export default function About({ site = {}, socials = [], stats = [] }) {
                   alt={name}
                   style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--color-primary)' }}
                   onError={(e) => {
-                    if (e.currentTarget.src !== heroFallback) {
-                      e.currentTarget.src = heroFallback;
+                    if (e.currentTarget.dataset.fallbackSet) {
+                      e.currentTarget.style.visibility = 'hidden';
+                      return;
                     }
+                    e.currentTarget.src = heroFallback;
+                    e.currentTarget.dataset.fallbackSet = 'true';
                   }}
                 />
                 <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-main)' }}>{name}</span>

@@ -53,7 +53,7 @@ export default function ApiPlayground() {
       setResponse(result.payload || result.data);
     } catch (err) {
       setError(err.message || 'Request failed');
-      setStatusCode(err.status || 500);
+      setStatusCode(typeof err.status === 'number' && err.status > 0 ? err.status : null);
     } finally {
       setLoading(false);
     }
@@ -108,6 +108,8 @@ export default function ApiPlayground() {
                     setEndpoint(e.target.value);
                     setResponse(null);
                     setError(null);
+                    setStatusCode(null);
+                    setLatency(null);
                   }}
                 >
                   <option value="/api/p/:slug">GET /api/p/:slug (Public Portfolio)</option>

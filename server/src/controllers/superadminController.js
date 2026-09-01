@@ -3,7 +3,7 @@ import { Portfolio } from '../models/Portfolio.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 
 function parsePagination(query) {
-  const page = Math.max(1, parseInt(query.page, 10) || 1);
+  const page = Math.min(100000, Math.max(1, parseInt(query.page, 10) || 1));
   const limit = Math.min(100, Math.max(1, parseInt(query.limit, 10) || 50));
   return { page, limit, skip: (page - 1) * limit };
 }
