@@ -19,6 +19,7 @@ export const config = {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
+  serverUrl: process.env.SERVER_URL,
   seedAdminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@gabrialdeora.com',
   seedAdminPassword:
     process.env.SEED_ADMIN_PASSWORD ||

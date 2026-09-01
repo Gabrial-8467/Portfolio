@@ -35,6 +35,8 @@ const errorHandler = (err, req, res, _next) => {
   } else if (error instanceof mongoose.Error.ValidationError) {
     const details = Object.values(error.errors).map((e) => e.message);
     error = new ApiError(400, 'Validation failed', details);
+  } else if (error.name === 'MulterError') {
+    error = new ApiError(error.code === 'LIMIT_FILE_SIZE' ? 413 : 400, error.message);
   }
 
   const status = error.status || 500;

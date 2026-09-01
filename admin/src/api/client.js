@@ -46,19 +46,19 @@ class ApiError extends Error {
   }
 }
 
-async function request(path, { method = 'GET', body, auth = false } = {}) {
-  const headers = { Accept: 'application/json' };
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
+async function request(path, { method = 'GET', body, auth = false, headers = {} } = {}) {
+  const hdrs = { Accept: 'application/json', ...headers };
+  if (body !== undefined) hdrs['Content-Type'] = 'application/json';
   if (auth) {
     const token = getToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
+    if (token) hdrs.Authorization = `Bearer ${token}`;
   }
 
   let response;
   try {
     response = await fetch(`${API_URL}${path}`, {
       method,
-      headers,
+      headers: hdrs,
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
@@ -77,7 +77,7 @@ async function request(path, { method = 'GET', body, auth = false } = {}) {
     throw new ApiError(message, response.status, payload?.details);
   }
 
-  return payload?.data;
+  return payload?.data ?? payload;
 }
 
 export const api = {

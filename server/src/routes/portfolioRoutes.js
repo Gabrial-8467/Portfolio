@@ -44,7 +44,7 @@ router.put(
 );
 
 const sectionFields = {
-  key: validators.str(80),
+  key: validators.slug,
   label: validators.str(200),
   content: validators.jsonContent,
   isPublished: validators.bool,

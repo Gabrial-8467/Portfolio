@@ -148,7 +148,7 @@ export default function SectionEditor() {
         <div className="admin-section-meta-card">
           <div className="admin-form-grid">
             <Field label="Key" hint="Lowercase letters and hyphens only.">
-              <TextInput value={form.key} onChange={(v) => set('key')(v.toLowerCase())} placeholder="projects" />
+              <TextInput value={form.key} onChange={(v) => set('key')(v.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="projects" />
             </Field>
             <Field label="Label" hint="Display name shown in this admin panel.">
               <TextInput value={form.label} onChange={set('label')} placeholder="Projects" />

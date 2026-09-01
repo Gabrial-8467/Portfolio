@@ -34,11 +34,12 @@ export const createSection = asyncHandler(async (req, res) => {
   const { key, label, content, isPublished } = req.body;
   if (!key) throw new ApiError(400, 'Section key is required');
 
+  const normalizedKey = key.toLowerCase();
   const existing = await Section.findOne({
     portfolio: req.portfolio._id,
-    key,
+    key: normalizedKey,
   });
-  if (existing) throw new ApiError(409, `Section "${key}" already exists`);
+  if (existing) throw new ApiError(409, `Section "${normalizedKey}" already exists`);
 
   const maxOrder = await Section.findOne({ portfolio: req.portfolio._id })
     .sort({ order: -1 })
@@ -46,7 +47,7 @@ export const createSection = asyncHandler(async (req, res) => {
     .lean();
   const section = await Section.create({
     portfolio: req.portfolio._id,
-    key: key.toLowerCase(),
+    key: normalizedKey,
     label: label || '',
     content: content ?? null,
     isPublished: isPublished ?? true,
@@ -65,9 +66,13 @@ export const updateSection = asyncHandler(async (req, res) => {
 
   const { key, label, content, isPublished, order } = req.body;
 
-  if (key !== undefined && key !== section.key) {
-    const conflict = await Section.findOne({ portfolio: req.portfolio._id, key: key.toLowerCase() });
-    if (conflict) throw new ApiError(409, `Section "${key}" already exists`);
+  if (key !== undefined && key.toLowerCase() !== section.key) {
+    const conflict = await Section.findOne({
+      portfolio: req.portfolio._id,
+      key: key.toLowerCase(),
+      _id: { $ne: section._id },
+    });
+    if (conflict) throw new ApiError(409, `Section "${key.toLowerCase()}" already exists`);
     section.key = key.toLowerCase();
   }
   if (label !== undefined) section.label = label;
@@ -97,7 +102,7 @@ export const updateSectionsOrder = asyncHandler(async (req, res) => {
 
   const owned = await Section.find({ portfolio: req.portfolio._id }).sort({ order: 1 }).lean();
   const ownedIds = new Set(owned.map((s) => String(s._id)));
-  const validIds = ids.map((id) => String(id));
+  const validIds = [...new Set(ids.map((id) => String(id)))];
 
   if (validIds.some((id) => !ownedIds.has(id))) {
     throw new ApiError(400, 'Cannot reorder sections you do not own');

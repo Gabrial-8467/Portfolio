@@ -17,6 +17,7 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import superadminRoutes from './routes/superadminRoutes.js';
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(
   helmet({
@@ -78,18 +79,29 @@ app.use('/api/uploads', authRequired, uploadRoutes);
 app.use('/api/admin', authRequired, superadminRoutes);
 
 app.get('/', (req, res) => {
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.get('host') || `localhost:${config.port}`;
+  const baseUrl = config.serverUrl || `${protocol}://${host}`;
+
   res.json({
     name: 'Portfolio CMS API',
     version: '1.0.0',
-    baseUrl: `http://localhost:${config.port}`,
+    status: 'online',
+    baseUrl,
     endpoints: {
       health: '/health',
       portfolioBySlug: '/api/p/:slug',
       sectionBySlug: '/api/p/:slug/section/:key',
       portfolioByKey: 'GET /api/v1/portfolio  (Authorization: Bearer <apiKey>)',
-      sectionByKey: '/api/v1/section/:key  (Authorization: Bearer <apiKey>)',
+      sectionByKey: 'GET /api/v1/section/:key  (Authorization: Bearer <apiKey>)',
       auth: ['POST /api/auth/register', 'POST /api/auth/login', 'GET /api/auth/me'],
-      ownerApi: ['/api/portfolios', '/api/api-keys', '...'],
+      ownerApi: [
+        'GET /api/portfolios',
+        'POST /api/portfolios',
+        'GET /api/portfolios/:portfolioId/sections',
+        'GET /api/api-keys',
+        'POST /api/uploads',
+      ],
     },
   });
 });

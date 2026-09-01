@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../admin/useAuth';
+import { API_URL } from '../../api/client';
 import {
   Copy,
   Check,
@@ -10,11 +11,12 @@ export default function ApiDocs() {
   const [selectedLang, setSelectedLang] = useState('javascript');
   const [copied, setCopied] = useState(false);
 
+  const apiUrl = API_URL.replace(/\/+$/, '');
   const slug = activePortfolio?.slug || 'my-portfolio';
 
   const snippets = {
     javascript: `// Fetch full portfolio with API key
-const res = await fetch("http://localhost:5000/api/v1/portfolio", {
+const res = await fetch("${apiUrl}/api/v1/portfolio", {
   headers: {
     "Authorization": "Bearer YOUR_API_KEY",
     "Accept": "application/json"
@@ -31,7 +33,7 @@ export function usePortfolio() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/p/${slug}")
+    fetch("${apiUrl}/api/p/${slug}")
       .then((res) => res.json())
       .then((json) => {
         setData(json.data);
@@ -44,7 +46,7 @@ export function usePortfolio() {
 
     nextjs: `// Next.js App Router (Server Component)
 export default async function Page() {
-  const res = await fetch("http://localhost:5000/api/p/${slug}", {
+  const res = await fetch("${apiUrl}/api/p/${slug}", {
     next: { revalidate: 60 } // ISR cache for 60s
   });
   const { data } = await res.json();
@@ -60,17 +62,17 @@ export default async function Page() {
 }`,
 
     curl: `# Fetch via Public Slug
-curl -X GET "http://localhost:5000/api/p/${slug}" \\
+curl -X GET "${apiUrl}/api/p/${slug}" \\
   -H "Accept: application/json"
 
 # Fetch via Developer API Key
-curl -X GET "http://localhost:5000/api/v1/portfolio" \\
+curl -X GET "${apiUrl}/api/v1/portfolio" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Accept: application/json"`,
 
     python: `import requests
 
-url = "http://localhost:5000/api/p/${slug}"
+url = "${apiUrl}/api/p/${slug}"
 response = requests.get(url)
 data = response.json().get("data", {})
 
@@ -161,7 +163,7 @@ print("Loaded sections:", len(data.get("sections", [])))`,
             Returns full portfolio config and all published sections for <code>{slug}</code>.
           </p>
           <div style={{ background: '#f8fafc', padding: 10, borderRadius: 6, fontSize: 12, fontFamily: 'var(--admin-mono)' }}>
-            curl http://localhost:5000/api/p/{slug}
+            curl {apiUrl}/api/p/{'{slug}'}
           </div>
         </div>
 
@@ -178,7 +180,7 @@ print("Loaded sections:", len(data.get("sections", [])))`,
             Authenticated developer endpoint for headless frameworks. Returns portfolio metadata and published content blocks.
           </p>
           <div style={{ background: '#f8fafc', padding: 10, borderRadius: 6, fontSize: 12, fontFamily: 'var(--admin-mono)' }}>
-            curl -H &quot;Authorization: Bearer &lt;API_KEY&gt;&quot; http://localhost:5000/api/v1/portfolio
+            curl -H &quot;Authorization: Bearer &lt;API_KEY&gt;&quot; {apiUrl}/api/v1/portfolio
           </div>
         </div>
 
@@ -195,7 +197,7 @@ print("Loaded sections:", len(data.get("sections", [])))`,
             Fetches a single published section (e.g. <code>projects</code>, <code>experience</code>, <code>skills</code>).
           </p>
           <div style={{ background: '#f8fafc', padding: 10, borderRadius: 6, fontSize: 12, fontFamily: 'var(--admin-mono)' }}>
-            curl -H &quot;Authorization: Bearer &lt;API_KEY&gt;&quot; http://localhost:5000/api/v1/section/projects
+            curl -H &quot;Authorization: Bearer &lt;API_KEY&gt;&quot; {apiUrl}/api/v1/section/projects
           </div>
         </div>
       </div>

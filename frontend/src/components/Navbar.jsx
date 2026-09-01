@@ -20,7 +20,9 @@ export default function Navbar({ site = {}, nav = [] }) {
     { label: 'Contact', href: '#contact' },
   ];
 
-  const links = Array.isArray(nav) && nav.length > 0 ? nav : defaultLinks;
+  const links = (Array.isArray(nav) && nav.length > 0 ? nav : defaultLinks).filter(
+    (l) => l && typeof l.href === 'string' && l.href
+  );
 
   useEffect(() => {
     const handleScrollSpy = () => {
@@ -75,11 +77,11 @@ export default function Navbar({ site = {}, nav = [] }) {
 
             {/* Desktop Navigation Links */}
             <nav className="nav-desktop-links" aria-label="Main Navigation">
-              {links.map((link) => {
+              {links.map((link, idx) => {
                 const isActive = activeSection === link.href.replace('#', '');
                 return (
                   <a
-                    key={link.label}
+                    key={link.label || link.href || idx}
                     href={link.href}
                     className={`nav-link-item ${isActive ? 'active' : ''}`}
                     data-cursor="NAV"
@@ -140,9 +142,9 @@ export default function Navbar({ site = {}, nav = [] }) {
           </div>
 
           <div className="mobile-drawer-links">
-            {links.map((link) => (
+            {links.map((link, idx) => (
               <a
-                key={link.label}
+                key={link.label || link.href || idx}
                 href={link.href}
                 className="mobile-nav-link"
                 onClick={(e) => scrollTo(e, link.href)}
