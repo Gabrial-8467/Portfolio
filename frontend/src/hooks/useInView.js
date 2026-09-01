@@ -5,7 +5,9 @@ export function useInView(options) {
   const ref = useRef(null);
   const optionsRef = useRef(options);
 
-  optionsRef.current = options;
+  useEffect(() => {
+    optionsRef.current = options;
+  });
 
   useEffect(() => {
     const node = ref.current;

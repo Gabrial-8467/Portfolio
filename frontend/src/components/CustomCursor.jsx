@@ -9,8 +9,10 @@ export default function CustomCursor() {
   const targetRef = useRef({ x: -100, y: -100 });
   const requestRef = useRef(null);
 
-  targetRef.current.x = x;
-  targetRef.current.y = y;
+  useEffect(() => {
+    targetRef.current.x = x;
+    targetRef.current.y = y;
+  });
 
   useEffect(() => {
     // Only on desktop non-touch

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { useScrollProgress } from '../hooks/useScrollProgress';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar({ site = {}, nav = [] }) {
   const { isScrolled } = useScrollProgress();
@@ -91,8 +92,11 @@ export default function Navbar({ site = {}, nav = [] }) {
               })}
             </nav>
 
-            {/* CTA / Action button */}
+            {/* CTA & Theme Action group */}
             <div className="nav-action-wrapper">
+              {/* Theme Toggle Button */}
+              <ThemeToggle />
+
               <a
                 href="#contact"
                 className="nav-cta-btn"
@@ -122,14 +126,17 @@ export default function Navbar({ site = {}, nav = [] }) {
         <div className="mobile-drawer-content">
           <div className="mobile-drawer-header">
             <span className="mobile-brand-title">{siteName}</span>
-            <button
-              type="button"
-              className="mobile-close-btn"
-              onClick={() => setDrawerOpen(false)}
-              aria-label="Close Menu"
-            >
-              <X size={22} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <ThemeToggle />
+              <button
+                type="button"
+                className="mobile-close-btn"
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Close Menu"
+              >
+                <X size={22} />
+              </button>
+            </div>
           </div>
 
           <div className="mobile-drawer-links">
