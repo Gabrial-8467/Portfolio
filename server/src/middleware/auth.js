@@ -54,8 +54,7 @@ export function loadPortfolio(param = 'portfolioId') {
       const portfolio = await Portfolio.findById(req.params[param]);
       if (!portfolio) throw new ApiError(404, 'Portfolio not found');
       const isOwner = req.user && portfolio.owner.equals(req.user._id);
-      const isSuper = req.user && req.user.role === 'superadmin';
-      if (!isOwner && !isSuper) throw new ApiError(403, 'You do not have access to this portfolio');
+      if (!isOwner) throw new ApiError(403, 'You do not have access to this portfolio');
       req.portfolio = portfolio;
       next();
     } catch (err) {

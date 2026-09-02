@@ -230,9 +230,4 @@ export const api = {
     },
     deleteFile: (filename) => api.del(`/api/uploads/${encodeURIComponent(filename)}`, { auth: true }),
   },
-
-  admin: {
-    portfolios: () => api.get('/api/admin/portfolios', { auth: true }),
-    users: () => api.get('/api/admin/users', { auth: true }),
-  },
 };

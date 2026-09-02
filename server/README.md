@@ -11,14 +11,13 @@ Every portfolio is scoped to its owner. You host **one** server that powers **ma
 - Each user gets one or more portfolios (`Portfolio` docs — `slug`, `name`, `settings`).
 - Content lives in `Section` docs (`key`, `label`, `content`, `order`, `isPublished`) owned by a portfolio.
 - The public API (`/api/p/:slug`) returns a full portfolio — config + published sections — so the frontend only ever needs the slug.
-- A `superadmin` user can see/manage every portfolio and user.
 
 ## Quick start
 
 ```bash
 cp .env.example .env     # then fill in values
 npm install
-npm run seed             # creates the superadmin + a demo portfolio (gabrial-deora)
+npm run seed             # creates the admin + a demo portfolio (gabrial-deora)
 npm run dev              # or npm start
 ```
 
@@ -41,12 +40,12 @@ Requirements: Node.js >= 18, and a MongoDB database (local or Atlas).
 | `JWT_SECRET`          | `dev-secret-change-me` | Long random string; required for security in prod    |
 | `JWT_EXPIRES_IN`      | `24h`                  | Token lifetime                                       |
 | `CORS_ORIGINS`        | `http://localhost:3000`| Comma-separated allowed frontend origins             |
-| `SEED_ADMIN_EMAIL`    | `admin@gabrialdeora.com` | Superadmin email used by the seed script           |
-| `SEED_ADMIN_PASSWORD` | `ChangeMe123!`         | Superadmin password used by the seed script          |
+| `SEED_ADMIN_EMAIL`    | `admin@gabrialdeora.com` | Admin email used by the seed script                |
+| `SEED_ADMIN_PASSWORD` | `ChangeMe123!`         | Admin password used by the seed script               |
 
 ## Data model
 
-- **User** — `email`, `password` (bcrypt), `name`, `role` (`admin` | `superadmin`), `isActive`, `lastLogin`.
+- **User** — `email`, `password` (bcrypt), `name`, `role` (`admin` | `editor`), `isActive`, `lastLogin`.
 - **Portfolio** — `slug` (unique), `name`, `owner` (User), `settings` (free-form JSON for design config), `isActive`.
 - **Section** — `portfolio` (ref), `key` (unique per portfolio), `label`, `content` (free-form JSON), `order`, `isPublished`.
 - **ApiKey** — `owner` (User), `portfolio` (ref), `name`, `prefix`, `keyHash` (sha256, unique). The full key is stored **hashed** and shown in plaintext only once, at creation.
@@ -110,11 +109,6 @@ Image uploads: `POST /api/uploads`
 - Returns `{ url }` (e.g. `/uploads/1234-abcd.png`), served statically from `GET /uploads/:file`.
 - `uploads/` is gitignored. Note: on ephemeral hosts (Render free tier) files wipe on redeploy — for production attach object storage (S3/Cloudinary) and keep the URL in section content.
 
-### Superadmin (Bearer token, role `superadmin`)
-
-- `GET /api/admin/portfolios` — all portfolios.
-- `GET /api/admin/users` — all users.
-
 ## Example: public payload
 
 ```json
@@ -158,7 +152,7 @@ Set `VITE_API_KEY` on your frontend build and it will call `/api/v1/portfolio` i
 1. Create a free cluster on MongoDB Atlas and copy the connection string into `MONGODB_URI`.
 2. Deploy this folder to Render as a **Web Service** with build command `npm install` and start command `npm start`.
 3. Set `NODE_ENV=production`, `JWT_SECRET`, `CORS_ORIGINS` (your Vercel URL), and the seed admin vars.
-4. Run `npm run seed` once to create the superadmin and demo portfolio.
+4. Run `npm run seed` once to create the initial admin and demo portfolio.
 5. Reset CORS if you later add more frontends.
 
 ## Layout
@@ -168,7 +162,7 @@ src/
   config/       env loading + db connection
   middleware/   auth (JWT + role), api key auth, validation, error handler
   models/       User, Portfolio, Section, ApiKey
-  controllers/  auth, portfolio, section, public, api keys, superadmin
+  controllers/  auth, portfolio, section, public, api keys
   routes/       matching route groups
   data/         seed data for the demo portfolio
   utils/        slugify, api key generation/hashing

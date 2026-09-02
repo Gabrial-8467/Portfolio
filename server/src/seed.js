@@ -8,23 +8,23 @@ import { demoPortfolio, sections } from './data/seedData.js';
 async function seed() {
   await connectDB();
 
-  let superadmin = await User.findOne({ email: config.seedAdminEmail });
-  if (!superadmin) {
-    superadmin = await User.create({
+  let admin = await User.findOne({ email: config.seedAdminEmail });
+  if (!admin) {
+    admin = await User.create({
       email: config.seedAdminEmail,
       password: config.seedAdminPassword,
-      name: 'Super Admin',
-      role: 'superadmin',
+      name: 'Admin',
+      role: 'admin',
     });
-    console.log(`Super admin created: ${superadmin.email}`);
+    console.log(`Admin user created: ${admin.email}`);
   } else {
-    if (superadmin.role !== 'superadmin' || !superadmin.isActive) {
-      superadmin.role = 'superadmin';
-      superadmin.isActive = true;
-      await superadmin.save();
-      console.log(`Upgraded existing user "${superadmin.email}" to superadmin`);
+    if (admin.role !== 'admin' || !admin.isActive) {
+      admin.role = 'admin';
+      admin.isActive = true;
+      await admin.save();
+      console.log(`Updated existing user "${admin.email}" to active admin`);
     } else {
-      console.log(`Super admin ready: ${superadmin.email}`);
+      console.log(`Admin ready: ${admin.email}`);
     }
   }
 
@@ -38,7 +38,7 @@ async function seed() {
   demo = await Portfolio.create({
     slug: demoPortfolio.slug,
     name: demoPortfolio.name,
-    owner: superadmin._id,
+    owner: admin._id,
     settings: demoPortfolio.settings || {},
   });
   console.log(`Created demo portfolio: ${demo.slug}`);

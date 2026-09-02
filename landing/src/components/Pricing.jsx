@@ -43,7 +43,7 @@ export default function Pricing({ onOpenRegister }) {
       desc: 'Collaborative workspaces for studios and development teams.',
       features: [
         'Unlimited Portfolios',
-        'Multi-User Roles (Superadmin, Editor)',
+        'Multi-User Workspace Collaboration',
         'Unlimited API Keys & Granular ACLs',
         'Audit Logging & Activity Tracking',
         'Custom Domain Binding',

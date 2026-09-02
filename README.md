@@ -39,7 +39,7 @@ graph TD
 cd server
 cp .env.example .env     # Update MONGODB_URI, JWT_SECRET, CORS_ORIGINS
 npm install
-npm run seed             # Seeds the superadmin + demo portfolio ('gabrial-deora')
+npm run seed             # Seeds initial admin user + demo portfolio ('gabrial-deora')
 npm run dev              # Starts dev server on http://localhost:5000
 ```
 
@@ -92,14 +92,14 @@ Portfolio/
 ├── server/                         # Headless CMS Backend
 │   ├── src/
 │   │   ├── config/                 # DB connection, Env parser, Multer upload config
-│   │   ├── controllers/            # Auth, Portfolio, Section, API Key, Superadmin controllers
+│   │   ├── controllers/            # Auth, Portfolio, Section, API Key controllers
 │   │   ├── data/                   # Default seed portfolio data
 │   │   ├── middleware/             # JWT auth, API key auth, Rate limiting, Error handlers
 │   │   ├── models/                 # User, Portfolio, Section, ApiKey (Mongoose Schemas)
 │   │   ├── routes/                 # Express route definitions
 │   │   ├── utils/                  # Slugifier, API key generation (crypto)
 │   │   ├── index.js                # App entrypoint & middleware pipeline
-│   │   ├── seed.js                 # Database seeder (Superadmin & Demo)
+│   │   ├── seed.js                 # Database seeder (Admin & Demo)
 │   │   └── seedToUser.js           # Content duplication script for users
 │   └── uploads/                    # Local asset storage for image uploads
 │
@@ -135,7 +135,7 @@ Portfolio/
 
 ## 📊 Data Models
 
-* **User**: `email`, `password` (bcrypt-hashed), `name`, `role` (`admin` | `superadmin` | `editor`), `isActive`, `lastLogin`.
+* **User**: `email`, `password` (bcrypt-hashed), `name`, `role` (`admin` | `editor`), `isActive`, `lastLogin`.
 * **Portfolio**: `slug` (unique identifier), `name`, `owner` (`User` reference), `settings` (arbitrary design/meta JSON), `isActive`.
 * **Section**: `portfolio` (`Portfolio` reference), `key` (unique per portfolio, e.g. `projects`, `experience`), `label`, `content` (flexible JSON), `order`, `isPublished`.
 * **ApiKey**: `owner` (`User` reference), `portfolio` (`Portfolio` reference), `name`, `prefix`, `keyHash` (SHA-256), `lastUsedAt`, `isActive`.
@@ -212,10 +212,6 @@ Authenticate using any of:
 
 #### Uploads (`/api/uploads`)
 - `POST /` — Upload image file (`multipart/form-data`, 5MB limit, PNG/JPG/SVG/WEBP)
-
-#### Superadmin (`/api/admin`)
-- `GET /portfolios` — View all system portfolios (Superadmin only)
-- `GET /users` — View all system users (Superadmin only)
 
 ---
 

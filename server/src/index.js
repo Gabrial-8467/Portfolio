@@ -16,7 +16,6 @@ import publicApiKeyRoutes from './routes/publicApiKeyRoutes.js';
 import portfolioRoutes from './routes/portfolioRoutes.js';
 import apiKeyRoutes from './routes/apiKeyRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
-import superadminRoutes from './routes/superadminRoutes.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -81,7 +80,6 @@ app.use('/api/v1', cors({ origin: true }), publicApiKeyRoutes);
 app.use('/api/portfolios', authRequired, portfolioRoutes);
 app.use('/api/api-keys', authRequired, apiKeyRoutes);
 app.use('/api/uploads', authRequired, uploadRoutes);
-app.use('/api/admin', authRequired, superadminRoutes);
 
 app.get('/', (req, res) => {
   const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
