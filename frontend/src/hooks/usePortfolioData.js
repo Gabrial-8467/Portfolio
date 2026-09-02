@@ -59,14 +59,6 @@ export function usePortfolioData(slug, customApiKey) {
   const load = useCallback(async () => {
     dispatch({ type: 'FETCH_START' });
 
-    if (!effectiveApiKey) {
-      dispatch({
-        type: 'FETCH_ERROR',
-        error: 'Missing API key. Set VITE_API_KEY in your .env file to fetch live portfolio content.',
-      });
-      return;
-    }
-
     try {
       const portfolio = await api.portfolio.get(effectiveApiKey);
       const sections = portfolio?.sections || [];

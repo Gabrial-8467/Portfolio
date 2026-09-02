@@ -32,8 +32,14 @@ class ApiError extends Error {
 }
 
 async function request(path, { apiKey } = {}) {
-  const headers = { Accept: 'application/json' };
-  if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+  if (!apiKey) {
+    throw new ApiError(
+      'API key is missing. Add VITE_API_KEY to your frontend/.env and restart the dev server.',
+      401
+    );
+  }
+
+  const headers = { Accept: 'application/json', Authorization: `Bearer ${apiKey}` };
 
   let response;
   try {
