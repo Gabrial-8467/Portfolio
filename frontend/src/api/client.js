@@ -3,6 +3,7 @@ export const API_URL = baseApiUrl.replace(/\/+$/, '');
 export const API_KEY = import.meta.env.VITE_API_KEY || '';
 
 export const PORTFOLIO_SLUG = import.meta.env.VITE_PORTFOLIO_SLUG || 'gabrial-deora';
+export const CMS_UPDATE_CHANNEL = 'portfolio_cms_updates';
 
 export function resolveAssetUrl(url) {
   if (!url) return '/hero.png';
@@ -30,7 +31,7 @@ class ApiError extends Error {
   }
 }
 
-async function request(path, { apiKey = API_KEY } = {}) {
+async function request(path, { apiKey } = {}) {
   const headers = { Accept: 'application/json' };
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
 
@@ -59,7 +60,7 @@ export const api = {
   public: {
     getPortfolio: (slug) => request(`/api/p/${slug}`),
     getSection: (slug, key) => request(`/api/p/${slug}/section/${key}`),
-    getPortfolioByKey: (apiKey) => request('/api/v1/portfolio', { apiKey }),
-    getSectionByKey: (key, apiKey) => request(`/api/v1/section/${key}`, { apiKey }),
+    getPortfolioByKey: (apiKey = API_KEY) => request('/api/v1/portfolio', { apiKey }),
+    getSectionByKey: (key, apiKey = API_KEY) => request(`/api/v1/section/${key}`, { apiKey }),
   },
 };

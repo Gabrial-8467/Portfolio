@@ -1,5 +1,5 @@
-import { useEffect, useReducer } from 'react';
-import { api, API_KEY, PORTFOLIO_SLUG } from '../api/client';
+import { useEffect, useReducer, useCallback } from 'react';
+import { api, API_KEY, PORTFOLIO_SLUG, CMS_UPDATE_CHANNEL } from '../api/client';
 import {
   SITE,
   STATS,
@@ -56,63 +56,96 @@ export function usePortfolioData(slug, customApiKey) {
   const effectiveApiKey = customApiKey || API_KEY;
   const [state, dispatch] = useReducer(reducer, { ...initialState, slug: targetSlug });
 
+  const load = useCallback(async () => {
+    dispatch({ type: 'FETCH_START' });
+    try {
+      let portfolio = null;
+      if (effectiveApiKey) {
+        try {
+          portfolio = await api.public.getPortfolioByKey(effectiveApiKey);
+        } catch {
+          portfolio = await api.public.getPortfolio(targetSlug);
+        }
+      } else {
+        portfolio = await api.public.getPortfolio(targetSlug);
+      }
+
+      const sections = portfolio?.sections || [];
+      const siteContent = sectionValue(sections, 'site', {});
+      const site = { ...SITE, ...siteContent };
+
+      dispatch({
+        type: 'FETCH_SUCCESS',
+        payload: {
+          slug: portfolio?.slug || targetSlug,
+          site,
+          socials: sectionValue(sections, 'socials', []),
+          navLinks: sectionValue(
+            sections,
+            'navLinks',
+            siteContent?.navLinks || []
+          ),
+          footerNav: sectionValue(
+            sections,
+            'footerNav',
+            siteContent?.footerNav || []
+          ),
+          stats: sectionValue(sections, 'stats', STATS),
+          processSteps: sectionValue(sections, 'processSteps', PROCESS_STEPS),
+          projects: sectionValue(sections, 'projects', localProjects),
+          skills: sectionValue(sections, 'skills', localSkills),
+          services: sectionValue(sections, 'services', localServices),
+          experience: sectionValue(sections, 'experience', localExperience),
+          education: sectionValue(sections, 'education', localEducation),
+          achievements: sectionValue(sections, 'achievements', localAchievements),
+        },
+      });
+    } catch {
+      dispatch({
+        type: 'FETCH_ERROR',
+        error: `Could not reach the API — showing local content for "${targetSlug}".`,
+      });
+    }
+  }, [targetSlug, effectiveApiKey]);
+
   useEffect(() => {
-    let cancelled = false;
+    load();
+  }, [load]);
 
-    async function load() {
-      dispatch({ type: 'FETCH_START' });
+  useEffect(() => {
+    // Re-fetch when switching back to this tab
+    const handleFocus = () => {
+      load();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        load();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Listen to real-time updates broadcasted by Admin CMS
+    let bc = null;
+    if (typeof BroadcastChannel !== 'undefined') {
       try {
-        const portfolio = effectiveApiKey
-          ? await api.public.getPortfolioByKey(effectiveApiKey)
-          : await api.public.getPortfolio(targetSlug);
-
-        if (cancelled) return;
-
-        const sections = portfolio?.sections || [];
-        const siteContent = sectionValue(sections, 'site', {});
-        const site = { ...SITE, ...siteContent };
-
-        dispatch({
-          type: 'FETCH_SUCCESS',
-          payload: {
-            slug: portfolio?.slug || targetSlug,
-            site,
-            socials: sectionValue(sections, 'socials', []),
-            navLinks: sectionValue(
-              sections,
-              'navLinks',
-              siteContent?.navLinks || []
-            ),
-            footerNav: sectionValue(
-              sections,
-              'footerNav',
-              siteContent?.footerNav || []
-            ),
-            stats: sectionValue(sections, 'stats', STATS),
-            processSteps: sectionValue(sections, 'processSteps', PROCESS_STEPS),
-            projects: sectionValue(sections, 'projects', localProjects),
-            skills: sectionValue(sections, 'skills', localSkills),
-            services: sectionValue(sections, 'services', localServices),
-            experience: sectionValue(sections, 'experience', localExperience),
-            education: sectionValue(sections, 'education', localEducation),
-            achievements: sectionValue(sections, 'achievements', localAchievements),
-          },
-        });
+        bc = new BroadcastChannel(CMS_UPDATE_CHANNEL);
+        bc.onmessage = () => {
+          load();
+        };
       } catch {
-        if (cancelled) return;
-        dispatch({
-          type: 'FETCH_ERROR',
-          error: `Could not reach the API — showing local content for "${targetSlug}".`,
-        });
+        /* ignore */
       }
     }
 
-    load();
-
     return () => {
-      cancelled = true;
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (bc) bc.close();
     };
-  }, [targetSlug, effectiveApiKey]);
+  }, [load]);
 
-  return state;
+  return { ...state, refetch: load };
 }

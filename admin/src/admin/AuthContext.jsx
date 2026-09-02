@@ -22,7 +22,12 @@ export function AuthProvider({ children }) {
         setPortfolios(me.portfolios || []);
         const hasActive = (me.portfolios || []).some((p) => String(p._id) === activePortfolioId);
         if (!hasActive && me.portfolios?.length) {
-          setActivePortfolioId(String(me.portfolios[0]._id));
+          const nextId = String(me.portfolios[0]._id);
+          setActivePortfolioId(nextId);
+          localStorage.setItem(ACTIVE_KEY, nextId);
+        } else if (!me.portfolios?.length) {
+          setActivePortfolioId(null);
+          localStorage.removeItem(ACTIVE_KEY);
         }
       })
       .catch(() => {

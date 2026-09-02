@@ -69,6 +69,20 @@ export function setToken(token) {
   }
 }
 
+export const CMS_UPDATE_CHANNEL = 'portfolio_cms_updates';
+
+export function notifyCmsUpdate(meta = {}) {
+  if (typeof BroadcastChannel !== 'undefined') {
+    try {
+      const bc = new BroadcastChannel(CMS_UPDATE_CHANNEL);
+      bc.postMessage({ type: 'CONTENT_UPDATED', timestamp: Date.now(), ...meta });
+      bc.close();
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 class ApiError extends Error {
   constructor(message, status, details) {
     super(message);
@@ -132,20 +146,52 @@ export const api = {
   portfolios: {
     list: () => api.get('/api/portfolios', { auth: true }),
     get: (id) => api.get(`/api/portfolios/${id}`, { auth: true }),
-    create: (data) => api.post('/api/portfolios', data, { auth: true }),
-    update: (id, data) => api.put(`/api/portfolios/${id}`, data, { auth: true }),
-    remove: (id) => api.del(`/api/portfolios/${id}`, { auth: true }),
+    create: async (data) => {
+      const res = await api.post('/api/portfolios', data, { auth: true });
+      notifyCmsUpdate({ action: 'create_portfolio' });
+      return res;
+    },
+    update: async (id, data) => {
+      const res = await api.put(`/api/portfolios/${id}`, data, { auth: true });
+      notifyCmsUpdate({ action: 'update_portfolio' });
+      return res;
+    },
+    remove: async (id) => {
+      const res = await api.del(`/api/portfolios/${id}`, { auth: true });
+      notifyCmsUpdate({ action: 'delete_portfolio' });
+      return res;
+    },
     getSettings: (id) => api.get(`/api/portfolios/${id}/settings`, { auth: true }),
-    updateSettings: (id, settings) => api.put(`/api/portfolios/${id}/settings`, { settings }, { auth: true }),
+    updateSettings: async (id, settings) => {
+      const res = await api.put(`/api/portfolios/${id}/settings`, { settings }, { auth: true });
+      notifyCmsUpdate({ action: 'update_settings' });
+      return res;
+    },
   },
 
   sections: {
     list: (portfolioId) => api.get(`/api/portfolios/${portfolioId}/sections`, { auth: true }),
     get: (portfolioId, sectionId) => api.get(`/api/portfolios/${portfolioId}/sections/${sectionId}`, { auth: true }),
-    create: (portfolioId, data) => api.post(`/api/portfolios/${portfolioId}/sections`, data, { auth: true }),
-    update: (portfolioId, sectionId, data) => api.put(`/api/portfolios/${portfolioId}/sections/${sectionId}`, data, { auth: true }),
-    remove: (portfolioId, sectionId) => api.del(`/api/portfolios/${portfolioId}/sections/${sectionId}`, { auth: true }),
-    reorder: (portfolioId, ids) => api.put(`/api/portfolios/${portfolioId}/sections/order/reorder`, { ids }, { auth: true }),
+    create: async (portfolioId, data) => {
+      const res = await api.post(`/api/portfolios/${portfolioId}/sections`, data, { auth: true });
+      notifyCmsUpdate({ action: 'create_section', sectionKey: data?.key });
+      return res;
+    },
+    update: async (portfolioId, sectionId, data) => {
+      const res = await api.put(`/api/portfolios/${portfolioId}/sections/${sectionId}`, data, { auth: true });
+      notifyCmsUpdate({ action: 'update_section', sectionKey: data?.key });
+      return res;
+    },
+    remove: async (portfolioId, sectionId) => {
+      const res = await api.del(`/api/portfolios/${portfolioId}/sections/${sectionId}`, { auth: true });
+      notifyCmsUpdate({ action: 'delete_section' });
+      return res;
+    },
+    reorder: async (portfolioId, ids) => {
+      const res = await api.put(`/api/portfolios/${portfolioId}/sections/order/reorder`, { ids }, { auth: true });
+      notifyCmsUpdate({ action: 'reorder_sections' });
+      return res;
+    },
   },
 
   apiKeys: {
