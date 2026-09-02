@@ -57,9 +57,11 @@ async function request(path, { apiKey } = {}) {
 }
 
 export const api = {
+  portfolio: {
+    get: (apiKey = API_KEY) => request('/api/v1/portfolio', { apiKey }),
+    getSection: (key, apiKey = API_KEY) => request(`/api/v1/section/${key}`, { apiKey }),
+  },
   public: {
-    getPortfolio: (slug) => request(`/api/p/${slug}`),
-    getSection: (slug, key) => request(`/api/p/${slug}/section/${key}`),
     getPortfolioByKey: (apiKey = API_KEY) => request('/api/v1/portfolio', { apiKey }),
     getSectionByKey: (key, apiKey = API_KEY) => request(`/api/v1/section/${key}`, { apiKey }),
   },

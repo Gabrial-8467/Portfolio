@@ -16,7 +16,6 @@ export default function ApiDocsSection() {
     { id: 'auth', category: 'Overview', title: 'Authentication' },
     { id: 'get-portfolio', category: 'Endpoints', title: 'GET /api/v1/portfolio' },
     { id: 'get-section', category: 'Endpoints', title: 'GET /api/v1/section/:key' },
-    { id: 'public-slug', category: 'Endpoints', title: 'GET /api/p/:slug' },
     { id: 'health', category: 'Endpoints', title: 'GET /health' },
     { id: 'errors', category: 'Guides', title: 'Errors & Status Codes' },
   ];
@@ -214,21 +213,6 @@ export default function ApiDocsSection() {
   }
 }`}
                   </pre>
-                </div>
-              </div>
-            )}
-
-            {selectedTopic === 'public-slug' && (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                  <span className="method-tag method-get">GET</span>
-                  <span style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--saas-mono)' }}>/api/p/:slug</span>
-                </div>
-                <p style={{ color: 'var(--saas-text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
-                  Public endpoint requiring no authentication. Ideal for fast client-side rendering with slug parameters.
-                </p>
-                <div style={{ background: '#f8fafc', border: '1px solid var(--saas-border)', borderRadius: 'var(--saas-radius)', padding: 12, fontSize: 13, fontFamily: 'var(--saas-mono)' }}>
-                  GET /api/p/{PORTFOLIO_SLUG}
                 </div>
               </div>
             )}

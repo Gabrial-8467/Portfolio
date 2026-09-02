@@ -7,11 +7,10 @@ import {
   RefreshCw,
   Clock,
 } from 'lucide-react';
-import { api, PORTFOLIO_SLUG } from '../api/client';
+import { api } from '../api/client';
 
 export default function ApiPlayground() {
-  const [endpoint, setEndpoint] = useState('/api/p/:slug');
-  const [paramSlug, setParamSlug] = useState(PORTFOLIO_SLUG);
+  const [endpoint, setEndpoint] = useState('/api/v1/portfolio');
   const [paramKey, setParamKey] = useState('projects');
   const [apiKey, setApiKey] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,11 +29,7 @@ export default function ApiPlayground() {
 
     try {
       let result;
-      if (endpoint === '/api/p/:slug') {
-        result = await api.getPublicPortfolio(paramSlug || PORTFOLIO_SLUG);
-      } else if (endpoint === '/api/p/:slug/section/:key') {
-        result = await api.getPublicSection(paramSlug || PORTFOLIO_SLUG, paramKey || 'projects');
-      } else if (endpoint === '/api/v1/portfolio') {
+      if (endpoint === '/api/v1/portfolio') {
         if (!apiKey) {
           throw new Error('Please enter an API Key to test /api/v1/portfolio');
         }
@@ -60,8 +55,6 @@ export default function ApiPlayground() {
   };
 
   const getComputedPath = () => {
-    if (endpoint === '/api/p/:slug') return `/api/p/${paramSlug || PORTFOLIO_SLUG}`;
-    if (endpoint === '/api/p/:slug/section/:key') return `/api/p/${paramSlug || PORTFOLIO_SLUG}/section/${paramKey || 'projects'}`;
     if (endpoint === '/api/v1/section/:key') return `/api/v1/section/${paramKey || 'projects'}`;
     return endpoint;
   };
@@ -112,8 +105,6 @@ export default function ApiPlayground() {
                     setLatency(null);
                   }}
                 >
-                  <option value="/api/p/:slug">GET /api/p/:slug (Public Portfolio)</option>
-                  <option value="/api/p/:slug/section/:key">GET /api/p/:slug/section/:key (Public Section)</option>
                   <option value="/api/v1/portfolio">GET /api/v1/portfolio (API Key Auth)</option>
                   <option value="/api/v1/section/:key">GET /api/v1/section/:key (API Key Auth)</option>
                   <option value="/health">GET /health (Liveness Check)</option>
@@ -121,17 +112,6 @@ export default function ApiPlayground() {
               </div>
 
               {/* Endpoint Parameters */}
-              {endpoint.includes(':slug') && (
-                <input
-                  type="text"
-                  placeholder="slug (e.g. gabrial-deora)"
-                  className="text-input"
-                  style={{ width: 170 }}
-                  value={paramSlug}
-                  onChange={(e) => setParamSlug(e.target.value)}
-                />
-              )}
-
               {endpoint.includes(':key') && (
                 <input
                   type="text"

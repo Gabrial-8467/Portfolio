@@ -138,11 +138,6 @@ export const api = {
     me: () => api.get('/api/auth/me', { auth: true }),
   },
 
-  public: {
-    getPortfolio: (slug) => api.get(`/api/p/${slug}`),
-    getSection: (slug, key) => api.get(`/api/p/${slug}/section/${key}`),
-  },
-
   portfolios: {
     list: () => api.get('/api/portfolios', { auth: true }),
     get: (id) => api.get(`/api/portfolios/${id}`, { auth: true }),

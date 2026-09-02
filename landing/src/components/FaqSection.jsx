@@ -9,11 +9,11 @@ export default function FaqSection() {
     },
     {
       q: 'Can I use this with Next.js App Router, Vite React, Astro, or Vue?',
-      a: 'Yes! Portfolio CMS provides standard JSON REST endpoints (`/api/v1/portfolio` and `/api/p/:slug`). You can fetch your content at build time (SSG), on every request (SSR), or on the client side (CSR) in any frontend framework.',
+      a: 'Yes! Portfolio CMS provides standard JSON REST endpoints (`/api/v1/portfolio` and `/api/v1/section/:key`) secured with API keys. You can fetch your content at build time (SSG), on every request (SSR), or on the client side (CSR) in any frontend framework.',
     },
     {
-      q: 'Are there any CORS restrictions on the public or developer API?',
-      a: 'No. The developer API (`/api/v1`) and public slug endpoints (`/api/p`) have CORS enabled for all origins (`*`), allowing direct client-side fetching from custom domains or localhost without proxy servers.',
+      q: 'Are there any CORS restrictions on the developer API?',
+      a: 'No. The developer API (`/api/v1`) has CORS enabled for all origins (`*`), allowing direct client-side fetching from custom domains or localhost without proxy servers.',
     },
     {
       q: 'How does API key security work?',

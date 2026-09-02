@@ -58,18 +58,17 @@ export function usePortfolioData(slug, customApiKey) {
 
   const load = useCallback(async () => {
     dispatch({ type: 'FETCH_START' });
-    try {
-      let portfolio = null;
-      if (effectiveApiKey) {
-        try {
-          portfolio = await api.public.getPortfolioByKey(effectiveApiKey);
-        } catch {
-          portfolio = await api.public.getPortfolio(targetSlug);
-        }
-      } else {
-        portfolio = await api.public.getPortfolio(targetSlug);
-      }
 
+    if (!effectiveApiKey) {
+      dispatch({
+        type: 'FETCH_ERROR',
+        error: 'Missing API key. Set VITE_API_KEY in your .env file to fetch live portfolio content.',
+      });
+      return;
+    }
+
+    try {
+      const portfolio = await api.portfolio.get(effectiveApiKey);
       const sections = portfolio?.sections || [];
       const siteContent = sectionValue(sections, 'site', {});
       const site = { ...SITE, ...siteContent };
@@ -100,10 +99,10 @@ export function usePortfolioData(slug, customApiKey) {
           achievements: sectionValue(sections, 'achievements', localAchievements),
         },
       });
-    } catch {
+    } catch (err) {
       dispatch({
         type: 'FETCH_ERROR',
-        error: `Could not reach the API — showing local content for "${targetSlug}".`,
+        error: err.message || 'Could not reach the Content API with the provided API key.',
       });
     }
   }, [targetSlug, effectiveApiKey]);

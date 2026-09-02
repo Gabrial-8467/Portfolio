@@ -11,7 +11,6 @@ import { requestLogger } from './middleware/logger.js';
 import { logger } from './utils/logger.js';
 
 import authRoutes from './routes/authRoutes.js';
-import publicRoutes from './routes/publicRoutes.js';
 import publicApiKeyRoutes from './routes/publicApiKeyRoutes.js';
 import portfolioRoutes from './routes/portfolioRoutes.js';
 import apiKeyRoutes from './routes/apiKeyRoutes.js';
@@ -75,7 +74,6 @@ const apiLimiter = rateLimit({
 app.use('/api', apiLimiter);
 app.use('/api/auth', authLimiter, authRoutes);
 
-app.use('/api/p', cors({ origin: true }), publicRoutes);
 app.use('/api/v1', cors({ origin: true }), publicApiKeyRoutes);
 app.use('/api/portfolios', authRequired, portfolioRoutes);
 app.use('/api/api-keys', authRequired, apiKeyRoutes);
@@ -93,8 +91,6 @@ app.get('/', (req, res) => {
     baseUrl,
     endpoints: {
       health: '/health',
-      portfolioBySlug: '/api/p/:slug',
-      sectionBySlug: '/api/p/:slug/section/:key',
       portfolioByKey: 'GET /api/v1/portfolio  (Authorization: Bearer <apiKey>)',
       sectionByKey: 'GET /api/v1/section/:key  (Authorization: Bearer <apiKey>)',
       auth: ['POST /api/auth/register', 'POST /api/auth/login', 'GET /api/auth/me'],
@@ -124,7 +120,7 @@ async function start() {
     server = app.listen(config.port, () => {
       const url = `http://localhost:${config.port}`;
       logger.success(`Portfolio CMS Server active on ${url} [${config.nodeEnv}]`);
-      logger.info(`Health check: ${url}/health | Public API: ${url}/api/p/:slug`);
+      logger.info(`Health: ${url}/health | API: ${url}/api/v1/portfolio (Authorization: Bearer <apiKey>)`);
     });
 
     server.on('error', (err) => {

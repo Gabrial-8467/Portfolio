@@ -83,12 +83,6 @@ export const api = {
   getHealth: async () => {
     return request('/health');
   },
-  getPublicPortfolio: async (slug) => {
-    return request(`/api/p/${slug}`);
-  },
-  getPublicSection: async (slug, key) => {
-    return request(`/api/p/${slug}/section/${key}`);
-  },
   getPortfolioByKey: async (apiKey) => {
     return request('/api/v1/portfolio', {
       headers: { Authorization: `Bearer ${apiKey}` },
