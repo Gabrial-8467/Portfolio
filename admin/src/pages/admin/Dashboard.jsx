@@ -14,12 +14,11 @@ import {
   ArrowUpRight,
   Terminal,
   KeyRound,
-  Play,
-  FileCode2,
   Copy,
   Check,
   Image as ImageIcon,
   Edit,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 
 function firstWord(name) {
@@ -254,12 +253,12 @@ export default function Dashboard() {
             <span>{copiedCurl ? 'Copied!' : 'Copy cURL'}</span>
           </button>
           <Link
-            to="/admin/playground"
+            to="/admin/apikeys"
             className="admin-btn admin-btn-primary"
             style={{ fontSize: 12, padding: '6px 12px' }}
           >
-            <Play size={13} />
-            <span>Open Playground</span>
+            <KeyRound size={13} />
+            <span>Manage Keys</span>
           </Link>
         </div>
       </div>
@@ -339,7 +338,7 @@ export default function Dashboard() {
         </Link>
 
         <Link
-          to="/admin/docs"
+          to="/admin/settings"
           style={{
             background: 'var(--admin-surface)',
             border: '1px solid var(--admin-border)',
@@ -354,11 +353,11 @@ export default function Dashboard() {
           }}
         >
           <div style={{ width: 36, height: 36, borderRadius: 8, background: '#f3e8ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <FileCode2 size={18} />
+            <SettingsIcon size={18} />
           </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--admin-text)' }}>Developer Docs</div>
-            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)' }}>React, Next.js, Node guide</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--admin-text)' }}>Settings</div>
+            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)' }}>Workspace & preferences</div>
           </div>
         </Link>
       </div>

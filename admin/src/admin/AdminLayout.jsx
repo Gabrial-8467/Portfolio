@@ -11,8 +11,6 @@ import {
   KeyRound,
   Zap,
   Image as ImageIcon,
-  FileCode2,
-  Play,
   ChevronDown,
   Menu,
   X,
@@ -123,7 +121,7 @@ export default function AdminLayout() {
             <span>Media Assets</span>
           </NavLink>
 
-          <div className="admin-nav-group-title">Developer</div>
+          <div className="admin-nav-group-title">Developer & Settings</div>
           <NavLink
             to="/admin/apikeys"
             onClick={() => setMobileOpen(false)}
@@ -132,24 +130,6 @@ export default function AdminLayout() {
             <KeyRound size={16} />
             <span>API Keys</span>
           </NavLink>
-          <NavLink
-            to="/admin/docs"
-            onClick={() => setMobileOpen(false)}
-            className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
-          >
-            <FileCode2 size={16} />
-            <span>API Reference</span>
-          </NavLink>
-          <NavLink
-            to="/admin/playground"
-            onClick={() => setMobileOpen(false)}
-            className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
-          >
-            <Play size={16} />
-            <span>API Playground</span>
-          </NavLink>
-
-          <div className="admin-nav-group-title">System</div>
           <NavLink
             to="/admin/settings"
             onClick={() => setMobileOpen(false)}
