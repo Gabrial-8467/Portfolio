@@ -13,8 +13,8 @@ export default function Hero({ site = {} }) {
   const heroTitle = site.heroTitle || 'Building Web Apps That Actually Perform';
   const heroBio = site.heroBio || site.bio || 'Full Stack Developer with hands-on experience building responsive, high-performance web applications with React, Node.js, and MongoDB.';
   const heroBgText = site.heroBgText || 'DEVELOPER';
-  const rawAvatarUrl = site.avatarUrl || '/hero.png';
-  const avatarSrc = resolveAssetUrl(rawAvatarUrl);
+  const rawAvatarUrl = site.avatarUrl ? site.avatarUrl.trim() : '';
+  const avatarSrc = rawAvatarUrl ? resolveAssetUrl(rawAvatarUrl) : heroFallback;
 
   useEffect(() => {
     // Only desktop parallax

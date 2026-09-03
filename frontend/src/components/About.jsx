@@ -16,8 +16,8 @@ export default function About({ site = {}, socials = [], stats = [] }) {
   const aboutTitle = site.aboutTitle || 'The Developer Shaping Modern Web Experiences';
   const aboutDesc1 = site.aboutDesc1 || "I'm a dynamic Full Stack Web Developer with strong internship experience crafting responsive, high-performance web applications using React.js, Node.js, and MongoDB.";
   const aboutDesc2 = site.aboutDesc2 || "My commitment is to enhancing user experience through clean, scalable architecture and modern design systems. I specialize in turning complex requirements into seamless digital products.";
-  const rawAvatarUrl = site.avatarUrl || '/hero.png';
-  const avatarSrc = resolveAssetUrl(rawAvatarUrl);
+  const rawAvatarUrl = site.avatarUrl ? site.avatarUrl.trim() : '';
+  const avatarSrc = rawAvatarUrl ? resolveAssetUrl(rawAvatarUrl) : heroFallback;
 
   useEffect(() => {
     const handleScroll = () => {
