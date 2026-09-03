@@ -19,10 +19,20 @@ async function authenticateWithApiKey(key) {
   });
   if (!portfolio) return null;
 
+  // Resolve the API key owner's plan ONCE here so the rate limiter does not
+  // need to run a database query on every request.
+  let planName = 'hobby';
+  try {
+    const owner = await User.findById(apiKey.owner).select('plan').lean();
+    planName = (owner && owner.plan) || 'hobby';
+  } catch {
+    /* fall through to hobby */
+  }
+
   apiKey.lastUsedAt = new Date();
   apiKey.save().catch(() => {});
 
-  return { apiKey, portfolio };
+  return { apiKey, portfolio, planName };
 }
 
 async function authenticateWithJwt(token) {
@@ -73,6 +83,7 @@ export async function requireApiKey(req, res, next) {
     req.apiKey = authenticated.apiKey || null;
     req.user = authenticated.user || req.user || null;
     req.portfolio = authenticated.portfolio;
+    req.planName = authenticated.planName || req.planName || (req.user && req.user.plan) || 'hobby';
     return next();
   } catch (err) {
     return next(err);

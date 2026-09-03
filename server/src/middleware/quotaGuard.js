@@ -5,10 +5,12 @@ import { User } from "../models/User.js";
 import { getPlanConfig } from "../config/plans.js";
 
 /**
- * Resolve the current user's plan. API-key-authenticated requests only set
- * req.apiKey, not req.user, so load the plan from the key's owner when needed.
+ * Resolve the current user's plan. Reads the plan that was already resolved
+ * during authentication (req.planName) or set on the JWT user, so no database
+ * query is issued per request except as a rare fallback.
  */
 async function resolveUserPlan(req) {
+  if (req.planName) return req.planName;
   if (req.user && req.user.plan) return req.user.plan;
   if (req.apiKey && req.apiKey.owner) {
     try {

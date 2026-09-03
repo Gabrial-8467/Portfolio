@@ -8,8 +8,7 @@ import Field, { TextInput, Toggle } from '../../admin/components/Field';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
 import AdminLoader from '../../admin/components/AdminLoader';
 import {
-  ArrowUp,
-  ArrowDown,
+  GripVertical,
   Trash2,
   Edit,
   SquareCheckBig,
@@ -44,6 +43,8 @@ export default function Sections() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'published' | 'draft'
+  const [dragId, setDragId] = useState(null);
+  const [dragOverId, setDragOverId] = useState(null);
 
   const load = async () => {
     try {
@@ -98,16 +99,7 @@ export default function Sections() {
     }
   };
 
-  const moveOrder = async (index, direction) => {
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= sections.length) return;
-
-    const reordered = [...sections];
-    const [moved] = reordered.splice(index, 1);
-    reordered.splice(targetIndex, 0, moved);
-
-    setSections(reordered);
-
+  const persistOrder = async (reordered) => {
     try {
       const ids = reordered.map((s) => s._id);
       await api.sections.reorder(ids);
@@ -116,6 +108,24 @@ export default function Sections() {
       addToast('Failed to save order', 'error');
       load();
     }
+  };
+
+  const handleDrop = (toId) => {
+    const fromId = dragId;
+    setDragId(null);
+    setDragOverId(null);
+    if (!fromId || fromId === toId) return;
+
+    const from = sections.findIndex((s) => s._id === fromId);
+    let to = sections.findIndex((s) => s._id === toId);
+    if (from < 0 || to < 0) return;
+
+    const reordered = [...sections];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(to, 0, moved);
+
+    setSections(reordered);
+    persistOrder(reordered);
   };
 
   const confirmDelete = async () => {
@@ -153,7 +163,7 @@ export default function Sections() {
         <div>
           <h1 className="admin-page-title">Sections</h1>
           <p className="admin-page-subtitle">
-            Manage, publish, and reorder content sections for <strong>{activePortfolio?.name}</strong>.
+            Manage, publish, and reorder content sections for <strong>{activePortfolio?.name}</strong>. Drag rows to reorder.
           </p>
         </div>
         <div className="admin-page-actions">
@@ -237,7 +247,9 @@ export default function Sections() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th style={{ width: 90 }}>Order</th>
+                <th style={{ width: 48 }}>
+                  <span title="Drag to reorder">≡</span>
+                </th>
                 <th>Section Key</th>
                 <th>Display Label</th>
                 <th>Status</th>
@@ -245,31 +257,40 @@ export default function Sections() {
               </tr>
             </thead>
             <tbody>
-              {filteredSections.map((section, idx) => (
-                <tr key={section._id}>
+              {filteredSections.map((section) => (
+                <tr
+                  key={section._id}
+                  draggable
+                  onDragStart={() => setDragId(section._id)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (dragOverId !== section._id) setDragOverId(section._id);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    handleDrop(section._id);
+                  }}
+                  onDragEnd={() => {
+                    setDragId(null);
+                    setDragOverId(null);
+                  }}
+                  style={{
+                    cursor: 'grab',
+                    opacity: dragId === section._id ? 0.45 : 1,
+                    outline: dragOverId === section._id ? '2px dashed var(--admin-primary)' : 'none',
+                    outlineOffset: -2,
+                  }}
+                  title="Drag to reorder"
+                >
                   <td>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button
-                        type="button"
-                        className="admin-btn admin-btn-ghost admin-btn-sm"
-                        style={{ padding: '3px 6px' }}
-                        disabled={idx === 0}
-                        onClick={() => moveOrder(idx, -1)}
-                        title="Move Up"
-                      >
-                        <ArrowUp size={13} />
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-btn admin-btn-ghost admin-btn-sm"
-                        style={{ padding: '3px 6px' }}
-                        disabled={idx === sections.length - 1}
-                        onClick={() => moveOrder(idx, 1)}
-                        title="Move Down"
-                      >
-                        <ArrowDown size={13} />
-                      </button>
-                    </div>
+                    <GripVertical
+                      size={16}
+                      style={{
+                        color: 'var(--admin-text-muted)',
+                        display: 'flex',
+                        cursor: 'grab',
+                      }}
+                    />
                   </td>
                   <td>
                     <span style={{ fontFamily: 'var(--admin-mono)', fontWeight: 600, color: 'var(--admin-text)' }}>

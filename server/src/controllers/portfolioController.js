@@ -1,6 +1,10 @@
 import { Portfolio } from '../models/Portfolio.js';
 import { Section } from '../models/Section.js';
 import { ApiKey } from '../models/ApiKey.js';
+import { Upload } from '../models/Upload.js';
+import path from 'node:path';
+import fs from 'node:fs';
+import { uploadsDir } from '../config/uploads.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 import { slugify } from '../utils/slugify.js';
 
@@ -67,11 +71,27 @@ export const updatePortfolio = asyncHandler(async (req, res) => {
 });
 
 export const deletePortfolio = asyncHandler(async (req, res) => {
+  const uploads = await Upload.find({ portfolio: req.portfolio._id }).select('filename').lean();
+
   await Promise.all([
     Section.deleteMany({ portfolio: req.portfolio._id }),
     ApiKey.deleteMany({ portfolio: req.portfolio._id }),
+    Upload.deleteMany({ portfolio: req.portfolio._id }),
   ]);
   await Portfolio.findByIdAndDelete(req.portfolio._id);
+
+  // Best-effort cleanup of uploaded files on disk.
+  await Promise.allSettled(
+    uploads.map((u) => {
+      const safe = path.basename(u.filename || '');
+      const filePath = path.join(uploadsDir, safe);
+      if (safe && filePath.startsWith(uploadsDir + path.sep)) {
+        return fs.promises.unlink(filePath);
+      }
+      return Promise.resolve();
+    })
+  );
+
   return res.json({ success: true, data: { id: req.portfolio._id } });
 });
 

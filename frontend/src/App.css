@@ -2031,27 +2031,3 @@ a {
   }
 }
 
-/* Generic CMS section fallback renderer */
-.generic-modern-section {
-  position: relative;
-  padding: clamp(80px, 10vw, 140px) 0;
-  border-bottom: 1px solid var(--color-primary-border);
-}
-.generic-section-body {
-  max-width: 900px;
-  background: var(--color-surface-soft, rgba(148, 163, 184, 0.06));
-  border: 1px solid var(--color-primary-border);
-  border-radius: var(--radius-lg, 20px);
-  padding: clamp(20px, 3vw, 36px);
-  color: var(--color-text-main);
-  line-height: 1.65;
-}
-.generic-section-item {
-  padding: 12px;
-  border: 1px solid var(--color-primary-border);
-  border-radius: var(--radius-md, 12px);
-  background: var(--color-surface, #ffffff);
-}
-[data-theme='dark'] .generic-section-item {
-  background: rgba(255, 255, 255, 0.03);
-}

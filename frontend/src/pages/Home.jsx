@@ -19,7 +19,6 @@ import Skills from '../components/Skills';
 import Hackathons from '../components/Hackathons';
 import DeveloperSection from '../components/DeveloperSection';
 import Contact from '../components/Contact';
-import GenericSection from '../components/GenericSection';
 import Footer from '../components/Footer';
 
 export default function Home() {
@@ -130,89 +129,68 @@ export default function Home() {
     contact: () => <Contact key="contact" site={appData.site} />,
   };
 
-  // Build rendered sections list based on admin panel's dynamic order
+  // Build rendered sections list based on admin panel's dynamic order.
+  // DB-backed sections (projects, skills, experience, ...) keep their admin-set
+  // order. Fixed core sections that are not stored in the DB (about, developer,
+  // contact) are inserted at natural positions instead of being pinned to the end.
   const renderDynamicSections = () => {
     const rawSections = Array.isArray(data.sections) ? data.sections : [];
 
-    // Filter to sections that have a matching visual component
-    const matchedKeys = new Set();
-    const orderedElements = [];
+    // Sections that have a dedicated visual component and can be ordered.
+    const hasKey = (key) => rawSections.some((s) => (s.key || '').toLowerCase() === key);
 
-    // Always guarantee Hero is first if not in rawSections
-    const hasHeroInSections = rawSections.some((s) => {
-      const k = (s.key || '').toLowerCase();
-      return k === 'hero' || k === 'site';
-    });
-    if (!hasHeroInSections) {
-      matchedKeys.add('hero');
-      matchedKeys.add('site');
-      orderedElements.push(SECTION_REGISTRY.hero());
-    }
-
-    // Keys that are purely data feeds for other components — these must NOT
-    // render as standalone blocks to avoid duplication with Hero/About/Skills/etc.
-    const DATA_ONLY_KEYS = new Set([
-      'site',
-      'socials',
-      'stats',
-      'processsteps',
-      'process',
-      'services',
-      'education',
-      'navlinks',
-      'footernav',
-    ]);
+    // Build the planned order of visible section keys, honoring the admin order.
+    const planned = [];
+    const isHero = (key) => key === 'hero' || key === 'site';
+    const isHackathons = (key) => key === 'hackathons' || key === 'achievements';
+    const seenHackathons = new Set();
 
     rawSections.forEach((sec) => {
-      const key = sec.key ? sec.key.toLowerCase() : '';
-      if (!key || matchedKeys.has(key)) return;
+      let key = (sec.key || '').toLowerCase();
+      if (!key || !SECTION_REGISTRY[key]) return;
 
-      if (SECTION_REGISTRY[key]) {
-        // Special case: if key is 'site', avoid rendering both 'site' and 'hero' duplicates
-        if (key === 'site' && matchedKeys.has('hero')) return;
-        if (key === 'hero' && matchedKeys.has('site')) return;
-        // Special case: hackathons vs achievements
-        if (key === 'achievements' && matchedKeys.has('hackathons')) return;
-        if (key === 'hackathons' && matchedKeys.has('achievements')) return;
-
-        matchedKeys.add(key);
-        // Map 'achievements' key to 'hackathons' visual tracker
-        if (key === 'achievements') matchedKeys.add('hackathons');
-        if (key === 'hackathons') matchedKeys.add('achievements');
-        if (key === 'site') matchedKeys.add('hero');
-        if (key === 'hero') matchedKeys.add('site');
-
-        orderedElements.push(SECTION_REGISTRY[key]());
-        return;
+      // Normalize alias pairs so hero/site and hackathons/achievements are one.
+      if (isHero(key)) key = 'hero';
+      if (isHackathons(key)) {
+        if (seenHackathons.has(key)) return;
+        seenHackathons.add(key);
+        key = 'hackathons';
       }
+      if (planned.includes(key)) return;
 
-      // Unknown key: render it generically so no CMS section is ever lost.
-      // Data-only helpers are excluded because they feed other components.
-      if (!DATA_ONLY_KEYS.has(key)) {
-        matchedKeys.add(key);
-        orderedElements.push(<GenericSection key={`gen-${key}`} section={sec} />);
-      }
+      planned.push(key);
     });
 
-    // Ensure essential core sections are ALWAYS visible even if not explicitly defined in CMS sections list
-    const CORE_FALLBACK_SEQUENCE = [
-      { key: 'about', fn: SECTION_REGISTRY.about },
-      { key: 'projects', fn: SECTION_REGISTRY.projects },
-      { key: 'experience', fn: SECTION_REGISTRY.experience },
-      { key: 'skills', fn: SECTION_REGISTRY.skills },
-      { key: 'hackathons', fn: SECTION_REGISTRY.hackathons },
-      { key: 'developer', fn: SECTION_REGISTRY.developer },
-      { key: 'contact', fn: SECTION_REGISTRY.contact },
-    ];
-
-    CORE_FALLBACK_SEQUENCE.forEach(({ key, fn }) => {
-      if (!matchedKeys.has(key)) {
-        matchedKeys.add(key);
-        orderedElements.push(fn());
+    // Ensure the Hero is always the first section.
+    if (!planned.includes('hero')) {
+      if (hasKey('site') || hasKey('hero')) {
+        planned.unshift('hero');
       }
-    });
+    }
 
-    return orderedElements;
+    // Ensure About always renders right after the Hero.
+    if (!planned.includes('about')) {
+      const heroIdx = planned.indexOf('hero');
+      planned.splice(heroIdx < 0 ? 0 : heroIdx + 1, 0, 'about');
+    }
+
+    // Ensure Contact is always the last section and Developer sits before it.
+    if (planned.includes('contact')) {
+      const idx = planned.indexOf('contact');
+      planned.splice(idx, 1);
+      planned.push('contact');
+    }
+    if (!planned.includes('contact')) {
+      planned.push('contact');
+    }
+    if (!planned.includes('developer')) {
+      const contactIdx = planned.indexOf('contact');
+      planned.splice(contactIdx, 0, 'developer');
+    }
+
+    // Any other core section the user may have intentionally hid should still
+    // render only if it exists in the CMS. Map keys to components in final order.
+    return planned.map((key) => SECTION_REGISTRY[key]());
   };
 
   return (
