@@ -17,6 +17,7 @@ export const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
   serverUrl: process.env.SERVER_URL || 'http://localhost:5000',
   clientAdminUrl: process.env.CLIENT_ADMIN_URL || 'http://localhost:5174',
+  clientLandingUrl: process.env.CLIENT_LANDING_URL || 'http://localhost:5176',
   githubClientId: process.env.GITHUB_CLIENT_ID || '',
   githubClientSecret: process.env.GITHUB_CLIENT_SECRET || '',
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',

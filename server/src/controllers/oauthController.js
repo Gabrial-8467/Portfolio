@@ -8,7 +8,7 @@ import { config } from "../config/env.js";
 import { slugify } from "../utils/slugify.js";
 import { logger } from "../utils/logger.js";
 
-const ALLOWED_REDIRECT_ORIGINS = [config.clientAdminUrl, config.serverUrl].filter(Boolean);
+const ALLOWED_REDIRECT_ORIGINS = [config.clientAdminUrl, config.clientLandingUrl, config.serverUrl].filter(Boolean);
 
 function isAllowedRedirectUrl(urlString) {
   try {

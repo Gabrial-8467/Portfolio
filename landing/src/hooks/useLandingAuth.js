@@ -48,6 +48,23 @@ export function useLandingAuth() {
         if (!nextToken) {
           setUser(null);
           setPortfolios([]);
+        } else if (nextToken !== token) {
+          setLoading(true);
+          api.getMe(nextToken)
+            .then((data) => {
+              if (data?.user) {
+                setUser(data.user);
+                setPortfolios(data.portfolios || []);
+              } else {
+                setUser(null);
+                setPortfolios([]);
+              }
+            })
+            .catch(() => {
+              setUser(null);
+              setPortfolios([]);
+            })
+            .finally(() => setLoading(false));
         }
       }
     };
@@ -79,6 +96,23 @@ export function useLandingAuth() {
       if (!nextToken) {
         setUser(null);
         setPortfolios([]);
+      } else if (nextToken !== token) {
+        setLoading(true);
+        api.getMe(nextToken)
+          .then((data) => {
+            if (data?.user) {
+              setUser(data.user);
+              setPortfolios(data.portfolios || []);
+            } else {
+              setUser(null);
+              setPortfolios([]);
+            }
+          })
+          .catch(() => {
+            setUser(null);
+            setPortfolios([]);
+          })
+          .finally(() => setLoading(false));
       }
     };
     window.addEventListener('portfolio_auth_change', handleAuthChange);
@@ -90,6 +124,23 @@ export function useLandingAuth() {
         if (!current) {
           setUser(null);
           setPortfolios([]);
+        } else {
+          setLoading(true);
+          api.getMe(current)
+            .then((data) => {
+              if (data?.user) {
+                setUser(data.user);
+                setPortfolios(data.portfolios || []);
+              } else {
+                setUser(null);
+                setPortfolios([]);
+              }
+            })
+            .catch(() => {
+              setUser(null);
+              setPortfolios([]);
+            })
+            .finally(() => setLoading(false));
         }
       }
     };

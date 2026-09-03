@@ -28,7 +28,7 @@ function GithubIcon({ size = 18 }) {
   );
 }
 
-export default function RegisterModal({ isOpen, onClose, initialMode = 'register' }) {
+export default function RegisterModal({ isOpen, onClose, initialMode = 'register', oauthApiKey = null, isNewUser = false }) {
   const [mode, setMode] = useState(initialMode); // 'login' | 'register'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -49,10 +49,10 @@ export default function RegisterModal({ isOpen, onClose, initialMode = 'register
     setPortfolioName('');
     setLoading(false);
     setError('');
-    setRevealedKey(null);
+    setRevealedKey(oauthApiKey && isNewUser ? oauthApiKey : null);
     setCreatedPortfolio(null);
     setCopied(false);
-  }, [isOpen, initialMode]);
+  }, [isOpen, initialMode, oauthApiKey, isNewUser]);
 
   if (!isOpen) return null;
 

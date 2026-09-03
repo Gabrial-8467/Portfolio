@@ -83,11 +83,7 @@ export default function Navbar({ site = {}, nav = [] }) {
               onClick={(e) => scrollTo(e, '#hero')}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
             >
-              <img
-                src="/favicon.svg"
-                alt="Logo"
-                style={{ width: 22, height: 22, borderRadius: 5, display: 'inline-block', flexShrink: 0 }}
-              />
+              
               <span className="brand-name-full">{isScrolled ? shortName : siteName}</span>
             </a>
 

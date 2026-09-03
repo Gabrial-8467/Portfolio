@@ -18,9 +18,33 @@ import RegisterModal from '../components/RegisterModal';
 import Footer from '../components/Footer';
 import { setStoredToken } from '../api/client';
 
+// Store OAuth token from URL before first render so useLandingAuth picks it up
+let _preloadedApiKey = null;
+let _preloadedIsNew = false;
+try {
+  const _params = new URLSearchParams(window.location.search);
+  const _token = _params.get('token') || _params.get('oauth_token');
+  if (_token) {
+    setStoredToken(_token);
+    _preloadedIsNew = _params.get('is_new') === 'true';
+    _preloadedApiKey = _preloadedIsNew ? _params.get('api_key') : null;
+    _params.delete('token');
+    _params.delete('oauth_token');
+    _params.delete('provider');
+    _params.delete('is_new');
+    _params.delete('api_key');
+    const _clean = _params.toString() ? `?${_params.toString()}` : '';
+    window.history.replaceState({}, document.title, window.location.pathname + _clean);
+  }
+} catch {
+  /* ignore */
+}
+
 export default function Landing() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('register'); // 'login' | 'register'
+  const [oauthApiKey, setOauthApiKey] = useState(_preloadedApiKey);
+  const [oauthIsNew, setOauthIsNew] = useState(_preloadedIsNew);
 
   const openRegister = () => {
     setAuthMode('register');
@@ -32,21 +56,10 @@ export default function Landing() {
     setAuthModalOpen(true);
   };
 
-  // Sync token if redirected to landing with ?token=... or ?oauth_token=...
+  // Open modal for new OAuth users who just signed up
   useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const incomingToken = params.get('token') || params.get('oauth_token');
-      if (incomingToken) {
-        setStoredToken(incomingToken);
-        params.delete('token');
-        params.delete('oauth_token');
-        params.delete('provider');
-        const cleanSearch = params.toString() ? `?${params.toString()}` : '';
-        window.history.replaceState({}, document.title, window.location.pathname + cleanSearch);
-      }
-    } catch {
-      /* ignore */
+    if (_preloadedIsNew && _preloadedApiKey) {
+      setAuthModalOpen(true);
     }
   }, []);
 
@@ -77,7 +90,9 @@ export default function Landing() {
       <RegisterModal
         isOpen={authModalOpen}
         initialMode={authMode}
-        onClose={() => setAuthModalOpen(false)}
+        onClose={() => { setAuthModalOpen(false); setOauthApiKey(null); setOauthIsNew(false); }}
+        oauthApiKey={oauthApiKey}
+        isNewUser={oauthIsNew}
       />
     </div>
   );
