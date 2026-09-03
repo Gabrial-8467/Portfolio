@@ -30,7 +30,7 @@ export const githubLoginRedirect = (req, res) => {
   const redirectUri = `${config.serverUrl}/api/auth/github/callback`;
   const githubUrl = `https://github.com/login/oauth/authorize?client_id=${config.githubClientId}&redirect_uri=${encodeURIComponent(
     redirectUri
-  )}&scope=user:email&state=${encodeURIComponent(returnTo)}`;
+  )}&scope=user:email&prompt=select_account&state=${encodeURIComponent(returnTo)}`;
   return res.redirect(githubUrl);
 };
 
@@ -88,11 +88,24 @@ export const githubCallback = asyncHandler(async (req, res) => {
   }
 
   const normalizedEmail = userEmail.trim().toLowerCase();
+  const ghIdStr = String(ghProfile.id);
 
-  // Find or create User
-  let user = await User.findOne({
-    $or: [{ githubId: String(ghProfile.id) }, { email: normalizedEmail }],
-  });
+  // 1. First search by exact GitHub ID
+  let user = await User.findOne({ githubId: ghIdStr });
+
+  // 2. If not found by GitHub ID, check by email
+  if (!user) {
+    const existingByEmail = await User.findOne({ email: normalizedEmail });
+    if (existingByEmail) {
+      // If found by email and has no githubId or matches, link it
+      if (!existingByEmail.githubId) {
+        existingByEmail.githubId = ghIdStr;
+        user = existingByEmail;
+      } else if (existingByEmail.githubId === ghIdStr) {
+        user = existingByEmail;
+      }
+    }
+  }
 
   let isNewUser = false;
 
@@ -101,7 +114,7 @@ export const githubCallback = asyncHandler(async (req, res) => {
     user = await User.create({
       email: normalizedEmail,
       name: ghProfile.name || ghProfile.login || "Developer",
-      githubId: String(ghProfile.id),
+      githubId: ghIdStr,
       avatar: ghProfile.avatar_url || "",
       role: "admin",
       plan: "hobby",
@@ -126,8 +139,8 @@ export const githubCallback = asyncHandler(async (req, res) => {
 
     logger.auth("New user signed up via GitHub: " + user.email + " (" + ghProfile.login + ")");
   } else {
-    // Update existing user with githubId / avatar if not yet attached
-    if (!user.githubId) user.githubId = String(ghProfile.id);
+    // Update existing user with avatar and last login
+    if (!user.githubId) user.githubId = ghIdStr;
     if (!user.avatar && ghProfile.avatar_url) user.avatar = ghProfile.avatar_url;
     user.lastLogin = new Date();
     await user.save();

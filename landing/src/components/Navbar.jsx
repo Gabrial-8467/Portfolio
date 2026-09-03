@@ -14,6 +14,7 @@ import {
   Cpu,
   Menu,
   X,
+  LogOut,
 } from 'lucide-react';
 import MagneticButton from './MagneticButton';
 import { ADMIN_URL } from '../api/client';
@@ -21,7 +22,7 @@ import { useLandingAuth } from '../hooks/useLandingAuth';
 
 export default function Navbar({ onOpenRegister, onOpenLogin, onSelectTab }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, isAuthenticated } = useLandingAuth();
+  const { user, isAuthenticated, logout } = useLandingAuth();
 
   const handleSignInClick = (e) => {
     e.preventDefault();
@@ -134,6 +135,16 @@ export default function Navbar({ onOpenRegister, onOpenLogin, onSelectTab }) {
                   <span>Dashboard</span>
                   <ArrowUpRight size={15} />
                 </MagneticButton>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="btn btn-secondary"
+                  style={{ padding: '8px 10px' }}
+                  title="Sign Out"
+                  aria-label="Sign Out"
+                >
+                  <LogOut size={15} />
+                </button>
               </div>
             ) : (
               <>

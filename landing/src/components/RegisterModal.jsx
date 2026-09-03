@@ -274,7 +274,11 @@ export default function RegisterModal({ isOpen, onClose, initialMode = 'register
               {/* GitHub OAuth Quick Button */}
               <div style={{ marginBottom: 16 }}>
                 <a
-                  href={`${API_URL}/api/auth/github`}
+                  href={`${API_URL}/api/auth/github?return_to=${encodeURIComponent(
+                    typeof window !== 'undefined'
+                      ? window.location.origin + window.location.pathname
+                      : ''
+                  )}`}
                   className="btn btn-secondary"
                   style={{
                     width: '100%',
