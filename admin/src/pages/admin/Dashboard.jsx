@@ -41,7 +41,7 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const [secList, keysList] = await Promise.allSettled([
-        api.sections.list(activePortfolio._id),
+        api.sections.list(),
         api.apiKeys.list(),
       ]);
 
@@ -78,17 +78,7 @@ export default function Dashboard() {
   }, [activePortfolio?._id]);
 
   const handleCreatePortfolio = async () => {
-    setCreating(true);
-    try {
-      const created = await api.portfolios.create({ name: 'My Portfolio' });
-      await refreshPortfolios();
-      selectPortfolio(created._id);
-      navigate('/admin');
-    } catch {
-      /* ignore */
-    } finally {
-      setCreating(false);
-    }
+    addToast('This workspace already exists for the connected API key.', 'info');
   };
 
   if (!activePortfolio) {
@@ -116,7 +106,7 @@ export default function Dashboard() {
   const published = sections.filter((s) => s.isPublished).length;
   const drafts = sections.length - published;
   const livePortfolioUrl = getPublicPortfolioUrl(activePortfolio.slug);
-  const curlSnippet = `curl -X GET "${API_URL.replace(/\/+$/, '')}/api/p/${activePortfolio.slug}"`;
+  const curlSnippet = `curl -X GET "${API_URL.replace(/\/+$/, '')}/api/v1/portfolio" \\\n  -H "Authorization: Bearer YOUR_API_KEY"`;
 
   const copyCurl = async () => {
     try {
@@ -419,7 +409,7 @@ export default function Dashboard() {
                         )}
                       </td>
                       <td className="admin-table-actions">
-                        <Link to={`/admin/sections/${section._id}`} className="admin-btn admin-btn-secondary admin-btn-sm">
+                        <Link to={`/admin/sections/${section.key}`} className="admin-btn admin-btn-secondary admin-btn-sm">
                           <Edit size={12} />
                           <span>Edit</span>
                         </Link>

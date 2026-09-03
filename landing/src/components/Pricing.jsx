@@ -11,7 +11,7 @@ export default function Pricing({ onOpenRegister }) {
       features: [
         '1 Active Portfolio Workspace',
         'Unlimited CMS Section Updates',
-        'Public REST Endpoints (/api/p/:slug)',
+        'Headless REST Endpoints (/api/v1)',
         '1 Scoped API Key',
         'Image Uploads (Up to 5MB/file)',
         'Community Support',

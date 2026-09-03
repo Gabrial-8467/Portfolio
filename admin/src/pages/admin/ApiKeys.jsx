@@ -79,7 +79,7 @@ export default function ApiKeys() {
     setCreating(true);
     setCreatingError('');
     try {
-      const result = await api.apiKeys.create(activePortfolio._id, createName.trim() || 'Production Key');
+      const result = await api.apiKeys.create(createName.trim() || 'Production Key');
       setKeys((current) => [
         { ...result.apiKey, portfolioName: activePortfolio?.name || '' },
         ...current,

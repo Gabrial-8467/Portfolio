@@ -84,7 +84,7 @@ It empowers developers to:
 
 ### 3. Sections & Content CMS
 - **Section Reordering**: Change presentation order dynamically with reordering controls.
-- **Publish / Unpublish Toggle**: Instantly toggle section visibility in the public API (`GET /api/p/:slug`) without deleting data.
+- **Publish / Unpublish Toggle**: Instantly toggle section visibility via the API (`GET /api/v1/portfolio`) without deleting data.
 - **Custom Section Creation**: Create custom JSON-driven sections with arbitrary data schemas.
 - **Live Preview Integration**: One-click preview opens the frontend with the active draft token or slug.
 
@@ -116,9 +116,8 @@ The editor supports two synchronized editing experiences:
 ### 7. Interactive API Playground
 - Test endpoints directly from the dashboard:
   - `GET /api/v1/portfolio`
+  - `GET /api/v1/sections`
   - `GET /api/v1/section/:key`
-  - `GET /api/p/:slug`
-  - `GET /api/p/:slug/section/:key`
 - Configure API Key headers (`Authorization: Bearer pk_live_...`).
 - Inspect live HTTP status badges (`200 OK`, `401 Unauthorized`), response duration, response headers, and formatted JSON response tree.
 - Automatically generates copyable **cURL commands**.

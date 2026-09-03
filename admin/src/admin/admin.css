@@ -1649,6 +1649,10 @@ html, body {
   .admin-main {
     padding: 24px 20px 48px;
   }
+
+  .admin-mobile-toggle {
+    display: inline-flex !important;
+  }
 }
 
 @media (max-width: 768px) {

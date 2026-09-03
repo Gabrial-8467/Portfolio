@@ -25,27 +25,13 @@ app.use(
   })
 );
 
+// Security is enforced by authentication (API key / JWT), not CORS.
+// All origins are allowed so any frontend can consume the API via credentials.
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. mobile apps, curl, Postman, same-origin)
-    if (!origin) return callback(null, true);
-
-    // In development mode, allow any origin (e.g. localhost:3000, localhost:5173, 127.0.0.1, LAN IPs)
-    if (config.nodeEnv !== 'production') {
-      return callback(null, true);
-    }
-
-    if (config.corsOrigins.includes(origin) || config.corsOrigins.includes('*')) {
-      return callback(null, true);
-    }
-
-    const error = new Error(`Origin ${origin} not allowed by CORS`);
-    error.status = 403;
-    return callback(error);
-  },
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-portfolio-id'],
 };
 
 app.use(cors(corsOptions));
@@ -74,7 +60,7 @@ const apiLimiter = rateLimit({
 app.use('/api', apiLimiter);
 app.use('/api/auth', authLimiter, authRoutes);
 
-app.use('/api/v1', cors({ origin: true }), publicApiKeyRoutes);
+app.use('/api/v1', publicApiKeyRoutes);
 app.use('/api/portfolios', authRequired, portfolioRoutes);
 app.use('/api/api-keys', authRequired, apiKeyRoutes);
 app.use('/api/uploads', authRequired, uploadRoutes);
@@ -91,15 +77,22 @@ app.get('/', (req, res) => {
     baseUrl,
     endpoints: {
       health: '/health',
-      portfolioByKey: 'GET /api/v1/portfolio  (Authorization: Bearer <apiKey>)',
-      sectionByKey: 'GET /api/v1/section/:key  (Authorization: Bearer <apiKey>)',
+      portfolio: 'GET /api/v1/portfolio  (Authorization: Bearer <apiKey>)',
+      section: 'GET /api/v1/section/:key  (Authorization: Bearer <apiKey>)',
+      sections: 'GET /api/v1/sections  (Authorization: Bearer <apiKey>)',
       auth: ['POST /api/auth/register', 'POST /api/auth/login', 'GET /api/auth/me'],
-      ownerApi: [
-        'GET /api/portfolios',
-        'POST /api/portfolios',
-        'GET /api/portfolios/:portfolioId/sections',
-        'GET /api/api-keys',
-        'POST /api/uploads',
+      v1OwnerApi: [
+        'PUT /api/v1/portfolio',
+        'GET /api/v1/portfolio/full',
+        'GET /api/v1/portfolio/settings',
+        'PUT /api/v1/portfolio/settings',
+        'POST /api/v1/section',
+        'PUT /api/v1/section/:key',
+        'DELETE /api/v1/section/:key',
+        'PUT /api/v1/sections/reorder',
+        'GET /api/v1/api-keys',
+        'POST /api/v1/api-keys',
+        'DELETE /api/v1/api-keys/:id',
       ],
     },
   });

@@ -2,6 +2,8 @@ export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const PORTFOLIO_SLUG = import.meta.env.VITE_PORTFOLIO_SLUG || 'gabrial-deora';
 
+export const ADMIN_API_KEY = (import.meta.env.VITE_ADMIN_API_KEY || '').trim();
+
 export const FRONTEND_URL = (import.meta.env.VITE_FRONTEND_URL || import.meta.env.VITE_PORTFOLIO_URL || 'http://localhost:3000').replace(/\/$/, '');
 
 export function resolveAssetUrl(url) {
@@ -28,6 +30,28 @@ export function getPublicPortfolioUrl(slug) {
 
 const TOKEN_KEY = 'portfolio_admin_token';
 const AUTH_CHANNEL = 'portfolio_auth_sync';
+
+const API_KEY_STORE = 'portfolio_admin_api_key';
+const ACTIVE_PORTFOLIO_KEY = 'portfolio_active_id';
+
+export function getActivePortfolioId() {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(ACTIVE_PORTFOLIO_KEY) || null;
+}
+
+export function getApiKey() {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(API_KEY_STORE) || null;
+}
+
+export function setApiKey(key) {
+  if (typeof window === 'undefined') return;
+  if (key) {
+    localStorage.setItem(API_KEY_STORE, key);
+  } else {
+    localStorage.removeItem(API_KEY_STORE);
+  }
+}
 
 export function getToken() {
   if (typeof window === 'undefined') return null;
@@ -92,10 +116,22 @@ class ApiError extends Error {
   }
 }
 
-async function request(path, { method = 'GET', body, auth = false, headers = {} } = {}) {
+async function request(path, { method = 'GET', body, auth = false, apiKey = false, headers = {} } = {}) {
   const hdrs = { Accept: 'application/json', ...headers };
   if (body !== undefined) hdrs['Content-Type'] = 'application/json';
-  if (auth) {
+  if (apiKey) {
+    const key = typeof apiKey === 'string' ? apiKey : getApiKey() || ADMIN_API_KEY;
+    if (key) {
+      hdrs.Authorization = `Bearer ${key}`;
+    } else {
+      const token = getToken();
+      if (token) {
+        hdrs.Authorization = `Bearer ${token}`;
+        const pid = getActivePortfolioId();
+        if (pid) hdrs['X-Portfolio-Id'] = pid;
+      }
+    }
+  } else if (auth) {
     const token = getToken();
     if (token) hdrs.Authorization = `Bearer ${token}`;
   }
@@ -140,59 +176,49 @@ export const api = {
 
   portfolios: {
     list: () => api.get('/api/portfolios', { auth: true }),
-    get: (id) => api.get(`/api/portfolios/${id}`, { auth: true }),
-    create: async (data) => {
-      const res = await api.post('/api/portfolios', data, { auth: true });
-      notifyCmsUpdate({ action: 'create_portfolio' });
-      return res;
-    },
-    update: async (id, data) => {
-      const res = await api.put(`/api/portfolios/${id}`, data, { auth: true });
+    get: () => api.get('/api/v1/portfolio/full', { apiKey: true }),
+    update: async (data) => {
+      const res = await api.put('/api/v1/portfolio', data, { apiKey: true });
       notifyCmsUpdate({ action: 'update_portfolio' });
       return res;
     },
-    remove: async (id) => {
-      const res = await api.del(`/api/portfolios/${id}`, { auth: true });
-      notifyCmsUpdate({ action: 'delete_portfolio' });
-      return res;
-    },
-    getSettings: (id) => api.get(`/api/portfolios/${id}/settings`, { auth: true }),
-    updateSettings: async (id, settings) => {
-      const res = await api.put(`/api/portfolios/${id}/settings`, { settings }, { auth: true });
+    getSettings: () => api.get('/api/v1/portfolio/settings', { apiKey: true }),
+    updateSettings: async (settings) => {
+      const res = await api.put('/api/v1/portfolio/settings', { settings: settings.settings ?? settings }, { apiKey: true });
       notifyCmsUpdate({ action: 'update_settings' });
       return res;
     },
   },
 
   sections: {
-    list: (portfolioId) => api.get(`/api/portfolios/${portfolioId}/sections`, { auth: true }),
-    get: (portfolioId, sectionId) => api.get(`/api/portfolios/${portfolioId}/sections/${sectionId}`, { auth: true }),
-    create: async (portfolioId, data) => {
-      const res = await api.post(`/api/portfolios/${portfolioId}/sections`, data, { auth: true });
+    list: () => api.get('/api/v1/sections', { apiKey: true }),
+    get: (key) => api.get(`/api/v1/section/${key}`, { apiKey: true }),
+    create: async (data) => {
+      const res = await api.post('/api/v1/section', data, { apiKey: true });
       notifyCmsUpdate({ action: 'create_section', sectionKey: data?.key });
       return res;
     },
-    update: async (portfolioId, sectionId, data) => {
-      const res = await api.put(`/api/portfolios/${portfolioId}/sections/${sectionId}`, data, { auth: true });
-      notifyCmsUpdate({ action: 'update_section', sectionKey: data?.key });
+    update: async (key, data) => {
+      const res = await api.put(`/api/v1/section/${key}`, data, { apiKey: true });
+      notifyCmsUpdate({ action: 'update_section', sectionKey: data?.key || key });
       return res;
     },
-    remove: async (portfolioId, sectionId) => {
-      const res = await api.del(`/api/portfolios/${portfolioId}/sections/${sectionId}`, { auth: true });
+    remove: async (key) => {
+      const res = await api.del(`/api/v1/section/${key}`, { apiKey: true });
       notifyCmsUpdate({ action: 'delete_section' });
       return res;
     },
-    reorder: async (portfolioId, ids) => {
-      const res = await api.put(`/api/portfolios/${portfolioId}/sections/order/reorder`, { ids }, { auth: true });
+    reorder: async (ids) => {
+      const res = await api.put('/api/v1/sections/reorder', { ids }, { apiKey: true });
       notifyCmsUpdate({ action: 'reorder_sections' });
       return res;
     },
   },
 
   apiKeys: {
-    list: () => api.get('/api/api-keys', { auth: true }),
-    create: (portfolioId, name) => api.post('/api/api-keys', { portfolioId, name }, { auth: true }),
-    revoke: (id) => api.del(`/api/api-keys/${id}`, { auth: true }),
+    list: () => api.get('/api/v1/api-keys', { apiKey: true }),
+    create: (name) => api.post('/api/v1/api-keys', { name }, { apiKey: true }),
+    revoke: (id) => api.del(`/api/v1/api-keys/${id}`, { apiKey: true }),
   },
 
   uploads: {
@@ -200,12 +226,21 @@ export const api = {
       const form = new FormData();
       form.append('file', file);
       const headers = { Accept: 'application/json' };
-      const token = getToken();
-      if (token) headers.Authorization = `Bearer ${token}`;
+      const key = getApiKey() || ADMIN_API_KEY;
+      if (key) {
+        headers.Authorization = `Bearer ${key}`;
+      } else {
+        const token = getToken();
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+          const pid = getActivePortfolioId();
+          if (pid) headers['X-Portfolio-Id'] = pid;
+        }
+      }
 
       let response;
       try {
-        response = await fetch(`${API_URL}/api/uploads`, { method: 'POST', headers, body: form });
+        response = await fetch(`${API_URL}/api/v1/upload`, { method: 'POST', headers, body: form });
       } catch {
         throw new ApiError('Network error — could not reach the API', 0);
       }
@@ -223,6 +258,6 @@ export const api = {
 
       return payload?.data ?? payload;
     },
-    deleteFile: (filename) => api.del(`/api/uploads/${encodeURIComponent(filename)}`, { auth: true }),
+    deleteFile: (filename) => api.del(`/api/v1/upload/${encodeURIComponent(filename)}`, { apiKey: true }),
   },
 };

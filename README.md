@@ -37,7 +37,7 @@ graph TD
 
 ```bash
 cd server
-cp .env.example .env     # Update MONGODB_URI, JWT_SECRET, CORS_ORIGINS
+cp .env.example .env     # Update MONGODB_URI, JWT_SECRET
 npm install
 npm run seed             # Seeds initial admin user + demo portfolio ('gabrial-deora')
 npm run dev              # Starts dev server on http://localhost:5000
@@ -153,18 +153,18 @@ Errors return:
 { "success": false, "error": "Description", "details": [] }
 ```
 
-### 1. Public Portfolio Endpoints (No Auth Required)
-Open CORS enabled for seamless static and dynamic frontend consumption.
+### 1. Portfolio Content API (API Key Auth Required)
+Open CORS enabled. Authenticate with API key via `Authorization: Bearer <key>` or `x-api-key: <key>`.
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/p/:slug` | Retrieve portfolio settings and all published sections |
-| `GET` | `/api/p/:slug/section/:key` | Retrieve a single published section by key |
+| `GET` | `/api/v1/portfolio` | Retrieve portfolio settings and all published sections |
+| `GET` | `/api/v1/section/:key` | Retrieve a single section by key |
 | `GET` | `/health` | Server uptime and health status |
 
 ---
 
-### 2. Headless API Key Endpoints (Public Developer API)
+### 2. Portfolio Management API (API Key Auth Required)
 Authenticate using any of:
 - `Authorization: Bearer <apiKey>`
 - `x-api-key: <apiKey>`
@@ -225,7 +225,6 @@ Authenticate using any of:
 | `MONGODB_URI` | Yes | — | MongoDB connection string |
 | `JWT_SECRET` | Yes | `dev-secret-change-me` | Secret key for JWT signing |
 | `JWT_EXPIRES_IN` | No | `24h` | JWT token lifespan |
-| `CORS_ORIGINS` | No | `http://localhost:3000` | Comma-separated list of allowed origins |
 | `SEED_ADMIN_EMAIL` | No | `admin@gabrialdeora.com` | Seed admin email address |
 | `SEED_ADMIN_PASSWORD` | No | `ChangeMe123!` | Seed admin password |
 
@@ -257,7 +256,7 @@ Authenticate using any of:
 1. Provision a MongoDB instance on MongoDB Atlas.
 2. Configure build command: `npm install`
 3. Configure start command: `npm start`
-4. Set required production environment variables (`MONGODB_URI`, `JWT_SECRET`, `NODE_ENV=production`, `CORS_ORIGINS`).
+4. Set required production environment variables (`MONGODB_URI`, `JWT_SECRET`, `NODE_ENV=production`).
 5. Run `npm run seed` once to initialize the administrator account.
 
 ### Frontends (e.g. Vercel, Netlify, Cloudflare Pages)

@@ -49,8 +49,6 @@ export default function AdminLayout() {
     if (p.startsWith('/admin/sections')) return { category: 'Content', page: 'Sections' };
     if (p.startsWith('/admin/media')) return { category: 'Content', page: 'Media Library' };
     if (p.startsWith('/admin/apikeys')) return { category: 'Developer', page: 'API Keys' };
-    if (p.startsWith('/admin/docs')) return { category: 'Developer', page: 'API Documentation' };
-    if (p.startsWith('/admin/playground')) return { category: 'Developer', page: 'API Playground' };
     if (p.startsWith('/admin/settings')) return { category: 'System', page: 'Settings' };
     return { category: 'Dashboard', page: 'Overview' };
   };
@@ -121,7 +119,7 @@ export default function AdminLayout() {
             <span>Media Assets</span>
           </NavLink>
 
-          <div className="admin-nav-group-title">Developer & Settings</div>
+          <div className="admin-nav-group-title">Settings & Access</div>
           <NavLink
             to="/admin/apikeys"
             onClick={() => setMobileOpen(false)}
@@ -168,8 +166,7 @@ export default function AdminLayout() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button
               type="button"
-              className="admin-btn admin-btn-ghost admin-btn-icon-only"
-              style={{ display: 'none' }}
+              className="admin-btn admin-btn-ghost admin-btn-icon-only admin-mobile-toggle"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
             >

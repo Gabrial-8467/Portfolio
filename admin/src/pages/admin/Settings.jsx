@@ -32,13 +32,12 @@ export default function Settings() {
       setLoading(false);
       return undefined;
     }
-    const portfolioId = activePortfolioId;
     // eslint-disable-next-line react/set-state-in-effect
     setLoading(true);
     setName(activePortfolioName || '');
     async function load() {
       try {
-        const data = await api.portfolios.getSettings(portfolioId);
+        const data = await api.portfolios.getSettings();
         if (!cancelled) setSettings(data || {});
       } catch (err) {
         if (!cancelled) setError(err.message || 'Failed to load settings');
@@ -58,8 +57,8 @@ export default function Settings() {
     setSaving(true);
     setError('');
     try {
-      await api.portfolios.updateSettings(activePortfolio._id, settings);
-      await api.portfolios.update(activePortfolio._id, { name });
+      await api.portfolios.updateSettings(settings);
+      await api.portfolios.update({ name });
       await refreshPortfolios();
       addToast('Portfolio settings saved successfully', 'success');
     } catch (err) {
@@ -70,20 +69,9 @@ export default function Settings() {
     }
   };
 
-  const handleDeletePortfolio = async () => {
-    if (!activePortfolio) return;
-    setDeleting(true);
-    try {
-      await api.portfolios.remove(activePortfolio._id);
-      addToast(`Portfolio "${activePortfolio.name}" was deleted`, 'info');
-      await refreshPortfolios();
-      navigate('/admin');
-    } catch (err) {
-      addToast(err.message || 'Could not delete portfolio', 'error');
-    } finally {
-      setDeleting(false);
-      setDeleteConfirmOpen(false);
-    }
+  const handleDeletePortfolio = () => {
+    addToast('Portfolio workspace deletion is not available via API key. Manage portfolios at the admin console.', 'info');
+    setDeleteConfirmOpen(false);
   };
 
   if (loading) {
@@ -151,7 +139,7 @@ export default function Settings() {
           <Field label="Portfolio Name">
             <TextInput value={name} onChange={setName} placeholder="My Portfolio" />
           </Field>
-          <Field label="Public Slug" hint="Unique slug in the public API URL /api/p/:slug.">
+          <Field label="Public Slug" hint="Unique slug used in your portfolio frontend and API responses.">
             <TextInput value={activePortfolio.slug} onChange={() => {}} disabled />
           </Field>
         </div>

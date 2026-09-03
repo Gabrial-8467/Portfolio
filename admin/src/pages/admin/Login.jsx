@@ -342,7 +342,7 @@ export default function Login() {
         </div>
 
         <p className="admin-field-hint">
-          Configure <code className="prefix-chip">VITE_API_KEY</code> in your frontend to fetch content directly.
+          Configure <code className="prefix-chip">VITE_ADMIN_API_KEY</code> in your admin <code>.env</code> to enable CMS editing via this key.
         </p>
       </ItemModal>
     </div>

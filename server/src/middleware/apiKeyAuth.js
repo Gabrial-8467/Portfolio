@@ -1,34 +1,80 @@
+import jwt from 'jsonwebtoken';
 import { ApiKey } from '../models/ApiKey.js';
 import { Portfolio } from '../models/Portfolio.js';
-import { sha256 } from '../utils/apiKey.js';
+import { User } from '../models/User.js';
+import { sha256, API_KEY_PREFIX } from '../utils/apiKey.js';
+import { config } from '../config/env.js';
 import { ApiError } from './errorHandler.js';
+
+async function authenticateWithApiKey(key) {
+  const apiKey = await ApiKey.findOne({
+    keyHash: sha256(key),
+    isActive: true,
+  });
+  if (!apiKey) return null;
+
+  const portfolio = await Portfolio.findOne({
+    _id: apiKey.portfolio,
+    isActive: true,
+  });
+  if (!portfolio) return null;
+
+  apiKey.lastUsedAt = new Date();
+  apiKey.save().catch(() => {});
+
+  return { apiKey, portfolio };
+}
+
+async function authenticateWithJwt(token) {
+  let payload;
+  try {
+    payload = jwt.verify(token, config.jwtSecret);
+  } catch {
+    return null;
+  }
+  const user = await User.findById(payload.id);
+  if (!user || !user.isActive) return null;
+  return { user };
+}
 
 export async function requireApiKey(req, res, next) {
   try {
     const header = req.headers.authorization || '';
-    let key = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
-    if (!key) key = req.headers['x-api-key'];
-    if (!key) throw new ApiError(401, 'API key required');
+    const raw = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
+    const apiKeyHeader = req.headers['x-api-key'];
 
-    const apiKey = await ApiKey.findOne({
-      keyHash: sha256(key),
-      isActive: true,
-    });
-    if (!apiKey) throw new ApiError(401, 'Invalid API key');
+    let authenticated = null;
 
-    const portfolio = await Portfolio.findOne({
-      _id: apiKey.portfolio,
-      isActive: true,
-    });
-    if (!portfolio) throw new ApiError(401, 'Invalid API key');
+    if (raw) {
+      if (raw.startsWith(API_KEY_PREFIX)) {
+        authenticated = await authenticateWithApiKey(raw);
+        if (!authenticated) throw new ApiError(401, 'Invalid API key');
+      } else {
+        const auth = await authenticateWithJwt(raw);
+        if (!auth) throw new ApiError(401, 'Invalid or expired token');
+        let portfolio = null;
+        const requestedId = req.headers['x-portfolio-id'];
+        if (requestedId) {
+          portfolio = await Portfolio.findOne({ _id: requestedId, owner: auth.user._id, isActive: true });
+          if (!portfolio) throw new ApiError(403, 'You do not have access to this portfolio');
+        } else {
+          portfolio = await Portfolio.findOne({ owner: auth.user._id, isActive: true }).sort({ createdAt: 1 });
+        }
+        if (!portfolio) throw new ApiError(404, 'No portfolio found for this account');
+        authenticated = { user: auth.user, portfolio };
+      }
+    } else if (apiKeyHeader) {
+      authenticated = await authenticateWithApiKey(apiKeyHeader);
+      if (!authenticated) throw new ApiError(401, 'Invalid API key');
+    } else {
+      throw new ApiError(401, 'API key required');
+    }
 
-    apiKey.lastUsedAt = new Date();
-    apiKey.save().catch(() => {});
-
-    req.apiKey = apiKey;
-    req.portfolio = portfolio;
-    next();
+    req.apiKey = authenticated.apiKey || null;
+    req.user = authenticated.user || req.user || null;
+    req.portfolio = authenticated.portfolio;
+    return next();
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }

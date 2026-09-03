@@ -46,7 +46,7 @@ export default function SectionEditor() {
     }
     setLoading(true);
     try {
-      const data = await api.sections.get(activePortfolio._id, sectionId);
+      const data = await api.sections.get(sectionId);
       setSection(data);
       setForm({
         key: data.key,
@@ -78,11 +78,11 @@ export default function SectionEditor() {
           content:
             form.content ?? (schema ? (schema.kind === 'list' ? [] : {}) : null),
         };
-        const created = await api.sections.create(activePortfolio._id, payload);
+        const created = await api.sections.create(payload);
         toast('Section created successfully', 'success');
-        navigate(`/admin/sections/${created._id}`, { replace: true });
+        navigate(`/admin/sections/${created.key}`, { replace: true });
       } else {
-        const updated = await api.sections.update(activePortfolio._id, sectionId, form);
+        const updated = await api.sections.update(section ? section.key : sectionId, form);
         setForm({
           key: updated.key,
           label: updated.label || '',
@@ -103,7 +103,7 @@ export default function SectionEditor() {
   const confirmDelete = async () => {
     if (!activePortfolio || isNew) return;
     try {
-      await api.sections.remove(activePortfolio._id, sectionId);
+      await api.sections.remove(section ? section.key : sectionId);
       toast('Section deleted', 'info');
       navigate('/admin/sections');
     } catch (err) {

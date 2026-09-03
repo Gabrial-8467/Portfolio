@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { api, getToken, setToken } from '../api/client';
+import { api, getToken, setToken, getApiKey, setApiKey, ADMIN_API_KEY } from '../api/client';
 import { AuthContext } from './useAuth';
 
 const ACTIVE_KEY = 'portfolio_active_id';
@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [activePortfolioId, setActivePortfolioId] = useState(() => localStorage.getItem(ACTIVE_KEY));
   const [token, setTokenState] = useState(() => getToken());
   const [isLoading, setIsLoading] = useState(Boolean(getToken()));
+  const [activePortfolio, setActivePortfolio] = useState(null);
 
   useEffect(() => {
     if (!token) return;
@@ -20,14 +21,36 @@ export function AuthProvider({ children }) {
         if (cancelled) return;
         setUser(me.user);
         setPortfolios(me.portfolios || []);
-        const hasActive = (me.portfolios || []).some((p) => String(p._id) === activePortfolioId);
-        if (!hasActive && me.portfolios?.length) {
-          const nextId = String(me.portfolios[0]._id);
-          setActivePortfolioId(nextId);
-          localStorage.setItem(ACTIVE_KEY, nextId);
-        } else if (!me.portfolios?.length) {
-          setActivePortfolioId(null);
-          localStorage.removeItem(ACTIVE_KEY);
+
+        if (getApiKey() || ADMIN_API_KEY) {
+          return api.portfolios.get().then((data) => {
+            if (cancelled) return;
+            setActivePortfolio(data);
+            if (data?._id) {
+              setActivePortfolioId(String(data._id));
+              localStorage.setItem(ACTIVE_KEY, String(data._id));
+            }
+          }).catch(() => {
+            const hasActive = (me.portfolios || []).some((p) => String(p._id) === activePortfolioId);
+            if (!hasActive && me.portfolios?.length) {
+              const nextId = String(me.portfolios[0]._id);
+              setActivePortfolioId(nextId);
+              localStorage.setItem(ACTIVE_KEY, nextId);
+              setActivePortfolio(me.portfolios[0]);
+            }
+          });
+        } else {
+          const hasActive = (me.portfolios || []).some((p) => String(p._id) === activePortfolioId);
+          if (!hasActive && me.portfolios?.length) {
+            const nextId = String(me.portfolios[0]._id);
+            setActivePortfolioId(nextId);
+            localStorage.setItem(ACTIVE_KEY, nextId);
+          }
+          setActivePortfolio(
+            (me.portfolios || []).find((p) => String(p._id) === (activePortfolioId || me.portfolios[0]?._id)) ||
+            me.portfolios?.[0] ||
+            null
+          );
         }
       })
       .catch(() => {
@@ -48,6 +71,7 @@ export function AuthProvider({ children }) {
   const applyAuthResult = useCallback((result) => {
     setToken(result.token);
     setTokenState(result.token);
+    if (result.apiKey) setApiKey(result.apiKey);
     setUser(result.user);
     const list = result.portfolios || [];
     setPortfolios(list);
@@ -80,7 +104,9 @@ export function AuthProvider({ children }) {
   const selectPortfolio = useCallback((id) => {
     setActivePortfolioId(String(id));
     localStorage.setItem(ACTIVE_KEY, String(id));
-  }, []);
+    const found = portfolios.find((p) => String(p._id) === String(id));
+    if (found) setActivePortfolio(found);
+  }, [portfolios]);
 
   const refreshPortfolios = useCallback(async () => {
     try {
@@ -98,10 +124,9 @@ export function AuthProvider({ children }) {
     setUser(null);
     setPortfolios([]);
     setActivePortfolioId(null);
+    setActivePortfolio(null);
     localStorage.removeItem(ACTIVE_KEY);
   }, []);
-
-  const activePortfolio = portfolios.find((p) => String(p._id) === activePortfolioId) || portfolios[0] || null;
 
   return (
     <AuthContext.Provider

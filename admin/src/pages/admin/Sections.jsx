@@ -15,6 +15,8 @@ import {
   SquareCheckBig,
   Plus,
   Layers,
+  Search,
+  Filter,
 } from 'lucide-react';
 
 const SUGGESTED_TEMPLATES = [
@@ -40,12 +42,12 @@ export default function Sections() {
   const [form, setForm] = useState({ key: '', label: '', isPublished: true });
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'published' | 'draft'
 
   const load = async () => {
-    if (!activePortfolio) return;
-    setLoading(true);
     try {
-      const list = await api.sections.list(activePortfolio._id);
+      const list = await api.sections.list();
       setSections(list || []);
     } catch (err) {
       setError(err.message || 'Failed to load sections');
@@ -56,19 +58,12 @@ export default function Sections() {
 
   useEffect(() => {
     setSections([]);
-    if (!activePortfolio) {
-      // eslint-disable-next-line react/set-state-in-effect
-      setLoading(false);
-      return undefined;
-    }
-    // eslint-disable-next-line react/set-state-in-effect
     setLoading(true);
     load().catch(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePortfolio?._id]);
 
   const submit = async () => {
-    if (!activePortfolio) return;
     if (!form.key.trim()) {
       addToast('Section key is required', 'error');
       return;
@@ -76,10 +71,10 @@ export default function Sections() {
     setSaving(true);
     setError('');
     try {
-      const created = await api.sections.create(activePortfolio._id, form);
+      const created = await api.sections.create(form);
       addToast(`Section "${created.key}" created`, 'success');
       setModalOpen(false);
-      navigate(`/admin/sections/${created._id}`);
+      navigate(`/admin/sections/${created.key}`);
     } catch (err) {
       setError(err.message || 'Failed to create section');
       addToast(err.message || 'Failed to create section', 'error');
@@ -89,10 +84,9 @@ export default function Sections() {
   };
 
   const togglePublished = async (section) => {
-    if (!activePortfolio) return;
     const newStatus = !section.isPublished;
     try {
-      await api.sections.update(activePortfolio._id, section._id, {
+      await api.sections.update(section.key, {
         isPublished: newStatus,
       });
       setSections((prev) =>
@@ -105,7 +99,6 @@ export default function Sections() {
   };
 
   const moveOrder = async (index, direction) => {
-    if (!activePortfolio) return;
     const targetIndex = index + direction;
     if (targetIndex < 0 || targetIndex >= sections.length) return;
 
@@ -117,7 +110,7 @@ export default function Sections() {
 
     try {
       const ids = reordered.map((s) => s._id);
-      await api.sections.reorder(activePortfolio._id, ids);
+      await api.sections.reorder(ids);
       addToast('Section order updated', 'success');
     } catch {
       addToast('Failed to save order', 'error');
@@ -126,9 +119,9 @@ export default function Sections() {
   };
 
   const confirmDelete = async () => {
-    if (!activePortfolio || !deleteTarget) return;
+    if (!deleteTarget) return;
     try {
-      await api.sections.remove(activePortfolio._id, deleteTarget._id);
+      await api.sections.remove(deleteTarget.key);
       setSections((prev) => prev.filter((s) => s._id !== deleteTarget._id));
       addToast(`Section "${deleteTarget.key}" deleted`, 'info');
     } catch (err) {
@@ -137,6 +130,18 @@ export default function Sections() {
       setDeleteTarget(null);
     }
   };
+
+  const filteredSections = sections.filter((s) => {
+    const matchesSearch =
+      !searchQuery.trim() ||
+      s.key.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+      (s.label && s.label.toLowerCase().includes(searchQuery.toLowerCase().trim()));
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'published' && s.isPublished) ||
+      (statusFilter === 'draft' && !s.isPublished);
+    return matchesSearch && matchesStatus;
+  });
 
   if (loading) {
     return <AdminLoader message="Loading portfolio sections…" subtext="Fetching layout schemas and publication status" />;
@@ -159,7 +164,64 @@ export default function Sections() {
         </div>
       </div>
 
-      {error && <div className="admin-form-error">{error}</div>}
+            {error && <div className="admin-form-error">{error}</div>}
+
+      {sections.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            marginBottom: 16,
+            padding: "10px 14px",
+            background: "var(--admin-surface)",
+            border: "1px solid var(--admin-border)",
+            borderRadius: 8,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 200, maxWidth: 360 }}>
+            <Search size={16} style={{ color: "var(--admin-text-muted)" }} />
+            <input
+              type="text"
+              className="admin-input"
+              style={{ height: 34, fontSize: 13, padding: "4px 10px" }}
+              placeholder="Search sections by key or label..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 12, color: "var(--admin-text-muted)", display: "flex", alignItems: "center", gap: 4, marginRight: 4 }}>
+              <Filter size={13} /> Filter:
+            </span>
+            {[
+              { id: "all", label: `All (${sections.length})` },
+              { id: "published", label: `Published (${sections.filter((s) => s.isPublished).length})` },
+              { id: "draft", label: `Drafts (${sections.filter((s) => !s.isPublished).length})` },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setStatusFilter(tab.id)}
+                style={{
+                  padding: "4px 10px",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  borderRadius: 6,
+                  border: "1px solid " + (statusFilter === tab.id ? "var(--admin-primary)" : "var(--admin-border)"),
+                  background: statusFilter === tab.id ? "var(--admin-surface-subtle)" : "transparent",
+                  color: statusFilter === tab.id ? "var(--admin-primary)" : "var(--admin-text-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {sections.length === 0 ? (
         <div className="admin-empty-state">
@@ -183,7 +245,7 @@ export default function Sections() {
               </tr>
             </thead>
             <tbody>
-              {sections.map((section, idx) => (
+              {filteredSections.map((section, idx) => (
                 <tr key={section._id}>
                   <td>
                     <div style={{ display: 'flex', gap: 4 }}>
@@ -219,6 +281,7 @@ export default function Sections() {
                     <button
                       type="button"
                       onClick={() => togglePublished(section)}
+                      title={section.isPublished ? "Click to switch to Draft" : "Click to Publish to API"}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -241,7 +304,7 @@ export default function Sections() {
                   <td className="admin-table-actions">
                     <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                       <Link
-                        to={`/admin/sections/${section._id}`}
+                        to={`/admin/sections/${section.key}`}
                         className="admin-btn admin-btn-secondary admin-btn-sm"
                       >
                         <Edit size={13} />

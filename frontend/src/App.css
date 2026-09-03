@@ -409,8 +409,9 @@ a {
 }
 
 .floating-nav-header.scrolled-island .nav-island-inner {
-  max-width: 820px;
-  padding: 8px 16px;
+  width: auto;
+  max-width: min(94vw, 1200px);
+  padding: 8px 18px;
   box-shadow: var(--shadow-md);
   border-color: var(--color-border-hover);
 }
@@ -424,6 +425,8 @@ a {
   color: var(--color-text-main);
   letter-spacing: -0.02em;
   padding: 4px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .brand-dot {
@@ -438,6 +441,7 @@ a {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .nav-link-item {
@@ -448,9 +452,13 @@ a {
   padding: 6px 14px;
   border-radius: var(--radius-full);
   transition: var(--transition-fast);
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1.2;
+  flex-shrink: 0;
 }
 
 .nav-link-item:hover, .nav-link-item.active {
@@ -484,6 +492,7 @@ a {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .nav-cta-btn {
@@ -1910,6 +1919,8 @@ a {
    Responsive Design Breakpoints
    ============================================================ */
 @media (max-width: 1024px) {
+  .nav-link-item { padding: 6px 10px; font-size: 12.5px; }
+  .nav-cta-btn { padding: 7px 12px; font-size: 12.5px; }
   .hero-narrative-grid { grid-template-columns: 1fr; }
   .about-detail-grid { grid-template-columns: 1fr; }
   .projects-showcase-grid { grid-template-columns: 1fr; }

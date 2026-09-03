@@ -10,8 +10,6 @@ import SectionEditor from './pages/admin/SectionEditor';
 import Settings from './pages/admin/Settings';
 import ApiKeys from './pages/admin/ApiKeys';
 import Media from './pages/admin/Media';
-import ApiDocs from './pages/admin/ApiDocs';
-import Playground from './pages/admin/Playground';
 
 function App() {
   return (
@@ -33,8 +31,6 @@ function App() {
             <Route path="sections/:sectionId" element={<SectionEditor />} />
             <Route path="media" element={<Media />} />
             <Route path="apikeys" element={<ApiKeys />} />
-            <Route path="docs" element={<ApiDocs />} />
-            <Route path="playground" element={<Playground />} />
             <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="/" element={<Navigate to="/admin" replace />} />

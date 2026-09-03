@@ -10,7 +10,7 @@ Every portfolio is scoped to its owner. You host **one** server that powers **ma
 
 - Each user gets one or more portfolios (`Portfolio` docs — `slug`, `name`, `settings`).
 - Content lives in `Section` docs (`key`, `label`, `content`, `order`, `isPublished`) owned by a portfolio.
-- The public API (`/api/p/:slug`) returns a full portfolio — config + published sections — so the frontend only ever needs the slug.
+- The API key endpoints (`/api/v1/portfolio`) return a full portfolio — config + published sections — so the frontend only ever needs the API key.
 
 ## Quick start
 
@@ -39,7 +39,6 @@ Requirements: Node.js >= 18, and a MongoDB database (local or Atlas).
 | `MONGODB_URI`         | _(required in prod)_   | MongoDB connection string                            |
 | `JWT_SECRET`          | `dev-secret-change-me` | Long random string; required for security in prod    |
 | `JWT_EXPIRES_IN`      | `24h`                  | Token lifetime                                       |
-| `CORS_ORIGINS`        | `http://localhost:3000`| Comma-separated allowed frontend origins             |
 | `SEED_ADMIN_EMAIL`    | `admin@gabrialdeora.com` | Admin email used by the seed script                |
 | `SEED_ADMIN_PASSWORD` | `ChangeMe123!`         | Admin password used by the seed script               |
 
@@ -60,11 +59,9 @@ All JSON. Responses are wrapped as `{ success, data }`; errors as `{ success: fa
 
 | Method | Path                          | Description                                   |
 | ------ | ----------------------------- | --------------------------------------------- |
-| GET    | `/api/p/:slug`                | Portfolio config + all published sections.    |
-| GET    | `/api/p/:slug/section/:key`   | One published section by key.                 |
 | GET    | `/health`                     | Liveness check.                               |
 
-### Public (API key auth)
+### API Key Auth (open CORS)
 
 Use these when integrating your own portfolio frontend. Authenticate with the API key via any of:
 
@@ -76,7 +73,7 @@ Use these when integrating your own portfolio frontend. Authenticate with the AP
 | GET    | `/api/v1/portfolio`      | Portfolio config + all published sections.     |
 | GET    | `/api/v1/section/:key`   | One published section by key.                  |
 
-`/api/v1` (like `/api/p`) is open to any origin — no CORS restrictions — so external developers can call it directly from the browser.
+/api/v1` is open to any origin — no CORS restrictions — so external developers can call it directly from the browser.
 
 ### Auth
 
@@ -126,10 +123,12 @@ Image uploads: `POST /api/uploads`
 
 ## Frontend
 
-Point any frontend at the public API with a portfolio slug. Example client:
+Point any frontend at the API with an API key. Example client:
 
 ```js
-fetch(`/api/p/${slug}`).then((r) => r.json()).then(({ data }) => data.sections)
+fetch('/api/v1/portfolio', {
+  headers: { 'Authorization': 'Bearer YOUR_API_KEY' }
+}).then((r) => r.json()).then(({ data }) => data.sections)
 ```
 
 If you use the dashboard-style admin panel, set:
@@ -151,7 +150,7 @@ Set `VITE_API_KEY` on your frontend build and it will call `/api/v1/portfolio` i
 
 1. Create a free cluster on MongoDB Atlas and copy the connection string into `MONGODB_URI`.
 2. Deploy this folder to Render as a **Web Service** with build command `npm install` and start command `npm start`.
-3. Set `NODE_ENV=production`, `JWT_SECRET`, `CORS_ORIGINS` (your Vercel URL), and the seed admin vars.
+3. Set `NODE_ENV=production`, `JWT_SECRET`, and the seed admin vars.
 4. Run `npm run seed` once to create the initial admin and demo portfolio.
 5. Reset CORS if you later add more frontends.
 
