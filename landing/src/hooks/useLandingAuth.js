@@ -73,6 +73,16 @@ export function useLandingAuth() {
       }
     }
 
+    const handleAuthChange = (e) => {
+      const nextToken = e.detail?.token !== undefined ? e.detail.token : getStoredToken();
+      setTokenState(nextToken);
+      if (!nextToken) {
+        setUser(null);
+        setPortfolios([]);
+      }
+    };
+    window.addEventListener('portfolio_auth_change', handleAuthChange);
+
     const handleFocus = () => {
       const current = getStoredToken();
       if (current !== token) {
@@ -87,6 +97,7 @@ export function useLandingAuth() {
 
     return () => {
       window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('portfolio_auth_change', handleAuthChange);
       window.removeEventListener('focus', handleFocus);
       if (bc) bc.close();
     };

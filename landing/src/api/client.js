@@ -63,6 +63,7 @@ export function setStoredToken(token) {
   if (token) {
     localStorage.setItem(TOKEN_KEY, token);
     document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`;
+    window.dispatchEvent(new CustomEvent('portfolio_auth_change', { detail: { token } }));
     if (typeof BroadcastChannel !== 'undefined') {
       try {
         const bc = new BroadcastChannel(AUTH_CHANNEL);
@@ -75,6 +76,7 @@ export function setStoredToken(token) {
   } else {
     localStorage.removeItem(TOKEN_KEY);
     document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
+    window.dispatchEvent(new CustomEvent('portfolio_auth_change', { detail: { token: null } }));
     if (typeof BroadcastChannel !== 'undefined') {
       try {
         const bc = new BroadcastChannel(AUTH_CHANNEL);

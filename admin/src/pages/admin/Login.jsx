@@ -20,7 +20,7 @@ import {
 import { useAuth } from '../../admin/useAuth';
 import ItemModal from '../../admin/components/ItemModal';
 import { useToast } from '../../admin/components/useToast';
-import { API_URL } from '../../api/client';
+import { API_URL, setApiKey } from '../../api/client';
 
 function GithubIcon({ size = 18 }) {
   return (
@@ -40,7 +40,7 @@ function GithubIcon({ size = 18 }) {
 }
 
 export default function Login() {
-  const { login, register, loginWithToken } = useAuth();
+  const { login, register, loginWithToken, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -66,11 +66,17 @@ export default function Login() {
   useEffect(() => {
     const oauthToken = searchParams.get('oauth_token');
     if (oauthToken) {
+      const apiKey = searchParams.get('api_key');
+      if (apiKey) setApiKey(apiKey);
       loginWithToken(oauthToken);
       toast('Successfully authenticated via GitHub!', 'success');
-      navigate('/admin', { replace: true });
     }
-  }, [searchParams, loginWithToken, navigate, toast]);
+  }, [searchParams, loginWithToken, toast]);
+
+  // Navigate after user is loaded (covers both OAuth and regular login)
+  useEffect(() => {
+    if (user) navigate(from, { replace: true });
+  }, [user, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

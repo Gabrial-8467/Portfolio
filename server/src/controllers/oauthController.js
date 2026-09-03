@@ -8,6 +8,20 @@ import { config } from "../config/env.js";
 import { slugify } from "../utils/slugify.js";
 import { logger } from "../utils/logger.js";
 
+const ALLOWED_REDIRECT_ORIGINS = [config.clientAdminUrl, config.serverUrl].filter(Boolean);
+
+function isAllowedRedirectUrl(urlString) {
+  try {
+    const url = new URL(urlString);
+    return ALLOWED_REDIRECT_ORIGINS.some((allowed) => {
+      const allowedUrl = new URL(allowed);
+      return url.origin === allowedUrl.origin;
+    });
+  } catch {
+    return false;
+  }
+}
+
 async function createUniqueSlug(base) {
   const slug = slugify(base) || "portfolio";
   let candidate = slug;
@@ -30,7 +44,7 @@ export const githubLoginRedirect = (req, res) => {
   const redirectUri = `${config.serverUrl}/api/auth/github/callback`;
   const githubUrl = `https://github.com/login/oauth/authorize?client_id=${config.githubClientId}&redirect_uri=${encodeURIComponent(
     redirectUri
-  )}&scope=user:email&prompt=select_account&state=${encodeURIComponent(returnTo)}`;
+  )}&scope=user:email&state=${encodeURIComponent(returnTo)}`;
   return res.redirect(githubUrl);
 };
 
@@ -128,7 +142,7 @@ export const githubCallback = asyncHandler(async (req, res) => {
       owner: user._id,
     });
 
-    const { prefix, keyHash } = generateApiKey();
+    const { key: apiKey, prefix, keyHash } = generateApiKey();
     await ApiKey.create({
       owner: user._id,
       portfolio: portfolio._id,
@@ -157,23 +171,26 @@ export const githubCallback = asyncHandler(async (req, res) => {
     path: '/',
   });
 
-  // Redirect back to target URL (landing or admin)
+  // Redirect back to target URL (landing or admin) — validate against allowed origins
   let targetUrl = config.clientAdminUrl + '/login';
   if (req.query.state) {
     try {
       const decoded = decodeURIComponent(req.query.state);
-      if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+      if (isAllowedRedirectUrl(decoded)) {
         targetUrl = decoded;
       }
     } catch {
-      /* ignore */
+      /* ignore — fall back to default */
     }
   }
 
   const clientRedirectUrl = new URL(targetUrl);
   clientRedirectUrl.searchParams.set("oauth_token", token);
   clientRedirectUrl.searchParams.set("provider", "github");
-  if (isNewUser) clientRedirectUrl.searchParams.set("is_new", "true");
+  if (isNewUser) {
+    clientRedirectUrl.searchParams.set("is_new", "true");
+    clientRedirectUrl.searchParams.set("api_key", apiKey);
+  }
 
   return res.redirect(clientRedirectUrl.toString());
 });

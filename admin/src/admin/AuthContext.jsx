@@ -15,6 +15,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
+    setIsLoading(true);
     api.auth
       .me()
       .then((me) => {
