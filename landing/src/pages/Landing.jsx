@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../landing/landing.css';
 import CustomCursor from '../components/CustomCursor';
 import ScrollProgress from '../components/ScrollProgress';
@@ -16,9 +16,28 @@ import Pricing from '../components/Pricing';
 import FaqSection from '../components/FaqSection';
 import RegisterModal from '../components/RegisterModal';
 import Footer from '../components/Footer';
+import { setStoredToken } from '../api/client';
 
 export default function Landing() {
   const [registerOpen, setRegisterOpen] = useState(false);
+
+  // Sync token if redirected to landing with ?token=... or ?oauth_token=...
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const incomingToken = params.get('token') || params.get('oauth_token');
+      if (incomingToken) {
+        setStoredToken(incomingToken);
+        params.delete('token');
+        params.delete('oauth_token');
+        params.delete('provider');
+        const cleanSearch = params.toString() ? `?${params.toString()}` : '';
+        window.history.replaceState({}, document.title, window.location.pathname + cleanSearch);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   return (
     <div className="land-page">

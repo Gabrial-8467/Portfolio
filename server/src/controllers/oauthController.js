@@ -26,10 +26,11 @@ export const githubLoginRedirect = (req, res) => {
   if (!config.githubClientId) {
     throw new ApiError(500, "GITHUB_CLIENT_ID is not configured on the server");
   }
+  const returnTo = req.query.return_to || req.headers.referer || config.clientAdminUrl;
   const redirectUri = `${config.serverUrl}/api/auth/github/callback`;
   const githubUrl = `https://github.com/login/oauth/authorize?client_id=${config.githubClientId}&redirect_uri=${encodeURIComponent(
     redirectUri
-  )}&scope=user:email`;
+  )}&scope=user:email&state=${encodeURIComponent(returnTo)}`;
   return res.redirect(githubUrl);
 };
 
@@ -135,8 +136,28 @@ export const githubCallback = asyncHandler(async (req, res) => {
 
   const token = signToken(user);
 
-  // Redirect back to Admin Frontend with JWT token in query param
-  const clientRedirectUrl = new URL(config.clientAdminUrl + "/login");
+  // Set auth cookie on the server response so root domains can access it
+  res.cookie('portfolio_admin_token', token, {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: false,
+    sameSite: 'lax',
+    path: '/',
+  });
+
+  // Redirect back to target URL (landing or admin)
+  let targetUrl = config.clientAdminUrl + '/login';
+  if (req.query.state) {
+    try {
+      const decoded = decodeURIComponent(req.query.state);
+      if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+        targetUrl = decoded;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const clientRedirectUrl = new URL(targetUrl);
   clientRedirectUrl.searchParams.set("oauth_token", token);
   clientRedirectUrl.searchParams.set("provider", "github");
   if (isNewUser) clientRedirectUrl.searchParams.set("is_new", "true");

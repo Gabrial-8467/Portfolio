@@ -9,7 +9,24 @@ import {
   ShieldAlert,
   CheckCircle2,
 } from 'lucide-react';
-import { api, ADMIN_URL } from '../api/client';
+import { api, ADMIN_URL, API_URL, setStoredToken } from '../api/client';
+
+function GithubIcon({ size = 18 }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      stroke="currentColor"
+      strokeWidth="2"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+    </svg>
+  );
+}
 
 export default function RegisterModal({ isOpen, onClose }) {
   const [name, setName] = useState('');
@@ -51,6 +68,9 @@ export default function RegisterModal({ isOpen, onClose }) {
         portfolioName: portfolioName || `${name}'s Portfolio`,
       });
 
+      if (res.token) {
+        setStoredToken(res.token);
+      }
       setRevealedKey(res.apiKey);
       setCreatedPortfolio(res.portfolios?.[0] || res.portfolio);
       setPassword('');
@@ -186,8 +206,47 @@ export default function RegisterModal({ isOpen, onClose }) {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit}>
-              {error && <div className="alert-danger">{error}</div>}
+            <div>
+              {/* GitHub OAuth Quick Button */}
+              <div style={{ marginBottom: 16 }}>
+                <a
+                  href={`${API_URL}/api/auth/github`}
+                  className="btn btn-secondary"
+                  style={{
+                    width: '100%',
+                    justifyContent: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '10px 16px',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    gap: 8,
+                    borderRadius: 8,
+                    textDecoration: 'none',
+                  }}
+                >
+                  <GithubIcon size={18} />
+                  <span>Continue with GitHub</span>
+                </a>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    margin: '16px 0 12px',
+                    color: 'var(--saas-text-secondary)',
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  <div style={{ flex: 1, height: 1, background: 'var(--saas-border)' }} />
+                  <span>OR WITH EMAIL</span>
+                  <div style={{ flex: 1, height: 1, background: 'var(--saas-border)' }} />
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                {error && <div className="alert-danger">{error}</div>}
 
               <div className="form-group">
                 <label className="form-label">Full Name</label>
@@ -259,6 +318,7 @@ export default function RegisterModal({ isOpen, onClose }) {
                 </a>
               </div>
             </form>
+          </div>
           )}
         </div>
       </div>

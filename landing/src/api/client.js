@@ -63,9 +63,27 @@ export function setStoredToken(token) {
   if (token) {
     localStorage.setItem(TOKEN_KEY, token);
     document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`;
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel(AUTH_CHANNEL);
+        bc.postMessage({ type: 'AUTH_CHANGE', token });
+        bc.close();
+      } catch {
+        /* ignore */
+      }
+    }
   } else {
     localStorage.removeItem(TOKEN_KEY);
     document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel(AUTH_CHANNEL);
+        bc.postMessage({ type: 'AUTH_CHANGE', token: null });
+        bc.close();
+      } catch {
+        /* ignore */
+      }
+    }
   }
 }
 
