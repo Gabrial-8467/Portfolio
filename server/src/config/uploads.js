@@ -28,10 +28,14 @@ const storage = multer.diskStorage({
   },
 });
 
+import { getPlanConfig } from './plans.js';
+
 export const uploadImage = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => {
+  limits: {
+    fileSize: 100 * 1024 * 1024, // Physical server upper ceiling (100MB)
+  },
+  fileFilter: (req, file, cb) => {
     if (!ALLOWED[file.mimetype]) {
       const err = new Error('Only image files are allowed (jpg, png, webp, gif, avif)');
       err.status = 400;

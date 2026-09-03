@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Copy, Check, Code2 } from 'lucide-react';
+import { API_URL } from '../api/client';
 
 export default function DeveloperSection() {
   const [lang, setLang] = useState('javascript');
@@ -7,7 +8,7 @@ export default function DeveloperSection() {
 
   const snippets = {
     javascript: `// Modern fetch with async/await
-const res = await fetch("http://localhost:5000/api/v1/portfolio", {
+const res = await fetch("${API_URL}/api/v1/portfolio", {
   headers: {
     "Authorization": "Bearer YOUR_API_KEY",
     "Accept": "application/json"
@@ -15,7 +16,7 @@ const res = await fetch("http://localhost:5000/api/v1/portfolio", {
 });
 
 const { data } = await res.json();
-console.log("Portfolio:", data.portfolio.name);
+console.log("Portfolio:", data.name);
 console.log("Published Sections:", data.sections);`,
 
     react: `// React custom hook with resilient fallback
@@ -26,7 +27,7 @@ export function usePortfolio(apiKey) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/v1/portfolio', {
+    fetch('${API_URL}/api/v1/portfolio', {
       headers: { Authorization: \`Bearer \${apiKey}\` }
     })
       .then(res => res.json())
@@ -41,7 +42,7 @@ export function usePortfolio(apiKey) {
 
     nextjs: `// Next.js App Router (Server Component with revalidation)
 export default async function PortfolioPage() {
-  const res = await fetch('http://localhost:5000/api/v1/portfolio', {
+  const res = await fetch('${API_URL}/api/v1/portfolio', {
     headers: { Authorization: \`Bearer \${process.env.PORTFOLIO_API_KEY}\` },
     next: { revalidate: 60 } // ISR every 60 seconds
   });
@@ -50,7 +51,7 @@ export default async function PortfolioPage() {
 
   return (
     <main className="container">
-      <h1>{data.portfolio.name}</h1>
+      <h1>{data.name}</h1>
       <section>
         {data.sections.map(section => (
           <div key={section.key}>
@@ -63,14 +64,14 @@ export default async function PortfolioPage() {
 }`,
 
     curl: `# Direct cURL request
-curl -X GET "http://localhost:5000/api/v1/portfolio" \\
+curl -X GET "${API_URL}/api/v1/portfolio" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Accept: application/json"`,
 
     python: `# Python requests
 import requests
 
-url = "http://localhost:5000/api/v1/portfolio"
+url = "${API_URL}/api/v1/portfolio"
 headers = {
     "Authorization": "Bearer YOUR_API_KEY",
     "Accept": "application/json"
@@ -79,7 +80,7 @@ headers = {
 response = requests.get(url, headers=headers)
 data = response.json().get("data", {})
 
-print(f"Loaded portfolio: {data.get('portfolio', {}).get('name')}")`,
+print(f"Loaded portfolio: {data.get('name')}")`,
   };
 
   const handleCopy = () => {

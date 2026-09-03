@@ -28,3 +28,6 @@ uploads/
 .DS_Store
 .vscode/
 */.vscode/
+
+# Local evaluation notes
+*Full SaaS Evaluation*

@@ -128,6 +128,15 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(ACTIVE_KEY);
   }, []);
 
+  const loginWithToken = useCallback((newToken) => {
+    setToken(newToken);
+    setTokenState(newToken);
+  }, []);
+
+  const updateUser = useCallback((updatedUserData) => {
+    setUser((prev) => (prev ? { ...prev, ...updatedUserData } : updatedUserData));
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -138,6 +147,8 @@ export function AuthProvider({ children }) {
         isLoading,
         login,
         register,
+        loginWithToken,
+        updateUser,
         logout,
         selectPortfolio,
         refreshPortfolios,

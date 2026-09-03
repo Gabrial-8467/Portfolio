@@ -18,6 +18,7 @@ import {
 } from '../controllers/sectionController.js';
 import { loadPortfolio } from '../middleware/auth.js';
 import { sanitize, validators } from '../middleware/validate.js';
+import { guardPortfolioQuota } from '../middleware/quotaGuard.js';
 
 const router = Router();
 
@@ -28,7 +29,7 @@ const portfolioFields = {
 };
 
 router.get('/', listMine);
-router.post('/', sanitize(portfolioFields), createPortfolio);
+router.post('/', guardPortfolioQuota, sanitize(portfolioFields), createPortfolio);
 
 const settingsFields = { settings: validators.jsonContent };
 

@@ -17,13 +17,35 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: false,
       minlength: 8,
+    },
+    githubId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    avatar: {
+      type: String,
+      default: '',
     },
     role: {
       type: String,
       enum: ['admin', 'editor'],
       default: 'admin',
+    },
+    plan: {
+      type: String,
+      enum: ['hobby', 'pro', 'agency'],
+      default: 'hobby',
+    },
+    razorpayCustomerId: {
+      type: String,
+      default: null,
+    },
+    razorpaySubscriptionId: {
+      type: String,
+      default: null,
     },
     isActive: {
       type: Boolean,
@@ -38,13 +60,14 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.password || !this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 userSchema.methods.comparePassword = function (candidate) {
+  if (!this.password) return false;
   return bcrypt.compare(candidate, this.password);
 };
 
@@ -53,7 +76,10 @@ userSchema.methods.toSafeObject = function () {
     id: this._id,
     email: this.email,
     name: this.name,
+    avatar: this.avatar,
+    githubId: this.githubId,
     role: this.role,
+    plan: this.plan || 'hobby',
   };
 };
 

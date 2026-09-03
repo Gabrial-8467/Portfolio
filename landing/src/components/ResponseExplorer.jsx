@@ -5,7 +5,6 @@ import { PORTFOLIO_SLUG } from '../api/client';
 export default function ResponseExplorer() {
   const [openNodes, setOpenNodes] = useState({
     data: true,
-    portfolio: true,
     sections: true,
   });
 
@@ -58,24 +57,9 @@ export default function ResponseExplorer() {
 
               {openNodes.data && (
                 <div style={{ marginLeft: 24, borderLeft: '1px solid #e2e8f0', paddingLeft: 12 }}>
-                  {/* portfolio object */}
-                  <div
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-                    onClick={() => toggleNode('portfolio')}
-                  >
-                    {openNodes.portfolio ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                    <span className="tree-key">&quot;portfolio&quot;</span>: &#123;
-                    <span className="tree-type">Object (Tenant metadata)</span>
-                  </div>
-
-                  {openNodes.portfolio && (
-                    <div style={{ marginLeft: 24, borderLeft: '1px solid #e2e8f0', paddingLeft: 12 }}>
-                      <div><span className="tree-key">&quot;name&quot;</span>: <span style={{ color: '#0d9488' }}>&quot;Gabrial Deora&quot;</span>,</div>
-                      <div><span className="tree-key">&quot;slug&quot;</span>: <span style={{ color: '#0d9488' }}>&quot;{PORTFOLIO_SLUG}&quot;</span>,</div>
-                      <div><span className="tree-key">&quot;settings&quot;</span>: &#123; <span className="tree-type">Custom JSON preferences</span> &#125;</div>
-                    </div>
-                  )}
-                  <div style={{ color: '#64748b' }}>&#125;,</div>
+                  <div><span className="tree-key">&quot;slug&quot;</span>: <span style={{ color: '#0d9488' }}>&quot;{PORTFOLIO_SLUG}&quot;</span>,</div>
+                  <div><span className="tree-key">&quot;name&quot;</span>: <span style={{ color: '#0d9488' }}>&quot;Gabrial Deora&quot;</span>,</div>
+                  <div><span className="tree-key">&quot;config&quot;</span>: &#123; <span className="tree-type">Custom JSON preferences (theme, accent...)</span> &#125;,</div>
 
                   {/* sections array */}
                   <div

@@ -1,5 +1,7 @@
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
 
+export { API_URL };
+
 export class ApiError extends Error {
   constructor(message, status, details) {
     super(message);

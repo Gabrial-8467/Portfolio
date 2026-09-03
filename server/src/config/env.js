@@ -15,7 +15,13 @@ export const config = {
   mongoUri: process.env.MONGODB_URI,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
-  serverUrl: process.env.SERVER_URL,
+  serverUrl: process.env.SERVER_URL || 'http://localhost:5000',
+  clientAdminUrl: process.env.CLIENT_ADMIN_URL || 'http://localhost:5174',
+  githubClientId: process.env.GITHUB_CLIENT_ID || '',
+  githubClientSecret: process.env.GITHUB_CLIENT_SECRET || '',
+  razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
+  razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
+  razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
   seedAdminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@gabrialdeora.com',
   seedAdminPassword:
     process.env.SEED_ADMIN_PASSWORD ||

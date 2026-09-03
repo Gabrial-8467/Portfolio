@@ -4,7 +4,7 @@ import {
   Search,
   ChevronRight,
 } from 'lucide-react';
-import { PORTFOLIO_SLUG } from '../api/client';
+import { PORTFOLIO_SLUG, API_URL } from '../api/client';
 
 export default function ApiDocsSection() {
   const [selectedTopic, setSelectedTopic] = useState('get-portfolio');
@@ -101,10 +101,9 @@ export default function ApiDocsSection() {
                   Portfolio CMS is a high-performance multi-tenant Content API designed specifically for personal websites, portfolio showcases, and resume applications. It decouples your portfolio content from its visual design, allowing you to update projects, hero details, skills, and work history without redeploying code.
                 </p>
                 <div style={{ padding: 16, background: '#f8fafc', border: '1px solid var(--saas-border)', borderRadius: 'var(--saas-radius)' }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>Base API URLs</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>Base API URL</div>
                   <div style={{ fontFamily: 'var(--saas-mono)', fontSize: 13, color: 'var(--saas-primary)' }}>
-                    Local: http://localhost:5000<br />
-                    Production: https://api.portfoliocms.dev
+                    {API_URL}
                   </div>
                 </div>
               </div>
@@ -128,18 +127,16 @@ export default function ApiDocsSection() {
               <div>
                 <h3 style={{ fontSize: 24, fontWeight: 800, color: 'var(--saas-text)', marginBottom: 12 }}>API Authentication</h3>
                 <p style={{ color: 'var(--saas-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
-                  The Developer API supports three authentication methods:
+                  The Developer API accepts your API key in two ways:
                 </p>
                 <div style={{ background: '#0f172a', borderRadius: 'var(--saas-radius)', padding: 16, color: '#f1f5f9', fontFamily: 'var(--saas-mono)', fontSize: 13, marginBottom: 16 }}>
                   # 1. Bearer Token Header (Recommended){'\n'}
                   Authorization: Bearer YOUR_API_KEY{'\n\n'}
                   # 2. Custom Header{'\n'}
-                  x-api-key: YOUR_API_KEY{'\n\n'}
-                  # 3. Query Parameter{'\n'}
-                  ?api_key=YOUR_API_KEY
+                  x-api-key: YOUR_API_KEY
                 </div>
                 <div className="alert-security">
-                  <strong>Security Best Practice:</strong> API keys provide read-only access to published content. Never commit your API key to public repositories.
+                  <strong>Security Best Practice:</strong> API keys grant full read/write access to your portfolio content. Never commit your API key to public repositories.
                 </div>
               </div>
             )}
@@ -165,10 +162,11 @@ export default function ApiDocsSection() {
 {`{
   "success": true,
   "data": {
-    "portfolio": {
-      "name": "Gabrial Deora",
-      "slug": "${PORTFOLIO_SLUG}",
-      "settings": {}
+    "slug": "${PORTFOLIO_SLUG}",
+    "name": "Gabrial Deora",
+    "config": {
+      "theme": "developer-dark",
+      "accent": "#4f46e5"
     },
     "sections": [
       {

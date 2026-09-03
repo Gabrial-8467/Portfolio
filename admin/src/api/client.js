@@ -221,6 +221,11 @@ export const api = {
     revoke: (id) => api.del(`/api/v1/api-keys/${id}`, { apiKey: true }),
   },
 
+  billing: {
+    createOrder: (planId) => api.post('/api/billing/create-order', { planId }),
+    verifyPayment: (data) => api.post('/api/billing/verify-payment', data),
+  },
+
   uploads: {
     uploadFile: async (file) => {
       const form = new FormData();

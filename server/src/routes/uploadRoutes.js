@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import fs from 'node:fs';
 import { uploadImage, imageUrl, uploadsDir } from '../config/uploads.js';
+import { guardUploadQuota } from '../middleware/quotaGuard.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 
 const router = express.Router();
@@ -9,6 +10,7 @@ const router = express.Router();
 router.post(
   '/',
   uploadImage.single('file'),
+  guardUploadQuota,
   asyncHandler(async (req, res) => {
     if (!req.file) throw new ApiError(400, 'No file uploaded');
     return res.status(201).json({

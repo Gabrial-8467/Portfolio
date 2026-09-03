@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { requireApiKey } from '../middleware/apiKeyAuth.js';
 import { sanitize, validators } from '../middleware/validate.js';
 import { uploadImage } from '../config/uploads.js';
+import { guardApiKeyQuota, guardUploadQuota } from '../middleware/quotaGuard.js';
+import { tenantRateLimiter } from '../middleware/tenantRateLimiter.js';
 import {
   getPortfolio,
   getPortfolioFull,
@@ -40,6 +42,7 @@ const sectionFields = {
 };
 
 router.use(requireApiKey);
+router.use(tenantRateLimiter);
 
 router.get('/portfolio', getPortfolio);
 router.get('/portfolio/full', getPortfolioFull);
@@ -55,10 +58,10 @@ router.delete('/section/:key', deleteSection);
 router.put('/sections/reorder', sanitize({ ids: validators.strArr(200, 200) }), reorderSections);
 
 router.get('/api-keys', listKeys);
-router.post('/api-keys', sanitize({ name: validators.str(100) }), createKey);
+router.post('/api-keys', guardApiKeyQuota, sanitize({ name: validators.str(100) }), createKey);
 router.delete('/api-keys/:id', revokeKey);
 
-router.post('/upload', uploadImage.single('file'), uploadFile);
+router.post('/upload', uploadImage.single('file'), guardUploadQuota, uploadFile);
 router.delete('/upload/:filename', deleteFile);
 
 export default router;

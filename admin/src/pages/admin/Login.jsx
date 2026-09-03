@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
 import {
   CheckCircle2,
   Copy,
@@ -20,12 +20,31 @@ import {
 import { useAuth } from '../../admin/useAuth';
 import ItemModal from '../../admin/components/ItemModal';
 import { useToast } from '../../admin/components/useToast';
+import { API_URL } from '../../api/client';
+
+function GithubIcon({ size = 18 }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      stroke="currentColor"
+      strokeWidth="2"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+    </svg>
+  );
+}
 
 export default function Login() {
-  const { login, register } = useAuth();
+  const { login, register, loginWithToken } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
@@ -42,6 +61,16 @@ export default function Login() {
   const from = location.state?.from?.pathname || '/admin';
 
   const finish = () => navigate(from, { replace: true });
+
+  // Handle incoming OAuth Redirect (e.g. ?oauth_token=...&provider=github)
+  useEffect(() => {
+    const oauthToken = searchParams.get('oauth_token');
+    if (oauthToken) {
+      loginWithToken(oauthToken);
+      toast.success('Successfully authenticated via GitHub!');
+      navigate('/admin', { replace: true });
+    }
+  }, [searchParams, loginWithToken, navigate, toast]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -192,6 +221,41 @@ export default function Login() {
             >
               Register
             </button>
+          </div>
+
+          {/* GitHub OAuth Quick Button */}
+          <div style={{ marginBottom: 16 }}>
+            <a
+              href={`${API_URL}/api/auth/github`}
+              className="admin-btn admin-btn-secondary"
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                padding: '10px 16px',
+                fontSize: 14,
+                fontWeight: 600,
+                gap: 8,
+                borderRadius: 8,
+                textDecoration: 'none',
+              }}
+            >
+              <GithubIcon size={18} />
+              <span>Continue with GitHub</span>
+            </a>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                margin: '16px 0 8px',
+                color: 'var(--admin-text-muted)',
+                fontSize: 12,
+              }}
+            >
+              <div style={{ flex: 1, height: 1, background: 'var(--admin-border)' }} />
+              <span>OR WITH EMAIL</span>
+              <div style={{ flex: 1, height: 1, background: 'var(--admin-border)' }} />
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="admin-login-form">

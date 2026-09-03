@@ -7,7 +7,7 @@ import {
   Check,
   Sparkles,
 } from 'lucide-react';
-import { PORTFOLIO_SLUG, ADMIN_URL } from '../api/client';
+import { PORTFOLIO_SLUG, ADMIN_URL, API_URL } from '../api/client';
 import { useLandingAuth } from '../hooks/useLandingAuth';
 import MagneticButton from './MagneticButton';
 
@@ -18,19 +18,19 @@ export default function Hero({ onOpenRegister }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef(null);
 
+  const host = API_URL.replace(/^https?:\/\//, '');
+
   const requestSnippet = `GET /api/v1/portfolio HTTP/1.1
-Host: api.portfoliocms.dev
+Host: ${host}
 Authorization: Bearer pk_live_9d82f71a9320e4b7c
 Accept: application/json`;
 
   const responseSnippet = `{
   "success": true,
   "data": {
-    "portfolio": {
-      "name": "Gabrial Deora",
-      "slug": "${PORTFOLIO_SLUG}",
-      "settings": { "theme": "developer-dark", "accent": "#4f46e5" }
-    },
+    "slug": "${PORTFOLIO_SLUG}",
+    "name": "Gabrial Deora",
+    "config": { "theme": "developer-dark", "accent": "#4f46e5" },
     "sections": [
       {
         "key": "site",
@@ -208,7 +208,7 @@ Accept: application/json`;
                   </div>
                   <pre style={{ margin: 0 }}>
                     <code>
-                      <span style={{ color: '#94a3b8' }}>Host: </span><span style={{ color: '#f1f5f9' }}>api.portfoliocms.dev</span>{'\n'}
+                      <span style={{ color: '#94a3b8' }}>Host: </span><span style={{ color: '#f1f5f9' }}>{host}</span>{'\n'}
                       <span style={{ color: '#94a3b8' }}>Authorization: </span><span style={{ color: '#fbbf24' }}>Bearer pk_live_9d82f71a9320e4b7c</span>{'\n'}
                       <span style={{ color: '#94a3b8' }}>Accept: </span><span style={{ color: '#a7f3d0' }}>application/json</span>
                     </code>
@@ -220,11 +220,9 @@ Accept: application/json`;
                     <span className="tok-brace">&#123;</span>{'\n'}
                     {'  '}<span className="tok-key">&quot;success&quot;</span>: <span className="tok-bool">true</span>,{'\n'}
                     {'  '}<span className="tok-key">&quot;data&quot;</span>: <span className="tok-brace">&#123;</span>{'\n'}
-                    {'    '}<span className="tok-key">&quot;portfolio&quot;</span>: <span className="tok-brace">&#123;</span>{'\n'}
-                    {'      '}<span className="tok-key">&quot;name&quot;</span>: <span className="tok-str">&quot;Gabrial Deora&quot;</span>,{'\n'}
-                    {'      '}<span className="tok-key">&quot;slug&quot;</span>: <span className="tok-str">&quot;{PORTFOLIO_SLUG}&quot;</span>,{'\n'}
-                    {'      '}<span className="tok-key">&quot;settings&quot;</span>: <span className="tok-brace">&#123;</span> <span className="tok-key">&quot;theme&quot;</span>: <span className="tok-str">&quot;developer-dark&quot;</span> <span className="tok-brace">&#125;</span>{'\n'}
-                    {'    '}<span className="tok-brace">&#125;</span>,{'\n'}
+                    {'    '}<span className="tok-key">&quot;slug&quot;</span>: <span className="tok-str">&quot;{PORTFOLIO_SLUG}&quot;</span>,{'\n'}
+                    {'    '}<span className="tok-key">&quot;name&quot;</span>: <span className="tok-str">&quot;Gabrial Deora&quot;</span>,{'\n'}
+                    {'    '}<span className="tok-key">&quot;config&quot;</span>: <span className="tok-brace">&#123;</span> <span className="tok-key">&quot;theme&quot;</span>: <span className="tok-str">&quot;developer-dark&quot;</span> <span className="tok-brace">&#125;</span>{'\n'}
                     {'    '}<span className="tok-key">&quot;sections&quot;</span>: [<span className="tok-brace">&#123;</span> <span className="tok-key">&quot;key&quot;</span>: <span className="tok-str">&quot;site&quot;</span>, <span className="tok-key">&quot;isPublished&quot;</span>: <span className="tok-bool">true</span> <span className="tok-brace">&#125;</span>, <span className="tok-brace">&#123;</span> <span className="tok-key">&quot;key&quot;</span>: <span className="tok-str">&quot;projects&quot;</span> <span className="tok-brace">&#125;</span>]{'\n'}
                     {'  '}<span className="tok-brace">&#125;</span>{'\n'}
                     <span className="tok-brace">&#125;</span>
