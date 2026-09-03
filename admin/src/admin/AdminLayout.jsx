@@ -70,12 +70,12 @@ export default function AdminLayout() {
       <aside className={`admin-sidebar ${mobileOpen ? 'open' : ''}`}>
         {/* Brand Header */}
         <div className="admin-brand">
-          <div className="admin-brand-mark">
-            <Zap size={16} strokeWidth={2.5} />
+          <div className="admin-brand-mark" style={{ background: 'transparent', padding: 0, overflow: 'hidden' }}>
+            <img src="/favicon.svg" alt="Portfolio CMS Logo" style={{ width: 32, height: 32, display: 'block', borderRadius: 8 }} />
           </div>
           <div className="admin-brand-info">
             <div className="admin-brand-title">Portfolio CMS</div>
-            <div className="admin-brand-badge">Developer Platform</div>
+            <div className="admin-brand-badge">Headless SaaS</div>
           </div>
           {mobileOpen && (
             <button

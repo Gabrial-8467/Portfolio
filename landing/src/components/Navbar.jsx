@@ -29,8 +29,8 @@ export default function Navbar({ onOpenRegister, onSelectTab }) {
         <div className="saas-nav-inner">
           {/* Logo */}
           <a href="#" className="saas-logo" data-cursor="CMS" onClick={() => onSelectTab && onSelectTab('overview')}>
-            <div className="saas-logo-icon">
-              <Layers size={18} />
+            <div className="saas-logo-icon" style={{ background: 'transparent', padding: 0, overflow: 'hidden' }}>
+              <img src="/favicon.svg" alt="Portfolio CMS Logo" style={{ width: 28, height: 28, borderRadius: 6, display: 'block' }} />
             </div>
             <span>Portfolio<span style={{ color: 'var(--saas-primary)' }}>CMS</span></span>
           </a>

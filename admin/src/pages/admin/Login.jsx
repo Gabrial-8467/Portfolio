@@ -119,8 +119,8 @@ export default function Login() {
 
         <div className="login-banner-top">
           <div className="login-brand-pill">
-            <div className="login-brand-icon">
-              <Zap size={18} />
+            <div className="login-brand-icon" style={{ background: 'transparent', padding: 0 }}>
+              <img src="/favicon.svg" alt="Portfolio CMS Logo" style={{ width: 28, height: 28, borderRadius: 6, display: 'block' }} />
             </div>
             <div>
               <div className="login-brand-name">Portfolio CMS</div>

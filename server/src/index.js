@@ -67,6 +67,11 @@ app.use('/api/api-keys', authRequired, apiKeyRoutes);
 app.use('/api/uploads', authRequired, uploadRoutes);
 app.use('/api/billing', billingRoutes);
 
+// Favicon handler
+app.get(['/favicon.ico', '/favicon.svg'], (_req, res) => {
+  res.sendFile(path.join(__dirname, 'favicon.svg'));
+});
+
 app.get('/', (req, res) => {
   const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
   const host = req.get('host') || `localhost:${config.port}`;
