@@ -58,7 +58,19 @@ export const createOrder = asyncHandler(async (req, res) => {
     },
   };
 
-  const order = await rzp.orders.create(options);
+  let order;
+  try {
+    order = await rzp.orders.create(options);
+  } catch (err) {
+    logger.error(
+      "Razorpay order creation failed: " + (err?.error?.description || err?.message || String(err)),
+    );
+    throw new ApiError(
+      err?.statusCode && err.statusCode < 500 ? 502 : 502,
+      "Could not create payment order with Razorpay. " +
+        (err?.error?.description || err?.message || "Please try again."),
+    );
+  }
 
   return res.status(201).json({
     success: true,
