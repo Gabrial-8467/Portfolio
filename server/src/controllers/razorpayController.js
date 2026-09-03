@@ -4,7 +4,6 @@ import { User } from "../models/User.js";
 import { asyncHandler, ApiError } from "../middleware/errorHandler.js";
 import { config } from "../config/env.js";
 import { logger } from "../utils/logger.js";
-import { PLANS } from "../config/plans.js";
 
 // Plan Pricing in INR (Paise) or USD (Cents)
 const PLAN_PRICES = {
@@ -72,6 +71,13 @@ export const createOrder = asyncHandler(async (req, res) => {
     );
   }
 
+  // Bind the pending upgrade to this user server-side so the client cannot
+  // tamper with the plan or order id during verification.
+  await User.findByIdAndUpdate(req.user._id, {
+    pendingPlan: planId,
+    pendingOrderId: order.id,
+  });
+
   return res.status(201).json({
     success: true,
     data: {
@@ -92,17 +98,27 @@ export const createOrder = asyncHandler(async (req, res) => {
  * 2. Verify Razorpay Payment Signature and Upgrade User Plan
  */
 export const verifyPayment = asyncHandler(async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, planId } = req.body;
+  const { razorpay_payment_id, razorpay_signature } = req.body;
 
-  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !planId) {
+  if (!razorpay_payment_id || !razorpay_signature) {
     throw new ApiError(400, "Payment verification details are incomplete");
   }
 
+  const user = await User.findById(req.user._id);
+  if (!user) throw new ApiError(404, "User not found");
+
+  // The plan and order id must come from the server-stored pending upgrade,
+  // NOT from the client, to prevent pricing tampering (buying pro, claiming agency).
+  const planId = user.pendingPlan;
+  const razorpay_order_id = user.pendingOrderId;
+  if (!planId || !razorpay_order_id) {
+    throw new ApiError(400, "No pending payment found. Please start a new checkout.");
+  }
   if (!PLAN_PRICES[planId]) {
-    throw new ApiError(400, "Invalid plan selected. Choose 'pro' or 'agency'");
+    throw new ApiError(400, "Invalid pending plan");
   }
 
-  // Cryptographic HMAC SHA-256 signature verification
+  // Cryptographic HMAC SHA-256 signature verification against the bound order id
   const expectedSignature = crypto
     .createHmac("sha256", config.razorpayKeySecret)
     .update(razorpay_order_id + "|" + razorpay_payment_id)
@@ -112,12 +128,19 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid payment signature verification failed");
   }
 
-  // Update user subscription plan
-  const user = await User.findById(req.user._id);
-  if (!user) throw new ApiError(404, "User not found");
+  // Prevent accidental downgrades: only allow moving up the plan ladder.
+  const PLAN_LEVELS = { hobby: 0, pro: 1, agency: 2 };
+  const currentLevel = PLAN_LEVELS[user.plan] ?? 0;
+  const targetLevel = PLAN_LEVELS[planId] ?? 0;
+  if (targetLevel < currentLevel) {
+    throw new ApiError(400, "Cannot downgrade to a lower plan via checkout");
+  }
 
+  // Update user subscription plan
   user.plan = planId;
   user.razorpaySubscriptionId = razorpay_payment_id;
+  user.pendingPlan = null;
+  user.pendingOrderId = null;
   await user.save();
 
   logger.auth("User upgraded plan via Razorpay: " + user.email + " -> " + planId + " (" + razorpay_payment_id + ")");
@@ -139,7 +162,8 @@ export const handleWebhook = asyncHandler(async (req, res) => {
   const secret = config.razorpayWebhookSecret || config.razorpayKeySecret;
 
   if (signature && secret) {
-    const rawBody = JSON.stringify(req.body);
+    // Use the original raw body (captured before JSON parsing) for a correct HMAC.
+    const rawBody = req.rawBody || JSON.stringify(req.body);
     const expectedSignature = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
 
     if (expectedSignature !== signature) {

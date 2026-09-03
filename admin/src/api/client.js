@@ -193,6 +193,11 @@ export const api = {
       notifyCmsUpdate({ action: 'update_settings' });
       return res;
     },
+    remove: async (portfolioId) => {
+      const res = await api.del(`/api/portfolios/${portfolioId}`, { auth: true });
+      notifyCmsUpdate({ action: 'delete_portfolio' });
+      return res;
+    },
   },
 
   sections: {

@@ -1,6 +1,6 @@
-import { Portfolio } from '../models/Portfolio.js';
 import { Section } from '../models/Section.js';
 import { ApiKey } from '../models/ApiKey.js';
+import { Upload } from '../models/Upload.js';
 import path from 'node:path';
 import fs from 'node:fs';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
@@ -269,6 +269,17 @@ export const revokeKey = asyncHandler(async (req, res) => {
 
 export const uploadFile = asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, 'No file uploaded');
+  const owner = (req.apiKey && req.apiKey.owner) || (req.user && req.user._id);
+  if (!owner) throw new ApiError(401, 'Authentication required');
+
+  await Upload.create({
+    owner,
+    portfolio: req.portfolio._id,
+    filename: req.file.filename,
+    size: req.file.size,
+    mimetype: req.file.mimetype,
+  });
+
   return res.status(201).json({
     success: true,
     data: { url: imageUrl(req.file.filename), name: req.file.filename, size: req.file.size },
@@ -280,6 +291,18 @@ export const deleteFile = asyncHandler(async (req, res) => {
   if (!safe || safe === '.' || safe === '..' || !safe.includes('.')) {
     throw new ApiError(400, 'Invalid filename');
   }
+
+  const owner = (req.apiKey && req.apiKey.owner) || (req.user && req.user._id);
+  if (!owner) throw new ApiError(401, 'Authentication required');
+
+  // Enforce ownership: only the owner (or scoped portfolio) may delete this file.
+  const upload = await Upload.findOne({
+    filename: safe,
+    owner,
+    portfolio: req.portfolio._id,
+  });
+  if (!upload) throw new ApiError(404, 'File not found');
+
   const filePath = path.join(uploadsDir, safe);
   if (!filePath.startsWith(uploadsDir + path.sep)) {
     throw new ApiError(400, 'Invalid filename');
@@ -291,6 +314,8 @@ export const deleteFile = asyncHandler(async (req, res) => {
     if (err.code === 'ENOENT') throw new ApiError(404, 'File not found');
     throw err;
   }
+
+  await Upload.deleteOne({ _id: upload._id });
 
   return res.json({ success: true, data: { filename: safe } });
 });

@@ -49,6 +49,61 @@ export default function Home() {
     achievements: data.achievements,
   };
 
+  const SECTION_REGISTRY = {
+    hero: () => <Hero key="hero" site={appData.site} />,
+    site: () => <Hero key="site" site={appData.site} />,
+    about: () => <About key="about" site={appData.site} socials={appData.socials} stats={appData.stats} />,
+    projects: () => <Projects key="projects" projects={appData.projects} />,
+    experience: () => <Experience key="experience" data={appData} />,
+    skills: () => <Skills key="skills" skills={appData.skills} services={appData.services} />,
+    hackathons: () => <Hackathons key="hackathons" achievements={appData.achievements} />,
+    achievements: () => <Hackathons key="achievements" achievements={appData.achievements} />,
+    developer: () => <DeveloperSection key="developer" site={appData.site} />,
+    contact: () => <Contact key="contact" site={appData.site} />,
+  };
+
+  // Build rendered sections list based on admin panel's dynamic order
+  const renderDynamicSections = () => {
+    const rawSections = Array.isArray(data.sections) ? data.sections : [];
+
+    // Filter to sections that have a matching visual component
+    const matchedKeys = new Set();
+    const orderedElements = [];
+
+    rawSections.forEach((sec) => {
+      const key = sec.key ? sec.key.toLowerCase() : '';
+      if (SECTION_REGISTRY[key] && !matchedKeys.has(key)) {
+        // Special case: if key is 'site', avoid rendering both 'site' and 'hero' duplicates
+        if (key === 'site' && matchedKeys.has('hero')) return;
+        if (key === 'hero' && matchedKeys.has('site')) return;
+        // Special case: hackathons vs achievements
+        if (key === 'achievements' && matchedKeys.has('hackathons')) return;
+        if (key === 'hackathons' && matchedKeys.has('achievements')) return;
+
+        matchedKeys.add(key);
+        orderedElements.push(SECTION_REGISTRY[key]());
+      }
+    });
+
+    // If API returned sections and we matched components, render in that dynamic order
+    if (orderedElements.length > 0) {
+      // If contact or developer or any section was not yet seeded/added, ensure essential contact is reachable if needed
+      return orderedElements;
+    }
+
+    // Default static fallback when running purely local or no sections returned
+    return [
+      <Hero key="hero" site={appData.site} />,
+      <About key="about" site={appData.site} socials={appData.socials} stats={appData.stats} />,
+      <Projects key="projects" projects={appData.projects} />,
+      <Experience key="experience" data={appData} />,
+      <Skills key="skills" skills={appData.skills} services={appData.services} />,
+      <Hackathons key="hackathons" achievements={appData.achievements} />,
+      <DeveloperSection key="developer" site={appData.site} />,
+      <Contact key="contact" site={appData.site} />,
+    ];
+  };
+
   return (
     <div className="portfolio-app-root">
       {previewFailed && (
@@ -85,16 +140,9 @@ export default function Home() {
       {/* Floating Left & Right Side Rails */}
       <SideRails site={appData.site} socials={appData.socials} />
 
-      {/* Main Content Flow */}
+      {/* Main Content Flow - Dynamically Ordered */}
       <main>
-        <Hero site={appData.site} />
-        <About site={appData.site} socials={appData.socials} stats={appData.stats} />
-        <Projects projects={appData.projects} />
-        <Experience data={appData} />
-        <Skills skills={appData.skills} services={appData.services} />
-        <Hackathons achievements={appData.achievements} />
-        <DeveloperSection site={appData.site} />
-        <Contact site={appData.site} />
+        {renderDynamicSections()}
       </main>
 
       {/* Minimal Footer */}

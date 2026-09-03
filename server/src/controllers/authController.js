@@ -2,6 +2,10 @@ import { User } from '../models/User.js';
 import { Portfolio } from '../models/Portfolio.js';
 import { Section } from '../models/Section.js';
 import { ApiKey } from '../models/ApiKey.js';
+import { Upload } from '../models/Upload.js';
+import path from 'node:path';
+import fs from 'node:fs';
+import { uploadsDir } from '../config/uploads.js';
 import { signToken } from '../middleware/auth.js';
 import { generateApiKey } from '../utils/apiKey.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
@@ -148,12 +152,29 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   const portfolios = await Portfolio.find({ owner: user._id }).select('_id').lean();
   const portfolioIds = portfolios.map((p) => p._id);
 
+  const uploads = await Upload.find({
+    $or: [{ owner: user._id }, { portfolio: { $in: portfolioIds } }],
+  }).select('filename').lean();
+
   await Promise.all([
     ApiKey.deleteMany({ owner: user._id }),
     Section.deleteMany({ portfolio: { $in: portfolioIds } }),
     Portfolio.deleteMany({ owner: user._id }),
+    Upload.deleteMany({ owner: user._id }),
     User.findByIdAndDelete(user._id),
   ]);
+
+  // Best-effort cleanup of uploaded files on disk.
+  await Promise.allSettled(
+    uploads.map((u) => {
+      const safe = path.basename(u.filename || '');
+      const filePath = path.join(uploadsDir, safe);
+      if (safe && filePath.startsWith(uploadsDir + path.sep)) {
+        return fs.promises.unlink(filePath);
+      }
+      return Promise.resolve();
+    })
+  );
 
   logger.auth('Account deleted: ' + user.email);
   return res.json({ success: true, message: 'Account deleted successfully' });

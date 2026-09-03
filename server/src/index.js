@@ -41,18 +41,25 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+
+// Razorpay webhook must receive the RAW body for HMAC signature verification.
+// Mount it before the global JSON parser so the raw bytes are preserved.
+app.use(
+  '/api/billing/webhook',
+  express.raw({ type: 'application/json', limit: '1mb' }),
+  (req, res, next) => {
+    if (Buffer.isBuffer(req.body)) {
+      req.rawBody = req.body.toString('utf8');
+      req.body = req.body.length ? JSON.parse(req.body.toString('utf8')) : {};
+    }
+    next();
+  }
+);
+
 app.use(express.json({ limit: '1mb' }));
 app.use(requestLogger);
 
 app.use('/uploads', express.static(uploadsDir, { maxAge: '7d' }));
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: 'Too many login attempts, please try again later' },
-});
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -63,7 +70,7 @@ const apiLimiter = rateLimit({
 });
 
 app.use('/api', apiLimiter);
-app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth', authRoutes);
 
 app.use('/api/v1', publicApiKeyRoutes);
 app.use('/api/portfolios', authRequired, portfolioRoutes);

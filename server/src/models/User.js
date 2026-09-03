@@ -47,6 +47,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    pendingPlan: {
+      type: String,
+      default: null,
+    },
+    pendingOrderId: {
+      type: String,
+      default: null,
+    },
     isActive: {
       type: Boolean,
       default: true,

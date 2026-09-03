@@ -2119,3 +2119,211 @@ html, body {
   align-items: center;
   justify-content: space-between;
 }
+
+/* ============================================================
+   Redesigned Settings Page Styles
+   ============================================================ */
+.settings-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--admin-border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.settings-nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--admin-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: var(--admin-transition);
+  white-space: nowrap;
+  border-radius: var(--admin-radius-sm) var(--admin-radius-sm) 0 0;
+}
+
+.settings-nav-tab:hover {
+  color: var(--admin-text);
+  background: var(--admin-surface-hover);
+}
+
+.settings-nav-tab.active {
+  color: var(--admin-primary);
+  border-bottom-color: var(--admin-primary);
+  background: transparent;
+}
+
+.settings-nav-tab svg {
+  color: inherit;
+}
+
+.settings-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--admin-border-subtle);
+}
+
+.settings-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--admin-text);
+  margin: 0;
+}
+
+.settings-card-subtitle {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  margin: 2px 0 0 0;
+}
+
+.settings-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.settings-pricing-card {
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  padding: 22px;
+  background: var(--admin-surface);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: var(--admin-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.settings-pricing-card.featured {
+  border-color: var(--admin-primary-border);
+  background: linear-gradient(180deg, #f8faff 0%, var(--admin-surface) 100%);
+  box-shadow: 0 4px 20px -2px rgba(79, 70, 229, 0.1);
+}
+
+.settings-pricing-card.current {
+  border-color: var(--admin-success-border);
+  background: linear-gradient(180deg, #f0fdf4 0%, var(--admin-surface) 100%);
+}
+
+.settings-pricing-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.settings-pricing-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--admin-text);
+  margin: 0 0 4px;
+}
+
+.settings-pricing-desc {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  margin: 0 0 16px;
+  min-height: 34px;
+}
+
+.settings-pricing-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.settings-pricing-amount {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--admin-text);
+}
+
+.settings-pricing-period {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  font-weight: 500;
+}
+
+.settings-pricing-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-pricing-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--admin-text-secondary);
+}
+
+.settings-pricing-feature svg {
+  color: var(--admin-success);
+  flex-shrink: 0;
+}
+
+.settings-danger-box {
+  border: 1px solid var(--admin-danger-border);
+  background: #fff5f5;
+  border-radius: var(--admin-radius);
+  padding: 24px;
+  margin-top: 12px;
+}
+
+.settings-danger-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: var(--admin-danger);
+}
+
+.settings-danger-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.settings-danger-item:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+

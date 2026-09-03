@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import {
   login,
   register,
@@ -13,14 +14,26 @@ import { sanitize, validators } from '../middleware/validate.js';
 
 const router = Router();
 
+// Brute-force protection for credential endpoints only (not for /me, /plan,
+// OAuth redirects, or authenticated account routes).
+const credentialLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many login attempts, please try again later' },
+});
+
 // Standard Password Authentication
 router.post(
   '/login',
+  credentialLimiter,
   sanitize({ email: validators.str, password: validators.str }),
   login
 );
 router.post(
   '/register',
+  credentialLimiter,
   sanitize({
     email: validators.str,
     password: validators.str,

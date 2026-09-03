@@ -29,6 +29,7 @@ const initialState = {
   experience: localExperience,
   education: localEducation,
   achievements: localAchievements,
+  sections: [],
 };
 
 function sectionValue(sections, key, fallback) {
@@ -89,6 +90,7 @@ export function usePortfolioData(slug, customApiKey) {
           experience: sectionValue(sections, 'experience', localExperience),
           education: sectionValue(sections, 'education', localEducation),
           achievements: sectionValue(sections, 'achievements', localAchievements),
+          sections: Array.isArray(sections) ? sections : [],
         },
       });
     } catch (err) {

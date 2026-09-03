@@ -15,14 +15,63 @@ import {
   Lock,
   Gauge,
   Layers,
+  Sparkles,
+  Sliders,
+  Shield,
+  CreditCard,
+  Check,
+  CheckCircle2,
+  Copy,
+  Code2,
+  ExternalLink,
+  Palette,
+  Eye,
+  EyeOff,
+  Zap,
 } from 'lucide-react';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
 import AdminLoader from '../../admin/components/AdminLoader';
+
+const THEME_PRESETS = [
+  {
+    name: 'Modern Indigo',
+    color: '#4f46e5',
+    accent: '#6366f1',
+    settings: { theme: 'indigo', accentColor: '#4f46e5', radius: '10px' },
+  },
+  {
+    name: 'Cyber Emerald',
+    color: '#10b981',
+    accent: '#059669',
+    settings: { theme: 'emerald', accentColor: '#10b981', radius: '8px' },
+  },
+  {
+    name: 'Vibrant Violet',
+    color: '#8b5cf6',
+    accent: '#7c3aed',
+    settings: { theme: 'violet', accentColor: '#8b5cf6', radius: '12px' },
+  },
+  {
+    name: 'Ocean Cyan',
+    color: '#0ea5e9',
+    accent: '#0284c7',
+    settings: { theme: 'cyan', accentColor: '#0ea5e9', radius: '8px' },
+  },
+  {
+    name: 'Sunset Rose',
+    color: '#f43f5e',
+    accent: '#e11d48',
+    settings: { theme: 'rose', accentColor: '#f43f5e', radius: '10px' },
+  },
+];
 
 export default function Settings() {
   const { user, activePortfolio, refreshPortfolios, logout } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+
+  // Active Tab: 'general' | 'billing' | 'security' | 'danger'
+  const [activeTab, setActiveTab] = useState('general');
 
   const [name, setName] = useState('');
   const [settings, setSettings] = useState({});
@@ -32,6 +81,7 @@ export default function Settings() {
   const [error, setError] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [copiedSlug, setCopiedSlug] = useState(false);
 
   // Plan usage state
   const [planStatus, setPlanStatus] = useState(null);
@@ -41,6 +91,8 @@ export default function Settings() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPwd, setShowCurrentPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
   const [pwdSaving, setPwdSaving] = useState(false);
   const [pwdError, setPwdError] = useState('');
 
@@ -73,11 +125,9 @@ export default function Settings() {
   useEffect(() => {
     let cancelled = false;
     if (!activePortfolioId) {
-      // eslint-disable-next-line react/set-state-in-effect
       setLoading(false);
       return undefined;
     }
-    // eslint-disable-next-line react/set-state-in-effect
     setLoading(true);
     setName(activePortfolioName || '');
     async function load() {
@@ -97,7 +147,7 @@ export default function Settings() {
   }, [activePortfolioId, activePortfolioName]);
 
   const submit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!activePortfolio) return;
     setSaving(true);
     setError('');
@@ -114,8 +164,19 @@ export default function Settings() {
     }
   };
 
+  const applyThemePreset = (preset) => {
+    setSettings((prev) => ({
+      ...prev,
+      ...preset.settings,
+    }));
+    addToast(`Applied preset "${preset.name}". Click "Save Changes" to apply.`, 'info');
+  };
+
   const handleDeletePortfolio = () => {
-    addToast('Portfolio workspace deletion is not available via API key. Manage portfolios at the admin console.', 'info');
+    addToast(
+      'Portfolio workspace deletion is not available via API key. Manage portfolios at the admin console.',
+      'info'
+    );
     setDeleteConfirmOpen(false);
   };
 
@@ -155,23 +216,102 @@ export default function Settings() {
     }
   };
 
+  const handleCopyUrl = async () => {
+    const url = getPublicPortfolioUrl(activePortfolio.slug);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedSlug(true);
+      setTimeout(() => setCopiedSlug(false), 2000);
+      addToast('Live portfolio URL copied to clipboard', 'success');
+    } catch {
+      addToast('Could not copy URL', 'error');
+    }
+  };
+
+  const handleRazorpayUpgrade = async (planId, planTitle) => {
+    setCheckoutLoading(true);
+    try {
+      const orderRes = await api.billing.createOrder(planId);
+      const orderData = orderRes?.data || orderRes;
+
+      const loadRazorpayScript = () =>
+        new Promise((resolve) => {
+          if (window.Razorpay) return resolve(true);
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = () => resolve(true);
+          script.onerror = () => resolve(false);
+          document.body.appendChild(script);
+        });
+
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        addToast('Could not load Razorpay SDK', 'error');
+        return;
+      }
+
+      const rzp = new window.Razorpay({
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: `Portfolio CMS ${planTitle}`,
+        description: `${planTitle} Plan Subscription`,
+        order_id: orderData.orderId,
+        prefill: {
+          name: user?.name,
+          email: user?.email,
+        },
+        theme: { color: '#4f46e5' },
+        handler: async (response) => {
+          try {
+            await api.billing.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planId,
+            });
+            addToast(`Successfully upgraded to ${planTitle}!`, 'success');
+            window.location.reload();
+          } catch (vErr) {
+            addToast(vErr.message || 'Payment verification failed', 'error');
+          }
+        },
+      });
+      rzp.open();
+    } catch (err) {
+      addToast(err.message || 'Failed to initiate Razorpay checkout', 'error');
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
   const usageRow = (label, used, max, icon) => {
-    const isUnlimited = max === 'Unlimited';
-    const pct = isUnlimited ? 0 : Math.min(100, Math.round((used / max) * 100));
+    const isUnlimited = max === 'Unlimited' || max === undefined || max === null;
+    const numMax = typeof max === 'number' ? max : 1;
+    const pct = isUnlimited ? 0 : Math.min(100, Math.round(((used || 0) / numMax) * 100));
+
     return (
       <div style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--admin-text)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--admin-text)' }}>
             {icon}
             <span>{label}</span>
           </div>
-          <span style={{ fontSize: 12, color: 'var(--admin-text-muted)' }}>
-            {used} / {max}
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--admin-text-muted)' }}>
+            {used} / {isUnlimited ? 'Unlimited' : max}
           </span>
         </div>
-        <div style={{ height: 6, background: 'var(--admin-border)', borderRadius: 9999, overflow: 'hidden' }}>
+        <div style={{ height: 7, background: 'var(--admin-border)', borderRadius: 9999, overflow: 'hidden' }}>
           {!isUnlimited && (
-            <div style={{ height: '100%', width: `${pct}%`, background: pct >= 90 ? 'var(--admin-danger)' : 'var(--admin-primary)', borderRadius: 9999, transition: 'width 0.3s ease' }} />
+            <div
+              style={{
+                height: '100%',
+                width: `${pct}%`,
+                background: pct >= 90 ? 'var(--admin-danger)' : pct >= 70 ? 'var(--admin-warning)' : 'var(--admin-primary)',
+                borderRadius: 9999,
+                transition: 'width 0.3s ease',
+              }}
+            />
           )}
         </div>
       </div>
@@ -186,6 +326,8 @@ export default function Settings() {
     return <AdminLoader message="No portfolio selected" subtext="Please select or create a workspace first" />;
   }
 
+  const liveUrl = getPublicPortfolioUrl(activePortfolio.slug);
+
   return (
     <div className="admin-page">
       {checkoutLoading && (
@@ -195,362 +337,770 @@ export default function Settings() {
           subtext="Please wait while we connect to the Razorpay payment gateway."
         />
       )}
+
+      {/* Header Section */}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Workspace Settings</h1>
-          <p className="admin-page-subtitle">Configure portfolio metadata, theme preferences, and access permissions.</p>
+          <p className="admin-page-subtitle">
+            Manage portfolio details, themes, API configurations, subscription, and security credentials.
+          </p>
         </div>
-        <a
-          className="admin-btn admin-btn-secondary admin-btn-sm"
-          href={getPublicPortfolioUrl(activePortfolio.slug)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <span>View Live Site</span>
-          <ArrowUpRight size={13} />
-        </a>
+        <div className="admin-page-actions">
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            onClick={handleCopyUrl}
+            title="Copy live site URL"
+          >
+            {copiedSlug ? <Check size={14} color="var(--admin-success)" /> : <Copy size={14} />}
+            <span>{copiedSlug ? 'Copied' : 'Copy Site URL'}</span>
+          </button>
+          <a
+            className="admin-btn admin-btn-primary"
+            href={liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>Live Portfolio</span>
+            <ExternalLink size={13} />
+          </a>
+        </div>
       </div>
 
       {error && <div className="admin-form-error">{error}</div>}
 
-      {/* User Account & Subscription Info Box */}
-      <div className="admin-form" style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--admin-primary-light)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <User size={16} />
-            </div>
-            <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', margin: 0 }}>
-              Account Profile &amp; Plan
-            </h2>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--admin-text-muted)' }}>Current Plan:</span>
-            <span className={`admin-badge ${user?.plan === 'agency' ? 'admin-badge-purple' : user?.plan === 'pro' ? 'admin-badge-blue' : 'admin-badge-green'}`} style={{ textTransform: 'uppercase', fontWeight: 700 }}>
-              {user?.plan || 'Hobby'}
-            </span>
-          </div>
-        </div>
+      {/* Navigation Tabs */}
+      <div className="settings-nav-tabs">
+        <button
+          type="button"
+          className={`settings-nav-tab ${activeTab === 'general' ? 'active' : ''}`}
+          onClick={() => setActiveTab('general')}
+        >
+          <Sliders size={15} />
+          <span>General &amp; Theme</span>
+        </button>
+        <button
+          type="button"
+          className={`settings-nav-tab ${activeTab === 'billing' ? 'active' : ''}`}
+          onClick={() => setActiveTab('billing')}
+        >
+          <CreditCard size={15} />
+          <span>Plan &amp; Billing</span>
+          <span
+            className={`admin-badge ${
+              user?.plan === 'agency'
+                ? 'admin-badge-purple'
+                : user?.plan === 'pro'
+                ? 'admin-badge-blue'
+                : 'admin-badge-green'
+            }`}
+            style={{ fontSize: 10, padding: '1px 6px' }}
+          >
+            {user?.plan || 'Hobby'}
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`settings-nav-tab ${activeTab === 'security' ? 'active' : ''}`}
+          onClick={() => setActiveTab('security')}
+        >
+          <Shield size={15} />
+          <span>Security &amp; Password</span>
+        </button>
+        <button
+          type="button"
+          className={`settings-nav-tab ${activeTab === 'danger' ? 'active' : ''}`}
+          onClick={() => setActiveTab('danger')}
+        >
+          <AlertTriangle size={15} />
+          <span>Danger Zone</span>
+        </button>
+      </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 20 }}>
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Name</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-text)', marginTop: 4 }}>{user?.name || 'Administrator'}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Email</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-text)', marginTop: 4 }}>{user?.email}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Role</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-primary)', marginTop: 4, textTransform: 'capitalize' }}>
-              {user?.role || 'Admin'}
-            </div>
-          </div>
-        </div>
-
-        {/* Razorpay Subscription Tier Actions */}
-        {user?.plan !== 'agency' && (
-          <div style={{ borderTop: '1px solid var(--admin-border)', paddingTop: 16 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 8 }}>
-              Upgrade Your SaaS Workspace via Razorpay
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-              {user?.plan !== 'pro' && (
-                <button
-                  type="button"
-                  className="admin-btn admin-btn-secondary admin-btn-sm"
-                  onClick={async () => {
-                    setCheckoutLoading(true);
-                    try {
-                      const orderRes = await api.billing.createOrder('pro');
-                      const orderData = orderRes?.data || orderRes;
-                      
-                      const loadRazorpayScript = () => new Promise((resolve) => {
-                        if (window.Razorpay) return resolve(true);
-                        const script = document.createElement('script');
-                        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-                        script.onload = () => resolve(true);
-                        script.onerror = () => resolve(false);
-                        document.body.appendChild(script);
-                      });
-
-                      const loaded = await loadRazorpayScript();
-                      if (!loaded) {
-                        addToast({ type: 'error', message: 'Could not load Razorpay SDK' });
-                        return;
-                      }
-
-                      const rzp = new window.Razorpay({
-                        key: orderData.keyId,
-                        amount: orderData.amount,
-                        currency: orderData.currency,
-                        name: 'Portfolio CMS Pro',
-                        description: 'Developer Pro Plan Subscription',
-                        order_id: orderData.orderId,
-                        prefill: {
-                          name: user?.name,
-                          email: user?.email,
-                        },
-                        theme: { color: '#6366f1' },
-                        handler: async (response) => {
-                          try {
-                            const verifyRes = await api.billing.verifyPayment({
-                              razorpay_order_id: response.razorpay_order_id,
-                              razorpay_payment_id: response.razorpay_payment_id,
-                              razorpay_signature: response.razorpay_signature,
-                              planId: 'pro',
-                            });
-                            addToast({ type: 'success', message: 'Successfully upgraded to Developer Pro!' });
-                            window.location.reload();
-                          } catch (vErr) {
-                            addToast({ type: 'error', message: vErr.message || 'Payment verification failed' });
-                          }
-                        },
-                      });
-                      rzp.open();
-                    } catch (err) {
-                      addToast({ type: 'error', message: err.message || 'Failed to initiate Razorpay checkout' });
-                    } finally {
-                      setCheckoutLoading(false);
-                    }
-                  }}
-                  disabled={checkoutLoading}
+      {/* TAB 1: General & Theme */}
+      {activeTab === 'general' && (
+        <form onSubmit={submit}>
+          {/* Portfolio Metadata Card */}
+          <div className="admin-form">
+            <div className="settings-card-header">
+              <div className="settings-card-title-group">
+                <div
+                  className="settings-card-icon"
+                  style={{ background: 'var(--admin-primary-light)', color: 'var(--admin-primary)' }}
                 >
-                  <span>Upgrade to Pro (₹799/mo)</span>
-                </button>
-              )}
-              <button
-                type="button"
-                className="admin-btn admin-btn-primary admin-btn-sm"
-                onClick={async () => {
-                  setCheckoutLoading(true);
-                  try {
-                    const orderRes = await api.billing.createOrder('agency');
-                    const orderData = orderRes?.data || orderRes;
-                    
-                    const loadRazorpayScript = () => new Promise((resolve) => {
-                      if (window.Razorpay) return resolve(true);
-                      const script = document.createElement('script');
-                      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-                      script.onload = () => resolve(true);
-                      script.onerror = () => resolve(false);
-                      document.body.appendChild(script);
-                    });
+                  <Layers size={18} />
+                </div>
+                <div>
+                  <h2 className="settings-card-title">Portfolio Identity</h2>
+                  <p className="settings-card-subtitle">
+                    Configure your workspace public identifier, display title, and live endpoint.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-                    const loaded = await loadRazorpayScript();
-                    if (!loaded) {
-                      addToast({ type: 'error', message: 'Could not load Razorpay SDK' });
-                      return;
-                    }
+            <div className="admin-form-grid">
+              <Field label="Portfolio Name" hint="The display name of your portfolio shown in header and titles.">
+                <TextInput
+                  value={name}
+                  onChange={setName}
+                  placeholder="e.g. Gabriel Deora — Portfolio"
+                  required
+                />
+              </Field>
 
-                    const rzp = new window.Razorpay({
-                      key: orderData.keyId,
-                      amount: orderData.amount,
-                      currency: orderData.currency,
-                      name: 'Portfolio CMS Agency',
-                      description: 'Agency & Team Plan Subscription',
-                      order_id: orderData.orderId,
-                      prefill: {
-                        name: user?.name,
-                        email: user?.email,
-                      },
-                      theme: { color: '#6366f1' },
-                      handler: async (response) => {
-                        try {
-                          await api.billing.verifyPayment({
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature,
-                            planId: 'agency',
-                          });
-                          addToast({ type: 'success', message: 'Successfully upgraded to Agency Plan!' });
-                          window.location.reload();
-                        } catch (vErr) {
-                          addToast({ type: 'error', message: vErr.message || 'Payment verification failed' });
-                        }
-                      },
-                    });
-                    rzp.open();
-                  } catch (err) {
-                    addToast({ type: 'error', message: err.message || 'Failed to initiate Razorpay checkout' });
-                  } finally {
-                    setCheckoutLoading(false);
-                  }
-                }}
-                disabled={checkoutLoading}
+              <Field
+                label="Portfolio Public Slug"
+                hint="Permanent slug used in routes, API queries, and webhooks."
               >
-                <span>Upgrade to Agency (₹2,499/mo)</span>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <TextInput value={activePortfolio.slug} onChange={() => {}} disabled />
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-secondary"
+                    onClick={handleCopyUrl}
+                    title="Copy full URL"
+                    style={{ flexShrink: 0 }}
+                  >
+                    {copiedSlug ? <Check size={14} color="var(--admin-success)" /> : <Copy size={14} />}
+                  </button>
+                </div>
+              </Field>
+            </div>
+          </div>
+
+          {/* Quick Theme Presets */}
+          <div className="admin-form">
+            <div className="settings-card-header">
+              <div className="settings-card-title-group">
+                <div
+                  className="settings-card-icon"
+                  style={{ background: '#fdf2f8', color: '#db2777' }}
+                >
+                  <Palette size={18} />
+                </div>
+                <div>
+                  <h2 className="settings-card-title">Theme Presets</h2>
+                  <p className="settings-card-subtitle">
+                    Select a curated color palette preset or customize manually below.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 16 }}>
+              {THEME_PRESETS.map((preset) => {
+                const isCurrentPreset =
+                  settings?.accentColor === preset.color ||
+                  settings?.theme === preset.settings.theme;
+
+                return (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() => applyThemePreset(preset)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 10,
+                      padding: '12px 14px',
+                      borderRadius: 'var(--admin-radius-sm)',
+                      border: isCurrentPreset
+                        ? `2px solid ${preset.color}`
+                        : '1px solid var(--admin-border)',
+                      background: isCurrentPreset
+                        ? 'var(--admin-surface-subtle)'
+                        : 'var(--admin-surface)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'var(--admin-transition)',
+                      boxShadow: isCurrentPreset
+                        ? `0 2px 8px -1px ${preset.color}33`
+                        : 'none',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isCurrentPreset) {
+                        e.currentTarget.style.borderColor = preset.color;
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isCurrentPreset) {
+                        e.currentTarget.style.borderColor = 'var(--admin-border)';
+                        e.currentTarget.style.transform = 'none';
+                      }
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: '50%',
+                          background: preset.color,
+                          boxShadow: `0 0 0 2px #fff, 0 0 0 3px ${preset.color}`,
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-text)' }}>
+                        {preset.name}
+                      </span>
+                    </div>
+                    {isCurrentPreset && (
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 18,
+                          height: 18,
+                          borderRadius: '50%',
+                          background: preset.color,
+                          color: '#fff',
+                        }}
+                      >
+                        <Check size={11} strokeWidth={3} />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Custom Settings & Theme Controls */}
+          <div className="admin-form">
+            <div className="settings-card-header">
+              <div className="settings-card-title-group">
+                <div
+                  className="settings-card-icon"
+                  style={{ background: 'var(--admin-surface-subtle)', color: 'var(--admin-text)' }}
+                >
+                  <Code2 size={18} />
+                </div>
+                <div>
+                  <h2 className="settings-card-title">Theme Customization &amp; Parameters</h2>
+                  <p className="settings-card-subtitle">
+                    Fine-tune branding colors, border styling, or edit raw <code>portfolio.settings</code> JSON directly.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-form-grid" style={{ marginBottom: 20 }}>
+              <Field label="Custom Accent Color" hint="Primary theme color used across buttons, links, and hero accents.">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <input
+                    type="color"
+                    value={settings?.accentColor || '#4f46e5'}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, accentColor: e.target.value }))}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      padding: 2,
+                      borderRadius: 'var(--admin-radius-sm)',
+                      border: '1px solid var(--admin-border)',
+                      cursor: 'pointer',
+                      background: 'none',
+                    }}
+                  />
+                  <TextInput
+                    value={settings?.accentColor || '#4f46e5'}
+                    onChange={(val) => setSettings((prev) => ({ ...prev, accentColor: val }))}
+                    placeholder="#4f46e5"
+                  />
+                </div>
+              </Field>
+
+              <Field label="Border Radius Style" hint="Corner curvature applied to cards, buttons, and badges.">
+                <select
+                  className="admin-input"
+                  value={settings?.radius || '10px'}
+                  onChange={(e) => setSettings((prev) => ({ ...prev, radius: e.target.value }))}
+                >
+                  <option value="4px">Sharp (4px)</option>
+                  <option value="8px">Subtle (8px)</option>
+                  <option value="10px">Modern (10px)</option>
+                  <option value="14px">Rounded (14px)</option>
+                  <option value="20px">Pill / Soft (20px)</option>
+                </select>
+              </Field>
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-text)', marginBottom: 6 }}>
+                Advanced Settings JSON
+              </div>
+              <div style={{ minHeight: 220 }}>
+                <JsonEditor value={settings} onChange={setSettings} />
+              </div>
+            </div>
+
+            <div className="admin-form-actions">
+              <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
+                <Save size={15} />
+                <span>{saving ? 'Saving changes…' : 'Save Changes'}</span>
               </button>
             </div>
           </div>
-        )}
-      </div>
+        </form>
+      )}
 
-      {/* Plan Usage & Limits */}
-      <div className="admin-form" style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--admin-primary-light)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Gauge size={16} />
-          </div>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', margin: 0 }}>
-            Plan Usage & Limits
-          </h2>
-        </div>
-
-        {planLoading ? (
-          <div style={{ fontSize: 13, color: 'var(--admin-text-muted)' }}>Loading usage…</div>
-        ) : planStatus ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {usageRow('Portfolios', planStatus.usage?.portfolios ?? 0, planStatus.limits?.maxPortfolios, <Layers size={14} />)}
-            {usageRow('Total API Keys', planStatus.usage?.totalApiKeys ?? 0, planStatus.limits?.maxApiKeysPerPortfolio, <KeyRound size={14} />)}
-            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-              <div style={{ fontSize: 12, color: 'var(--admin-text-muted)' }}>
-                Max upload: <strong style={{ color: 'var(--admin-text)' }}>
-                  {Math.round((planStatus.limits?.maxUploadSizeBytes || 0) / (1024 * 1024))}MB
-                </strong>
+      {/* TAB 2: Plan & Billing */}
+      {activeTab === 'billing' && (
+        <div>
+          {/* Account Profile Box */}
+          <div className="admin-form" style={{ marginBottom: 24 }}>
+            <div className="settings-card-header">
+              <div className="settings-card-title-group">
+                <div
+                  className="settings-card-icon"
+                  style={{ background: 'var(--admin-primary-light)', color: 'var(--admin-primary)' }}
+                >
+                  <User size={18} />
+                </div>
+                <div>
+                  <h2 className="settings-card-title">Account Profile</h2>
+                  <p className="settings-card-subtitle">Your identity and subscription tier.</p>
+                </div>
               </div>
-              <div style={{ fontSize: 12, color: 'var(--admin-text-muted)' }}>
-                API rate limit: <strong style={{ color: 'var(--admin-text)' }}>
-                  {planStatus.limits?.rateLimitPerMin} req/min
-                </strong>
+              <span
+                className={`admin-badge ${
+                  user?.plan === 'agency'
+                    ? 'admin-badge-purple'
+                    : user?.plan === 'pro'
+                    ? 'admin-badge-blue'
+                    : 'admin-badge-green'
+                }`}
+                style={{ textTransform: 'uppercase', fontWeight: 700, padding: '4px 10px' }}
+              >
+                {user?.plan || 'Hobby'} Plan
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+              <div style={{ padding: '12px 14px', background: 'var(--admin-surface-subtle)', borderRadius: 'var(--admin-radius-sm)', border: '1px solid var(--admin-border-subtle)' }}>
+                <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Name</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--admin-text)', marginTop: 4 }}>{user?.name || 'Administrator'}</div>
+              </div>
+              <div style={{ padding: '12px 14px', background: 'var(--admin-surface-subtle)', borderRadius: 'var(--admin-radius-sm)', border: '1px solid var(--admin-border-subtle)' }}>
+                <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Email</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--admin-text)', marginTop: 4 }}>{user?.email}</div>
+              </div>
+              <div style={{ padding: '12px 14px', background: 'var(--admin-surface-subtle)', borderRadius: 'var(--admin-radius-sm)', border: '1px solid var(--admin-border-subtle)' }}>
+                <div style={{ fontSize: 11, color: 'var(--admin-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Role</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--admin-primary)', marginTop: 4, textTransform: 'capitalize' }}>
+                  {user?.role || 'Admin'}
+                </div>
               </div>
             </div>
           </div>
-        ) : (
-          <div style={{ fontSize: 13, color: 'var(--admin-text-muted)' }}>Could not load plan usage.</div>
-        )}
-      </div>
 
-      {/* Security: Change Password */}
-      <form className="admin-form" onSubmit={handleChangePassword} style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--admin-primary-light)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Lock size={16} />
+          {/* Plan Usage & Quotas */}
+          <div className="admin-form" style={{ marginBottom: 24 }}>
+            <div className="settings-card-header">
+              <div className="settings-card-title-group">
+                <div
+                  className="settings-card-icon"
+                  style={{ background: 'var(--admin-warning-light)', color: 'var(--admin-warning)' }}
+                >
+                  <Gauge size={18} />
+                </div>
+                <div>
+                  <h2 className="settings-card-title">Resource Usage &amp; Limits</h2>
+                  <p className="settings-card-subtitle">Real-time capacity tracking against your active tier.</p>
+                </div>
+              </div>
+            </div>
+
+            {planLoading ? (
+              <div style={{ fontSize: 13, color: 'var(--admin-text-muted)' }}>Loading resource quotas…</div>
+            ) : planStatus ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                {usageRow(
+                  'Portfolios Created',
+                  planStatus.usage?.portfolios ?? 0,
+                  planStatus.limits?.maxPortfolios,
+                  <Layers size={15} />
+                )}
+                {usageRow(
+                  'API Keys Active',
+                  planStatus.usage?.totalApiKeys ?? 0,
+                  planStatus.limits?.maxApiKeysPerPortfolio,
+                  <KeyRound size={15} />
+                )}
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: 12,
+                    marginTop: 8,
+                    paddingTop: 16,
+                    borderTop: '1px solid var(--admin-border-subtle)',
+                  }}
+                >
+                  <div style={{ fontSize: 13, color: 'var(--admin-text-secondary)' }}>
+                    Max Upload File Size:{' '}
+                    <strong style={{ color: 'var(--admin-text)' }}>
+                      {Math.round((planStatus.limits?.maxUploadSizeBytes || 0) / (1024 * 1024))} MB
+                    </strong>
+                  </div>
+                  <div style={{ fontSize: 13, color: 'var(--admin-text-secondary)' }}>
+                    API Rate Limits:{' '}
+                    <strong style={{ color: 'var(--admin-text)' }}>
+                      {planStatus.limits?.rateLimitPerMin} req/min
+                    </strong>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--admin-text-muted)' }}>Could not load plan quotas.</div>
+            )}
           </div>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', margin: 0 }}>Change Password</h2>
-        </div>
 
-        {pwdError && <div className="admin-form-error">{pwdError}</div>}
+          {/* Pricing Tiers Comparison */}
+          <div className="admin-form">
+            <div className="settings-card-header">
+              <div className="settings-card-title-group">
+                <div
+                  className="settings-card-icon"
+                  style={{ background: 'var(--admin-primary-light)', color: 'var(--admin-primary)' }}
+                >
+                  <Sparkles size={18} />
+                </div>
+                <div>
+                  <h2 className="settings-card-title">Available Subscription Tiers</h2>
+                  <p className="settings-card-subtitle">
+                    Instant activation powered by Razorpay secure checkout.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-        <div className="admin-form-grid" style={{ marginBottom: 16 }}>
-          <div className="admin-field">
-            <label className="admin-field-label">Current Password</label>
-            <input
-              type="password"
-              className="admin-input"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
+            <div className="settings-pricing-grid">
+              {/* Free Tier */}
+              <div className={`settings-pricing-card ${!user?.plan || user?.plan === 'free' || user?.plan === 'hobby' ? 'current' : ''}`}>
+                {(!user?.plan || user?.plan === 'free' || user?.plan === 'hobby') && (
+                  <div className="settings-pricing-badge">
+                    <span className="admin-badge admin-badge-green">Current Plan</span>
+                  </div>
+                )}
+                <div>
+                  <h3 className="settings-pricing-title">Hobby / Starter</h3>
+                  <p className="settings-pricing-desc">Perfect for personal portfolios and getting started.</p>
+                  <div className="settings-pricing-price">
+                    <span className="settings-pricing-amount">₹0</span>
+                    <span className="settings-pricing-period">/ forever</span>
+                  </div>
+                  <ul className="settings-pricing-features">
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>1 Portfolio Workspace</span>
+                    </li>
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>2 Active API Keys</span>
+                    </li>
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>5MB Upload Limit</span>
+                    </li>
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>Standard Community Support</span>
+                    </li>
+                  </ul>
+                </div>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-secondary admin-btn-block"
+                  disabled={!user?.plan || user?.plan === 'free' || user?.plan === 'hobby'}
+                >
+                  {(!user?.plan || user?.plan === 'free' || user?.plan === 'hobby') ? 'Current Active Plan' : 'Free Tier'}
+                </button>
+              </div>
+
+              {/* Pro Tier */}
+              <div className={`settings-pricing-card featured ${user?.plan === 'pro' ? 'current' : ''}`}>
+                <div className="settings-pricing-badge">
+                  {user?.plan === 'pro' ? (
+                    <span className="admin-badge admin-badge-green">Current Plan</span>
+                  ) : (
+                    <span className="admin-badge admin-badge-blue">Most Popular</span>
+                  )}
+                </div>
+                <div>
+                  <h3 className="settings-pricing-title">Developer Pro</h3>
+                  <p className="settings-pricing-desc">For serious developers needing multi-site capabilities.</p>
+                  <div className="settings-pricing-price">
+                    <span className="settings-pricing-amount">₹799</span>
+                    <span className="settings-pricing-period">/ month</span>
+                  </div>
+                  <ul className="settings-pricing-features">
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>Up to 5 Portfolios</span>
+                    </li>
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>10 API Keys per Workspace</span>
+                    </li>
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>25MB Upload Limit</span>
+                    </li>
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>Custom Domain Ready</span>
+                    </li>
+                  </ul>
+                </div>
+                {user?.plan === 'pro' ? (
+                  <button type="button" className="admin-btn admin-btn-secondary admin-btn-block" disabled>
+                    Current Active Plan
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-primary admin-btn-block"
+                    onClick={() => handleRazorpayUpgrade('pro', 'Developer Pro')}
+                    disabled={checkoutLoading || user?.plan === 'agency'}
+                  >
+                    <Zap size={14} />
+                    <span>{user?.plan === 'agency' ? 'Included in Agency' : 'Upgrade to Pro'}</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Agency Tier */}
+              <div className={`settings-pricing-card ${user?.plan === 'agency' ? 'current' : ''}`}>
+                {user?.plan === 'agency' && (
+                  <div className="settings-pricing-badge">
+                    <span className="admin-badge admin-badge-green">Current Plan</span>
+                  </div>
+                )}
+                <div>
+                  <h3 className="settings-pricing-title">Agency &amp; Teams</h3>
+                  <p className="settings-pricing-desc">Uncapped capabilities for studios and agencies.</p>
+                  <div className="settings-pricing-price">
+                    <span className="settings-pricing-amount">₹2,499</span>
+                    <span className="settings-pricing-period">/ month</span>
+                  </div>
+                  <ul className="settings-pricing-features">
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>Unlimited Portfolios</span>
+                    </li>
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>Unlimited API Keys</span>
+                    </li>
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>100MB Upload Limits</span>
+                    </li>
+                    <li className="settings-pricing-feature">
+                      <CheckCircle2 size={15} />
+                      <span>Priority High-Bandwidth SLA</span>
+                    </li>
+                  </ul>
+                </div>
+                {user?.plan === 'agency' ? (
+                  <button type="button" className="admin-btn admin-btn-secondary admin-btn-block" disabled>
+                    Current Active Plan
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-primary admin-btn-block"
+                    onClick={() => handleRazorpayUpgrade('agency', 'Agency')}
+                    disabled={checkoutLoading}
+                  >
+                    <Zap size={14} />
+                    <span>Upgrade to Agency</span>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="admin-field">
-            <label className="admin-field-label">New Password</label>
-            <input
-              type="password"
-              className="admin-input"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-              placeholder="At least 8 characters"
-            />
+        </div>
+      )}
+
+      {/* TAB 3: Security & Password */}
+      {activeTab === 'security' && (
+        <form className="admin-form" onSubmit={handleChangePassword}>
+          <div className="settings-card-header">
+            <div className="settings-card-title-group">
+              <div
+                className="settings-card-icon"
+                style={{ background: 'var(--admin-primary-light)', color: 'var(--admin-primary)' }}
+              >
+                <Lock size={18} />
+              </div>
+              <div>
+                <h2 className="settings-card-title">Change Password</h2>
+                <p className="settings-card-subtitle">
+                  Ensure your account is protected by using a strong, unique password.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="admin-field">
-            <label className="admin-field-label">Confirm New Password</label>
-            <input
-              type="password"
-              className="admin-input"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
+
+          {pwdError && <div className="admin-form-error">{pwdError}</div>}
+
+          <div className="admin-form-grid" style={{ marginBottom: 20 }}>
+            <div className="admin-field">
+              <label className="admin-field-label">Current Password</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showCurrentPwd ? 'text' : 'password'}
+                  className="admin-input"
+                  style={{ paddingRight: 36 }}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  placeholder="Enter current password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPwd(!showCurrentPwd)}
+                  style={{
+                    position: 'absolute',
+                    right: 8,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--admin-text-muted)',
+                    padding: 4,
+                  }}
+                  tabIndex={-1}
+                >
+                  {showCurrentPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="admin-field">
+              <label className="admin-field-label">New Password</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showNewPwd ? 'text' : 'password'}
+                  className="admin-input"
+                  style={{ paddingRight: 36 }}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  placeholder="At least 8 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPwd(!showNewPwd)}
+                  style={{
+                    position: 'absolute',
+                    right: 8,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--admin-text-muted)',
+                    padding: 4,
+                  }}
+                  tabIndex={-1}
+                >
+                  {showNewPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              <span className="admin-field-hint">Must contain at least 8 characters.</span>
+            </div>
+
+            <div className="admin-field">
+              <label className="admin-field-label">Confirm New Password</label>
+              <input
+                type="password"
+                className="admin-input"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+                placeholder="Re-enter new password"
+              />
+            </div>
+          </div>
+
+          <div className="admin-form-actions">
+            <button type="submit" className="admin-btn admin-btn-primary" disabled={pwdSaving}>
+              <Lock size={15} />
+              <span>{pwdSaving ? 'Updating password…' : 'Update Password'}</span>
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* TAB 4: Danger Zone */}
+      {activeTab === 'danger' && (
+        <div className="settings-danger-box">
+          <div className="settings-danger-header">
+            <AlertTriangle size={20} />
+            <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Danger Zone Actions</h2>
+          </div>
+          <p style={{ fontSize: 13, color: '#7f1d1d', margin: '0 0 20px 0' }}>
+            Actions taken here are irreversible. Please proceed with utmost caution.
+          </p>
+
+          <div className="settings-danger-item">
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)' }}>
+                Delete Portfolio Workspace
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--admin-text-muted)', margin: '4px 0 0' }}>
+                Permanently delete "{activePortfolio.name}" along with all of its custom sections, media mappings, and API keys.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="admin-btn admin-btn-danger"
+              onClick={() => setDeleteConfirmOpen(true)}
+              disabled={deleting}
+              style={{ flexShrink: 0 }}
+            >
+              <Trash2 size={14} />
+              <span>{deleting ? 'Deleting…' : 'Delete Portfolio'}</span>
+            </button>
+          </div>
+
+          <div className="settings-danger-item">
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)' }}>
+                Delete Entire Account
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--admin-text-muted)', margin: '4px 0 0' }}>
+                Permanently delete your account ({user?.email}) and all owned portfolios, API keys, and uploads.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="admin-btn admin-btn-danger-ghost"
+              onClick={() => setDeleteAccountOpen(true)}
+              style={{ flexShrink: 0, border: '1px solid var(--admin-danger-border)' }}
+            >
+              <Trash2 size={14} />
+              <span>Delete My Account</span>
+            </button>
           </div>
         </div>
+      )}
 
-        <button type="submit" className="admin-btn admin-btn-primary" disabled={pwdSaving}>
-          <Lock size={15} />
-          <span>{pwdSaving ? 'Updating…' : 'Update Password'}</span>
-        </button>
-      </form>
-
-      {/* Portfolio Config Form */}
-      <form className="admin-form" onSubmit={submit}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 16 }}>
-          Portfolio Metadata
-        </div>
-        <div className="admin-form-grid">
-          <Field label="Portfolio Name">
-            <TextInput value={name} onChange={setName} placeholder="My Portfolio" />
-          </Field>
-          <Field label="Public Slug" hint="Unique slug used in your portfolio frontend and API responses.">
-            <TextInput value={activePortfolio.slug} onChange={() => {}} disabled />
-          </Field>
-        </div>
-
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', margin: '24px 0 6px' }}>
-          Custom Settings & Theme JSON
-        </div>
-        <p className="admin-field-hint" style={{ marginBottom: 14 }}>
-          Arbitrary JSON payload delivered under <code>portfolio.settings</code>. Configure color accents, theme preferences, or analytics IDs.
-        </p>
-        <div style={{ minHeight: 240 }}>
-          <JsonEditor value={settings} onChange={setSettings} />
-        </div>
-
-        <div className="admin-form-actions">
-          <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
-            <Save size={15} />
-            <span>{saving ? 'Saving…' : 'Save Changes'}</span>
-          </button>
-        </div>
-      </form>
-
-      {/* Danger Zone */}
-      <div
-        style={{
-          border: '1px solid var(--admin-danger-border)',
-          background: 'var(--admin-danger-light)',
-          borderRadius: 'var(--admin-radius)',
-          padding: 22,
-          marginTop: 32,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--admin-danger)', marginBottom: 6 }}>
-          <AlertTriangle size={16} />
-          <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>Danger Zone</h3>
-        </div>
-        <p style={{ fontSize: 13, color: '#991b1b', margin: '0 0 16px 0' }}>
-          Deleting this portfolio workspace permanently deletes all of its content sections, media mappings, and API keys.
-        </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-          <button
-            type="button"
-            className="admin-btn admin-btn-danger"
-            onClick={() => setDeleteConfirmOpen(true)}
-            disabled={deleting}
-          >
-            <Trash2 size={14} />
-            <span>{deleting ? 'Deleting…' : 'Delete Portfolio Workspace'}</span>
-          </button>
-          <button
-            type="button"
-            className="admin-btn admin-btn-danger-ghost"
-            onClick={() => setDeleteAccountOpen(true)}
-          >
-            <Trash2 size={14} />
-            <span>Delete My Account</span>
-          </button>
-        </div>
-        <p style={{ fontSize: 12, color: '#991b1b', margin: 0 }}>
-          Deleting your account permanently removes all portfolios, sections, API keys, and media. This cannot be undone.
-        </p>
-      </div>
-
+      {/* Dialogs */}
       {deleteConfirmOpen && (
         <ConfirmDialog
           title="Delete Portfolio Workspace"
@@ -564,7 +1114,11 @@ export default function Settings() {
         <ConfirmDialog
           title="Permanently Delete Your Account"
           message="This will permanently delete your account and all of your portfolios, sections, API keys, and media files. This action cannot be undone."
-          onCancel={() => { setDeleteAccountOpen(false); setDeleteAccountError(''); setDeleteAccountPwd(''); }}
+          onCancel={() => {
+            setDeleteAccountOpen(false);
+            setDeleteAccountError('');
+            setDeleteAccountPwd('');
+          }}
           onConfirm={handleDeleteAccount}
           confirmLabel="Delete My Account"
         >
