@@ -15,7 +15,6 @@ import {
   Lock,
   Gauge,
   Layers,
-  Loader2,
 } from 'lucide-react';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
 import AdminLoader from '../../admin/components/AdminLoader';
@@ -189,6 +188,13 @@ export default function Settings() {
 
   return (
     <div className="admin-page">
+      {checkoutLoading && (
+        <AdminLoader
+          fullscreen
+          message="Opening secure checkout…"
+          subtext="Please wait while we connect to the Razorpay payment gateway."
+        />
+      )}
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Workspace Settings</h1>
@@ -311,7 +317,6 @@ export default function Settings() {
                   }}
                   disabled={checkoutLoading}
                 >
-                  {checkoutLoading && <Loader2 size={14} className="spin" />}
                   <span>Upgrade to Pro (₹799/mo)</span>
                 </button>
               )}
@@ -375,7 +380,6 @@ export default function Settings() {
                 }}
                 disabled={checkoutLoading}
               >
-                {checkoutLoading && <Loader2 size={14} className="spin" />}
                 <span>Upgrade to Agency (₹2,499/mo)</span>
               </button>
             </div>
