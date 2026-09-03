@@ -34,6 +34,12 @@ import AdminLoader from '../../admin/components/AdminLoader';
 
 const THEME_PRESETS = [
   {
+    name: 'Midnight Noir (Default)',
+    color: '#090d16',
+    accent: '#1e293b',
+    settings: { theme: 'noir', accentColor: '#090d16', radius: '12px' },
+  },
+  {
     name: 'Modern Indigo',
     color: '#4f46e5',
     accent: '#6366f1',
@@ -421,8 +427,88 @@ export default function Settings() {
       {/* TAB 1: General & Theme */}
       {activeTab === 'general' && (
         <form onSubmit={submit}>
-          {/* Portfolio Metadata Card */}
-          <div className="admin-form">
+          {/* Live Theme Mockup Preview */}
+          <div className="theme-studio-preview-card">
+            <div className="theme-studio-preview-header">
+              <div className="theme-studio-preview-dots">
+                <span className="theme-studio-dot" style={{ background: '#ef4444' }} />
+                <span className="theme-studio-dot" style={{ background: '#f59e0b' }} />
+                <span className="theme-studio-dot" style={{ background: '#10b981' }} />
+                <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--admin-text-muted)' }}>
+                  Interactive Live Theme Preview
+                </span>
+              </div>
+              <span className="admin-badge admin-badge-blue" style={{ fontSize: 11, padding: '2px 8px' }}>
+                {settings?.theme ? settings.theme.toUpperCase() : 'MODERN'}
+              </span>
+            </div>
+
+            <div
+              className="theme-studio-preview-canvas"
+              style={{
+                '--canvas-accent': settings?.accentColor || '#4f46e5',
+                background: settings?.darkMode === false ? '#ffffff' : 'var(--admin-surface)',
+              }}
+            >
+              <div
+                className="theme-studio-avatar-mock"
+                style={{
+                  background: `linear-gradient(135deg, ${settings?.accentColor || '#4f46e5'} 0%, #1e1b4b 100%)`,
+                }}
+              >
+                {(name || 'G')[0]}
+              </div>
+              <h3 className="theme-studio-name-mock">{name || 'Your Portfolio Name'}</h3>
+              <div
+                className="theme-studio-badge-mock"
+                style={{
+                  background: `${settings?.accentColor || '#4f46e5'}18`,
+                  color: settings?.accentColor || '#4f46e5',
+                  border: `1px solid ${settings?.accentColor || '#4f46e5'}33`,
+                  borderRadius: settings?.radius || '10px',
+                }}
+              >
+                <Sparkles size={12} />
+                <span>Full Stack Developer &amp; Engineer</span>
+              </div>
+              <div className="theme-studio-buttons-row">
+                <button
+                  type="button"
+                  style={{
+                    padding: '8px 18px',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    background: settings?.accentColor || '#4f46e5',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: settings?.radius || '10px',
+                    cursor: 'pointer',
+                    boxShadow: `0 4px 14px 0 ${settings?.accentColor || '#4f46e5'}40`,
+                  }}
+                >
+                  View Projects
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    padding: '8px 18px',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    background: 'transparent',
+                    color: 'var(--admin-text)',
+                    border: '1px solid var(--admin-border)',
+                    borderRadius: settings?.radius || '10px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Contact Me
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Portfolio Identity Card */}
+          <div className="admin-form" style={{ marginBottom: 24 }}>
             <div className="settings-card-header">
               <div className="settings-card-title-group">
                 <div
@@ -441,7 +527,7 @@ export default function Settings() {
             </div>
 
             <div className="admin-form-grid">
-              <Field label="Portfolio Name" hint="The display name of your portfolio shown in header and titles.">
+              <Field label="Portfolio Name" hint="The display name of your portfolio shown in headers and SEO titles.">
                 <TextInput
                   value={name}
                   onChange={setName}
@@ -471,7 +557,7 @@ export default function Settings() {
           </div>
 
           {/* Quick Theme Presets */}
-          <div className="admin-form">
+          <div className="admin-form" style={{ marginBottom: 24 }}>
             <div className="settings-card-header">
               <div className="settings-card-title-group">
                 <div
@@ -481,109 +567,85 @@ export default function Settings() {
                   <Palette size={18} />
                 </div>
                 <div>
-                  <h2 className="settings-card-title">Theme Presets</h2>
+                  <h2 className="settings-card-title">Theme Presets &amp; Color Palettes</h2>
                   <p className="settings-card-subtitle">
-                    Select a curated color palette preset or customize manually below.
+                    Select a curated color palette preset with tailored gradients and radius rules.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 16 }}>
+            <div className="theme-presets-grid">
               {THEME_PRESETS.map((preset) => {
                 const isCurrentPreset =
                   settings?.accentColor === preset.color ||
                   settings?.theme === preset.settings.theme;
 
                 return (
-                  <button
+                  <div
                     key={preset.name}
-                    type="button"
+                    className={`theme-preset-card ${isCurrentPreset ? 'active' : ''}`}
                     onClick={() => applyThemePreset(preset)}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 10,
-                      padding: '12px 14px',
-                      borderRadius: 'var(--admin-radius-sm)',
-                      border: isCurrentPreset
-                        ? `2px solid ${preset.color}`
-                        : '1px solid var(--admin-border)',
-                      background: isCurrentPreset
-                        ? 'var(--admin-surface-subtle)'
-                        : 'var(--admin-surface)',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'var(--admin-transition)',
-                      boxShadow: isCurrentPreset
-                        ? `0 2px 8px -1px ${preset.color}33`
-                        : 'none',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isCurrentPreset) {
-                        e.currentTarget.style.borderColor = preset.color;
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isCurrentPreset) {
-                        e.currentTarget.style.borderColor = 'var(--admin-border)';
-                        e.currentTarget.style.transform = 'none';
-                      }
+                      borderColor: isCurrentPreset ? preset.color : 'var(--admin-border)',
+                      boxShadow: isCurrentPreset ? `0 4px 14px -2px ${preset.color}30` : 'none',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span
-                        style={{
-                          width: 20,
-                          height: 20,
-                          borderRadius: '50%',
-                          background: preset.color,
-                          boxShadow: `0 0 0 2px #fff, 0 0 0 3px ${preset.color}`,
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-text)' }}>
-                        {preset.name}
-                      </span>
+                    <div className="theme-preset-color-strip">
+                      <span style={{ flex: 2, background: preset.color }} />
+                      <span style={{ flex: 1, background: preset.accent }} />
                     </div>
-                    {isCurrentPreset && (
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: 18,
-                          height: 18,
-                          borderRadius: '50%',
-                          background: preset.color,
-                          color: '#fff',
-                        }}
-                      >
-                        <Check size={11} strokeWidth={3} />
-                      </span>
-                    )}
-                  </button>
+                    <div className="theme-preset-info">
+                      <div>
+                        <div className="theme-preset-name">{preset.name}</div>
+                        <div className="theme-preset-badge">Radius: {preset.settings.radius}</div>
+                      </div>
+                      {isCurrentPreset ? (
+                        <span
+                          style={{
+                            width: 22,
+                            height: 22,
+                            borderRadius: '50%',
+                            background: preset.color,
+                            color: '#fff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Check size={12} strokeWidth={3} />
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: '50%',
+                            border: `2px solid ${preset.color}`,
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Custom Settings & Theme Controls */}
-          <div className="admin-form">
+          {/* Theme Customization & Typography Controls */}
+          <div className="admin-form" style={{ marginBottom: 24 }}>
             <div className="settings-card-header">
               <div className="settings-card-title-group">
                 <div
                   className="settings-card-icon"
                   style={{ background: 'var(--admin-surface-subtle)', color: 'var(--admin-text)' }}
                 >
-                  <Code2 size={18} />
+                  <Sliders size={18} />
                 </div>
                 <div>
-                  <h2 className="settings-card-title">Theme Customization &amp; Parameters</h2>
+                  <h2 className="settings-card-title">Design Controls &amp; Styling</h2>
                   <p className="settings-card-subtitle">
-                    Fine-tune branding colors, border styling, or edit raw <code>portfolio.settings</code> JSON directly.
+                    Customize primary accent colors, component curvature, and typography.
                   </p>
                 </div>
               </div>
@@ -614,7 +676,7 @@ export default function Settings() {
                 </div>
               </Field>
 
-              <Field label="Border Radius Style" hint="Corner curvature applied to cards, buttons, and badges.">
+              <Field label="Corner Curvature (Border Radius)" hint="Radius applied to cards, buttons, and badges.">
                 <select
                   className="admin-input"
                   value={settings?.radius || '10px'}
@@ -627,15 +689,52 @@ export default function Settings() {
                   <option value="20px">Pill / Soft (20px)</option>
                 </select>
               </Field>
+
+              <Field label="Typography Font Family" hint="Font style applied to headers and body content.">
+                <select
+                  className="admin-input"
+                  value={settings?.fontFamily || 'Inter, sans-serif'}
+                  onChange={(e) => setSettings((prev) => ({ ...prev, fontFamily: e.target.value }))}
+                >
+                  <option value="Inter, sans-serif">Inter (Modern &amp; Clean)</option>
+                  <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans (Tech / SaaS)</option>
+                  <option value="'Outfit', sans-serif">Outfit (Bold &amp; Expressive)</option>
+                  <option value="'Space Grotesk', sans-serif">Space Grotesk (Engineering / Code)</option>
+                  <option value="'Playfair Display', serif">Playfair Display (Editorial / Elegant)</option>
+                </select>
+              </Field>
+
+              <Field label="Portfolio Site Subtitle" hint="Meta tagline delivered in portfolio API response.">
+                <TextInput
+                  value={settings?.siteSubtitle || ''}
+                  onChange={(val) => setSettings((prev) => ({ ...prev, siteSubtitle: val }))}
+                  placeholder="e.g. Full Stack Web Developer &amp; Engineer"
+                />
+              </Field>
+            </div>
+          </div>
+
+          {/* Advanced JSON Parameters */}
+          <div className="admin-form">
+            <div className="settings-card-header">
+              <div className="settings-card-title-group">
+                <div
+                  className="settings-card-icon"
+                  style={{ background: 'var(--admin-surface-subtle)', color: 'var(--admin-text)' }}
+                >
+                  <Code2 size={18} />
+                </div>
+                <div>
+                  <h2 className="settings-card-title">Advanced Settings &amp; JSON Editor</h2>
+                  <p className="settings-card-subtitle">
+                    Direct access to raw <code>portfolio.settings</code> object for developer parameters and tokens.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-text)', marginBottom: 6 }}>
-                Advanced Settings JSON
-              </div>
-              <div style={{ minHeight: 220 }}>
-                <JsonEditor value={settings} onChange={setSettings} />
-              </div>
+            <div style={{ minHeight: 220, marginBottom: 16 }}>
+              <JsonEditor value={settings} onChange={setSettings} />
             </div>
 
             <div className="admin-form-actions">

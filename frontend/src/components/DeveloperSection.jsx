@@ -14,7 +14,7 @@ export default function DeveloperSection({ site = {} }) {
   const githubUrl = site.github || 'https://github.com/Gabrial-8467';
 
   return (
-    <section ref={sectionRef} className="dev-modern-section">
+    <section id="developer" ref={sectionRef} className="dev-modern-section">
       <div className="section-container">
         <div className={`dev-cta-card ${isInView ? 'in-view' : ''}`}>
           <div className="dev-card-left">

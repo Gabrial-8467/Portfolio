@@ -30,6 +30,7 @@ const initialState = {
   education: localEducation,
   achievements: localAchievements,
   sections: [],
+  config: {},
 };
 
 function sectionValue(sections, key, fallback) {
@@ -91,6 +92,7 @@ export function usePortfolioData(slug, customApiKey) {
           education: sectionValue(sections, 'education', localEducation),
           achievements: sectionValue(sections, 'achievements', localAchievements),
           sections: Array.isArray(sections) ? sections : [],
+          config: portfolio?.config || {},
         },
       });
     } catch (err) {
