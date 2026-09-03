@@ -1,5 +1,12 @@
 import { Router } from 'express';
-import { login, register, me } from '../controllers/authController.js';
+import {
+  login,
+  register,
+  me,
+  changePassword,
+  deleteAccount,
+  planStatus,
+} from '../controllers/authController.js';
 import { githubLoginRedirect, githubCallback } from '../controllers/oauthController.js';
 import { authRequired } from '../middleware/auth.js';
 import { sanitize, validators } from '../middleware/validate.js';
@@ -23,6 +30,22 @@ router.post(
   register
 );
 router.get('/me', authRequired, me);
+router.get('/plan', authRequired, planStatus);
+router.post(
+  '/change-password',
+  authRequired,
+  sanitize({
+    currentPassword: validators.str,
+    newPassword: validators.str,
+  }),
+  changePassword
+);
+router.post(
+  '/delete-account',
+  authRequired,
+  sanitize({ password: validators.str }),
+  deleteAccount
+);
 
 // GitHub OAuth Endpoints
 router.get('/github', githubLoginRedirect);

@@ -83,6 +83,10 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Payment verification details are incomplete");
   }
 
+  if (!PLAN_PRICES[planId]) {
+    throw new ApiError(400, "Invalid plan selected. Choose 'pro' or 'agency'");
+  }
+
   // Cryptographic HMAC SHA-256 signature verification
   const expectedSignature = crypto
     .createHmac("sha256", config.razorpayKeySecret)

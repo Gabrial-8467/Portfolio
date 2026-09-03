@@ -13,7 +13,7 @@ import {
 
 export default function Media() {
   const { addToast } = useToast();
-  const { activePortfolio } = useAuth();
+  const { activePortfolio, user } = useAuth();
   const fileInputRef = useRef(null);
   const cacheKey = `portfolio_media_cache_${activePortfolio?._id || 'none'}`;
   const [uploading, setUploading] = useState(false);
@@ -27,6 +27,13 @@ export default function Media() {
     }
   });
   const [copiedUrl, setCopiedUrl] = useState(null);
+
+  const maxUploadMb = {
+    hobby: 5,
+    pro: 50,
+    agency: 100,
+  }[user?.plan] || 5;
+  const maxUploadBytes = maxUploadMb * 1024 * 1024;
 
   useEffect(() => {
     // Reload cached uploads when the active portfolio changes
@@ -52,8 +59,11 @@ export default function Media() {
 
   const uploadSingleFile = async (file) => {
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      addToast('File size must be under 5MB', 'error');
+    if (file.size > maxUploadBytes) {
+      addToast(
+        `File size must be under ${maxUploadMb}MB for your ${user?.plan || 'hobby'} plan`,
+        'error'
+      );
       return;
     }
 
@@ -189,7 +199,7 @@ const removeMedia = async (url) => {
           {uploading ? 'Uploading asset to server…' : 'Drop images here, or click to browse'}
         </div>
         <div style={{ fontSize: 12, color: 'var(--admin-text-muted)' }}>
-          PNG, JPG, WEBP, GIF, SVG or AVIF up to 5MB
+          PNG, JPG, WEBP, GIF, SVG or AVIF up to {maxUploadMb}MB
         </div>
       </div>
 

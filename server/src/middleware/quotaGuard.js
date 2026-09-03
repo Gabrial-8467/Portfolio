@@ -1,7 +1,25 @@
 import { ApiError } from "./errorHandler.js";
 import { Portfolio } from "../models/Portfolio.js";
 import { ApiKey } from "../models/ApiKey.js";
+import { User } from "../models/User.js";
 import { getPlanConfig } from "../config/plans.js";
+
+/**
+ * Resolve the current user's plan. API-key-authenticated requests only set
+ * req.apiKey, not req.user, so load the plan from the key's owner when needed.
+ */
+async function resolveUserPlan(req) {
+  if (req.user && req.user.plan) return req.user.plan;
+  if (req.apiKey && req.apiKey.owner) {
+    try {
+      const owner = await User.findById(req.apiKey.owner).select("plan").lean();
+      if (owner && owner.plan) return owner.plan;
+    } catch {
+      /* fallthrough */
+    }
+  }
+  return "hobby";
+}
 
 /**
  * Middleware: Enforces maximum number of portfolios allowed on user plan
@@ -41,14 +59,20 @@ export async function guardApiKeyQuota(req, res, next) {
     const ownerId = (req.apiKey && req.apiKey.owner) || (req.user && req.user._id);
     if (!ownerId) throw new ApiError(401, "Authentication required");
 
-    // Load owner user if not directly attached
-    const userPlan = req.user?.plan || "hobby";
-    const plan = getPlanConfig(userPlan);
+    const planName = await resolveUserPlan(req);
+    const plan = getPlanConfig(planName);
 
     if (plan.maxApiKeysPerPortfolio === Infinity) return next();
 
-    const portfolioId = req.body.portfolioId || req.portfolio?._id;
-    if (!portfolioId) return next();
+    const portfolioId =
+      req.body.portfolioId ||
+      req.portfolio?._id ||
+      (req.apiKey && req.apiKey.portfolio) ||
+      req.query.portfolioId;
+
+    if (!portfolioId) {
+      throw new ApiError(400, "Unable to determine portfolio for API key quota check");
+    }
 
     const keyCount = await ApiKey.countDocuments({ portfolio: portfolioId });
     if (keyCount >= plan.maxApiKeysPerPortfolio) {
@@ -73,26 +97,30 @@ export async function guardApiKeyQuota(req, res, next) {
 /**
  * Middleware: Enforces maximum file size limit for uploaded media assets based on user plan
  */
-export function guardUploadQuota(req, res, next) {
+export async function guardUploadQuota(req, res, next) {
   if (!req.file) return next();
-  const userPlan = req.user?.plan || "hobby";
-  const plan = getPlanConfig(userPlan);
+  try {
+    const planName = await resolveUserPlan(req);
+    const plan = getPlanConfig(planName);
 
-  if (req.file.size > plan.maxUploadSizeBytes) {
-    const limitMb = Math.round(plan.maxUploadSizeBytes / (1024 * 1024));
-    return next(
-      new ApiError(
-        413,
-        `File size exceeds the ${limitMb}MB limit for your ${plan.name} tier. Upgrade to Developer Pro or Agency for larger file uploads.`,
-        {
-          code: "FILE_SIZE_LIMIT_EXCEEDED",
-          plan: plan.id,
-          fileSize: req.file.size,
-          maxAllowedBytes: plan.maxUploadSizeBytes,
-          upgradeUrl: "/#pricing",
-        }
-      )
-    );
+    if (req.file.size > plan.maxUploadSizeBytes) {
+      const limitMb = Math.round(plan.maxUploadSizeBytes / (1024 * 1024));
+      return next(
+        new ApiError(
+          413,
+          `File size exceeds the ${limitMb}MB limit for your ${plan.name} tier. Upgrade to Developer Pro or Agency for larger file uploads.`,
+          {
+            code: "FILE_SIZE_LIMIT_EXCEEDED",
+            plan: plan.id,
+            fileSize: req.file.size,
+            maxAllowedBytes: plan.maxUploadSizeBytes,
+            upgradeUrl: "/#pricing",
+          }
+        )
+      );
+    }
+    return next();
+  } catch (err) {
+    return next(err);
   }
-  next();
 }

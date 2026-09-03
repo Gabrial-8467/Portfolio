@@ -5,12 +5,22 @@ import { api, getPublicPortfolioUrl } from '../../api/client';
 import { useToast } from '../../admin/components/useToast';
 import JsonEditor from '../../admin/components/JsonEditor';
 import Field, { TextInput } from '../../admin/components/Field';
-import { Save, ArrowUpRight, Trash2, AlertTriangle, User } from 'lucide-react';
+import {
+  Save,
+  ArrowUpRight,
+  Trash2,
+  AlertTriangle,
+  User,
+  KeyRound,
+  Lock,
+  Gauge,
+  Layers,
+} from 'lucide-react';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
 import AdminLoader from '../../admin/components/AdminLoader';
 
 export default function Settings() {
-  const { user, activePortfolio, refreshPortfolios } = useAuth();
+  const { user, activePortfolio, refreshPortfolios, logout } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -22,8 +32,42 @@ export default function Settings() {
   const [error, setError] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
+  // Plan usage state
+  const [planStatus, setPlanStatus] = useState(null);
+  const [planLoading, setPlanLoading] = useState(true);
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwdSaving, setPwdSaving] = useState(false);
+  const [pwdError, setPwdError] = useState('');
+
+  // Delete account state
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [deleteAccountPwd, setDeleteAccountPwd] = useState('');
+  const [deleteAccountError, setDeleteAccountError] = useState('');
+
   const activePortfolioId = activePortfolio?._id;
   const activePortfolioName = activePortfolio?.name;
+
+  useEffect(() => {
+    let cancelled = false;
+    api.auth
+      .plan()
+      .then((data) => {
+        if (!cancelled) setPlanStatus(data || null);
+      })
+      .catch(() => {
+        if (!cancelled) setPlanStatus(null);
+      })
+      .finally(() => {
+        if (!cancelled) setPlanLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?._id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +116,65 @@ export default function Settings() {
   const handleDeletePortfolio = () => {
     addToast('Portfolio workspace deletion is not available via API key. Manage portfolios at the admin console.', 'info');
     setDeleteConfirmOpen(false);
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPwdError('');
+    if (newPassword !== confirmPassword) {
+      setPwdError('New password and confirmation do not match');
+      return;
+    }
+    setPwdSaving(true);
+    try {
+      await api.auth.changePassword(currentPassword, newPassword);
+      addToast('Password updated successfully', 'success');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      setPwdError(err.message || 'Failed to update password');
+    } finally {
+      setPwdSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteAccountError('');
+    if (!deleteAccountPwd) {
+      setDeleteAccountError('Please enter your password to confirm deletion');
+      return;
+    }
+    try {
+      await api.auth.deleteAccount(deleteAccountPwd);
+      logout();
+      navigate('/admin/login', { replace: true });
+    } catch (err) {
+      setDeleteAccountError(err.message || 'Failed to delete account');
+    }
+  };
+
+  const usageRow = (label, used, max, icon) => {
+    const isUnlimited = max === 'Unlimited';
+    const pct = isUnlimited ? 0 : Math.min(100, Math.round((used / max) * 100));
+    return (
+      <div style={{ width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--admin-text)' }}>
+            {icon}
+            <span>{label}</span>
+          </div>
+          <span style={{ fontSize: 12, color: 'var(--admin-text-muted)' }}>
+            {used} / {max}
+          </span>
+        </div>
+        <div style={{ height: 6, background: 'var(--admin-border)', borderRadius: 9999, overflow: 'hidden' }}>
+          {!isUnlimited && (
+            <div style={{ height: '100%', width: `${pct}%`, background: pct >= 90 ? 'var(--admin-danger)' : 'var(--admin-primary)', borderRadius: 9999, transition: 'width 0.3s ease' }} />
+          )}
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -268,6 +371,97 @@ export default function Settings() {
         )}
       </div>
 
+      {/* Plan Usage & Limits */}
+      <div className="admin-form" style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--admin-primary-light)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Gauge size={16} />
+          </div>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', margin: 0 }}>
+            Plan Usage & Limits
+          </h2>
+        </div>
+
+        {planLoading ? (
+          <div style={{ fontSize: 13, color: 'var(--admin-text-muted)' }}>Loading usage…</div>
+        ) : planStatus ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {usageRow('Portfolios', planStatus.usage?.portfolios ?? 0, planStatus.limits?.maxPortfolios, <Layers size={14} />)}
+            {usageRow('Total API Keys', planStatus.usage?.totalApiKeys ?? 0, planStatus.limits?.maxApiKeysPerPortfolio, <KeyRound size={14} />)}
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div style={{ fontSize: 12, color: 'var(--admin-text-muted)' }}>
+                Max upload: <strong style={{ color: 'var(--admin-text)' }}>
+                  {Math.round((planStatus.limits?.maxUploadSizeBytes || 0) / (1024 * 1024))}MB
+                </strong>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--admin-text-muted)' }}>
+                API rate limit: <strong style={{ color: 'var(--admin-text)' }}>
+                  {planStatus.limits?.rateLimitPerMin} req/min
+                </strong>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ fontSize: 13, color: 'var(--admin-text-muted)' }}>Could not load plan usage.</div>
+        )}
+      </div>
+
+      {/* Security: Change Password */}
+      <form className="admin-form" onSubmit={handleChangePassword} style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--admin-primary-light)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Lock size={16} />
+          </div>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', margin: 0 }}>Change Password</h2>
+        </div>
+
+        {pwdError && <div className="admin-form-error">{pwdError}</div>}
+
+        <div className="admin-form-grid" style={{ marginBottom: 16 }}>
+          <div className="admin-field">
+            <label className="admin-field-label">Current Password</label>
+            <input
+              type="password"
+              className="admin-input"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </div>
+          <div className="admin-field">
+            <label className="admin-field-label">New Password</label>
+            <input
+              type="password"
+              className="admin-input"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              placeholder="At least 8 characters"
+            />
+          </div>
+          <div className="admin-field">
+            <label className="admin-field-label">Confirm New Password</label>
+            <input
+              type="password"
+              className="admin-input"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+            />
+          </div>
+        </div>
+
+        <button type="submit" className="admin-btn admin-btn-primary" disabled={pwdSaving}>
+          <Lock size={15} />
+          <span>{pwdSaving ? 'Updating…' : 'Update Password'}</span>
+        </button>
+      </form>
+
       {/* Portfolio Config Form */}
       <form className="admin-form" onSubmit={submit}>
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 16 }}>
@@ -317,15 +511,28 @@ export default function Settings() {
         <p style={{ fontSize: 13, color: '#991b1b', margin: '0 0 16px 0' }}>
           Deleting this portfolio workspace permanently deletes all of its content sections, media mappings, and API keys.
         </p>
-        <button
-          type="button"
-          className="admin-btn admin-btn-danger"
-          onClick={() => setDeleteConfirmOpen(true)}
-          disabled={deleting}
-        >
-          <Trash2 size={14} />
-          <span>{deleting ? 'Deleting…' : 'Delete Portfolio Workspace'}</span>
-        </button>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+          <button
+            type="button"
+            className="admin-btn admin-btn-danger"
+            onClick={() => setDeleteConfirmOpen(true)}
+            disabled={deleting}
+          >
+            <Trash2 size={14} />
+            <span>{deleting ? 'Deleting…' : 'Delete Portfolio Workspace'}</span>
+          </button>
+          <button
+            type="button"
+            className="admin-btn admin-btn-danger-ghost"
+            onClick={() => setDeleteAccountOpen(true)}
+          >
+            <Trash2 size={14} />
+            <span>Delete My Account</span>
+          </button>
+        </div>
+        <p style={{ fontSize: 12, color: '#991b1b', margin: 0 }}>
+          Deleting your account permanently removes all portfolios, sections, API keys, and media. This cannot be undone.
+        </p>
       </div>
 
       {deleteConfirmOpen && (
@@ -335,6 +542,31 @@ export default function Settings() {
           onConfirm={handleDeletePortfolio}
           onCancel={() => setDeleteConfirmOpen(false)}
         />
+      )}
+
+      {deleteAccountOpen && (
+        <ConfirmDialog
+          title="Permanently Delete Your Account"
+          message="This will permanently delete your account and all of your portfolios, sections, API keys, and media files. This action cannot be undone."
+          onCancel={() => { setDeleteAccountOpen(false); setDeleteAccountError(''); setDeleteAccountPwd(''); }}
+          onConfirm={handleDeleteAccount}
+          confirmLabel="Delete My Account"
+        >
+          <div style={{ padding: '4px 0 12px' }}>
+            {deleteAccountError && <div className="admin-form-error">{deleteAccountError}</div>}
+            <input
+              type="password"
+              className="admin-input"
+              value={deleteAccountPwd}
+              onChange={(e) => setDeleteAccountPwd(e.target.value)}
+              placeholder="Enter your password to confirm"
+              autoComplete="current-password"
+            />
+            <p className="admin-field-hint" style={{ margin: '8px 0 0' }}>
+              Enter your password to confirm permanent deletion.
+            </p>
+          </div>
+        </ConfirmDialog>
       )}
     </div>
   );

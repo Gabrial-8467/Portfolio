@@ -1,6 +1,6 @@
 import { Pencil, Trash2, X } from 'lucide-react';
 
-export function ConfirmDialog({ title, message, confirmLabel = 'Delete', onConfirm, onCancel }) {
+export function ConfirmDialog({ title, message, confirmLabel = 'Delete', onConfirm, onCancel, children, loading = false }) {
   if (!message) return null;
 
   return (
@@ -11,12 +11,13 @@ export function ConfirmDialog({ title, message, confirmLabel = 'Delete', onConfi
         </button>
         <h3 className="admin-modal-title">{title}</h3>
         <p className="admin-modal-message">{message}</p>
+        {children}
         <div className="admin-modal-actions">
           <button type="button" className="admin-btn admin-btn-ghost" onClick={onCancel}>
             Cancel
           </button>
-          <button type="button" className="admin-btn admin-btn-danger" onClick={onConfirm}>
-            {confirmLabel}
+          <button type="button" className="admin-btn admin-btn-danger" onClick={onConfirm} disabled={loading}>
+            {loading ? 'Working…' : confirmLabel}
           </button>
         </div>
       </div>

@@ -163,12 +163,13 @@ export const githubCallback = asyncHandler(async (req, res) => {
 
   const token = signToken(user);
 
-  // Set auth cookie on the server response so root domains can access it
+  // Set auth cookie on the server response so root domains can access it.
   res.cookie('portfolio_admin_token', token, {
     maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: false,
     sameSite: 'lax',
     path: '/',
+    secure: config.nodeEnv === 'production',
   });
 
   // Redirect back to target URL (landing or admin) — validate against allowed origins

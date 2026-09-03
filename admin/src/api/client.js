@@ -172,6 +172,11 @@ export const api = {
     login: (email, password) => api.post('/api/auth/login', { email, password }),
     register: (data) => api.post('/api/auth/register', data),
     me: () => api.get('/api/auth/me', { auth: true }),
+    plan: () => api.get('/api/auth/plan', { auth: true }),
+    changePassword: (currentPassword, newPassword) =>
+      api.post('/api/auth/change-password', { currentPassword, newPassword }, { auth: true }),
+    deleteAccount: (password) =>
+      api.post('/api/auth/delete-account', { password }, { auth: true }),
   },
 
   portfolios: {
@@ -222,8 +227,8 @@ export const api = {
   },
 
   billing: {
-    createOrder: (planId) => api.post('/api/billing/create-order', { planId }),
-    verifyPayment: (data) => api.post('/api/billing/verify-payment', data),
+    createOrder: (planId) => api.post('/api/billing/create-order', { planId }, { auth: true }),
+    verifyPayment: (data) => api.post('/api/billing/verify-payment', data, { auth: true }),
   },
 
   uploads: {

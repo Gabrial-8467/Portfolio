@@ -1,7 +1,10 @@
 import React from 'react';
 import { Check, Sparkles, ArrowRight } from 'lucide-react';
+import { ADMIN_URL } from '../api/client';
+import { useLandingAuth } from '../hooks/useLandingAuth';
 
 export default function Pricing({ onOpenRegister }) {
+  const { isAuthenticated } = useLandingAuth();
   const plans = [
     {
       name: 'Hobby',
@@ -115,7 +118,10 @@ export default function Pricing({ onOpenRegister }) {
                 type="button"
                 className={`btn ${plan.featured ? 'btn-primary' : 'btn-secondary'} btn-lg`}
                 style={{ width: '100%' }}
-                onClick={onOpenRegister}
+                onClick={isAuthenticated
+                  ? () => window.open(`${ADMIN_URL}/admin/settings`, '_blank')
+                  : onOpenRegister
+                }
               >
                 {plan.cta} <ArrowRight size={15} />
               </button>

@@ -1,11 +1,13 @@
 import { User } from '../models/User.js';
 import { Portfolio } from '../models/Portfolio.js';
+import { Section } from '../models/Section.js';
 import { ApiKey } from '../models/ApiKey.js';
 import { signToken } from '../middleware/auth.js';
 import { generateApiKey } from '../utils/apiKey.js';
 import { asyncHandler, ApiError } from '../middleware/errorHandler.js';
 import { slugify } from '../utils/slugify.js';
 import { logger } from '../utils/logger.js';
+import { getPlanConfig } from '../config/plans.js';
 
 async function createUniqueSlug(base) {
   const slug = slugify(base) || 'portfolio';
@@ -96,4 +98,107 @@ export const me = asyncHandler(async (req, res) => {
   if (!user) throw new ApiError(404, 'User not found');
   const portfolios = await Portfolio.find({ owner: user._id }).sort({ createdAt: 1 }).lean();
   return res.json({ success: true, data: { user: user.toSafeObject(), portfolios } });
+});
+
+/**
+ * Change the authenticated user's password (requires current password).
+ */
+export const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    throw new ApiError(400, 'Current password and new password are required');
+  }
+  if (String(newPassword).length < 8) {
+    throw new ApiError(400, 'New password must be at least 8 characters');
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) throw new ApiError(404, 'User not found');
+
+  // Users without a password (OAuth-only accounts) cannot use password auth.
+  if (!user.password) {
+    throw new ApiError(400, 'This account uses GitHub sign-in and has no password set');
+  }
+
+  const match = await user.comparePassword(currentPassword);
+  if (!match) throw new ApiError(401, 'Current password is incorrect');
+
+  user.password = newPassword;
+  await user.save();
+
+  logger.auth('Password changed for user: ' + user.email);
+  return res.json({ success: true, message: 'Password updated successfully' });
+});
+
+/**
+ * Permanently delete the authenticated user's account and all associated data.
+ */
+export const deleteAccount = asyncHandler(async (req, res) => {
+  const { password } = req.body;
+  const user = await User.findById(req.user._id);
+  if (!user) throw new ApiError(404, 'User not found');
+
+  // For accounts with a password, require it to confirm deletion.
+  if (user.password) {
+    if (!password) throw new ApiError(400, 'Password is required to delete your account');
+    const match = await user.comparePassword(password);
+    if (!match) throw new ApiError(401, 'Password is incorrect');
+  }
+
+  const portfolios = await Portfolio.find({ owner: user._id }).select('_id').lean();
+  const portfolioIds = portfolios.map((p) => p._id);
+
+  await Promise.all([
+    ApiKey.deleteMany({ owner: user._id }),
+    Section.deleteMany({ portfolio: { $in: portfolioIds } }),
+    Portfolio.deleteMany({ owner: user._id }),
+    User.findByIdAndDelete(user._id),
+  ]);
+
+  logger.auth('Account deleted: ' + user.email);
+  return res.json({ success: true, message: 'Account deleted successfully' });
+});
+
+/**
+ * Return the user's current plan, quota limits, and current usage.
+ */
+export const planStatus = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const user = await User.findById(userId).select('plan email name').lean();
+  if (!user) throw new ApiError(404, 'User not found');
+
+  const planName = user.plan || 'hobby';
+  const plan = getPlanConfig(planName);
+
+  const portfolioCount = await Portfolio.countDocuments({ owner: userId });
+  const portfolioIds = await Portfolio.find({ owner: userId }).select('_id').lean();
+  const portfolioIdList = portfolioIds.map((p) => p._id);
+  const apiKeyCount = await ApiKey.countDocuments({ owner: userId });
+
+  return res.json({
+    success: true,
+    data: {
+      plan: planName,
+      planName: plan.name,
+      limits: {
+        maxPortfolios: plan.maxPortfolios === Infinity ? 'Unlimited' : plan.maxPortfolios,
+        maxApiKeysPerPortfolio:
+          plan.maxApiKeysPerPortfolio === Infinity ? 'Unlimited' : plan.maxApiKeysPerPortfolio,
+        maxUploadSizeBytes: plan.maxUploadSizeBytes,
+        rateLimitPerMin: plan.rateLimitPerMin,
+      },
+      usage: {
+        portfolios: portfolioCount,
+        totalApiKeys: apiKeyCount,
+        apiKeysPerPortfolio: portfolioIdList.length
+          ? await Promise.all(
+              portfolioIdList.map(async (pid) => ({
+                portfolioId: pid,
+                count: await ApiKey.countDocuments({ portfolio: pid }),
+              }))
+            )
+          : [],
+      },
+    },
+  });
 });

@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -16,6 +18,8 @@ import portfolioRoutes from './routes/portfolioRoutes.js';
 import apiKeyRoutes from './routes/apiKeyRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import billingRoutes from './routes/billingRoutes.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.set('trust proxy', 1);
