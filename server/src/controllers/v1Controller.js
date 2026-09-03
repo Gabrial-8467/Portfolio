@@ -272,18 +272,46 @@ export const uploadFile = asyncHandler(async (req, res) => {
   const owner = (req.apiKey && req.apiKey.owner) || (req.user && req.user._id);
   if (!owner) throw new ApiError(401, 'Authentication required');
 
-  await Upload.create({
+  const upload = await Upload.create({
     owner,
     portfolio: req.portfolio._id,
     filename: req.file.filename,
+    originalName: req.file.originalname || req.file.filename,
     size: req.file.size,
     mimetype: req.file.mimetype,
   });
 
+  const url = imageUrl(req.file.filename);
   return res.status(201).json({
     success: true,
-    data: { url: imageUrl(req.file.filename), name: req.file.filename, size: req.file.size },
+    data: {
+      id: upload._id,
+      url,
+      filename: req.file.filename,
+      originalName: req.file.originalname || req.file.filename,
+      size: req.file.size,
+      mimeType: req.file.mimetype,
+      uploadedAt: upload.createdAt,
+    },
   });
+});
+
+export const listUploads = asyncHandler(async (req, res) => {
+  const uploads = await Upload.find({ portfolio: req.portfolio._id })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const data = uploads.map((u) => ({
+    id: u._id,
+    url: imageUrl(u.filename),
+    filename: u.filename,
+    originalName: u.originalName || u.filename,
+    size: u.size,
+    mimeType: u.mimetype,
+    uploadedAt: u.createdAt,
+  }));
+
+  return res.json({ success: true, data });
 });
 
 export const deleteFile = asyncHandler(async (req, res) => {

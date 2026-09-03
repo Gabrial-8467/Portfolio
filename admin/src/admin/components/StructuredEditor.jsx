@@ -1,8 +1,9 @@
 import { useId, useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, ImageIcon, Loader2, Plus, Trash2, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, FolderOpen, ImageIcon, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { api, resolveAssetUrl } from '../../api/client';
 import { blankItem } from '../structuredSchemas';
 import { useToast } from './useToast';
+import MediaPickerModal from './MediaPickerModal';
 
 function StringTagsEditor({ value, onChange, placeholder }) {
   const [draft, setDraft] = useState('');
@@ -111,6 +112,7 @@ function ImageField({ field = {}, value, onChange }) {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [name, setName] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const upload = async (file) => {
     if (!file) return;
@@ -132,7 +134,7 @@ function ImageField({ field = {}, value, onChange }) {
       <label className="admin-field-label" htmlFor={inputId}>
         {field.label || 'Image'}
         <span className="admin-field-hint" style={{ textTransform: 'none', fontWeight: 400, marginTop: 2 }}>
-          Upload a file or paste a URL.
+          Upload a file, pick from media, or paste a URL.
         </span>
       </label>
       <div className="img-upload-row">
@@ -158,6 +160,14 @@ function ImageField({ field = {}, value, onChange }) {
           {uploading ? <Loader2 size={14} className="spin" /> : <Plus size={14} />}
           {uploading ? `${name}…` : 'Upload'}
         </button>
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary admin-btn-sm"
+          onClick={() => setPickerOpen(true)}
+        >
+          <FolderOpen size={14} />
+          Browse Media
+        </button>
       </div>
       <div className="img-preview">
         {value ? (
@@ -168,6 +178,14 @@ function ImageField({ field = {}, value, onChange }) {
           <ImageIcon size={18} />
         )}
       </div>
+      <MediaPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(url) => {
+          onChange(url);
+          setPickerOpen(false);
+        }}
+      />
     </div>
   );
 }

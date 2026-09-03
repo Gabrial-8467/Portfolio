@@ -36,7 +36,7 @@ export default function Media() {
   const maxUploadBytes = maxUploadMb * 1024 * 1024;
 
   useEffect(() => {
-    // Reload cached uploads when the active portfolio changes
+    // Fill instantly from cache, then reconcile with server-side assets.
     // eslint-disable-next-line react/set-state-in-effect
     setUploads(() => {
       try {
@@ -46,6 +46,29 @@ export default function Media() {
         return [];
       }
     });
+
+    let cancelled = false;
+    api.uploads
+      .list()
+      .then((list) => {
+        if (cancelled) return;
+        const serverItems = (list || []).map((m) => ({
+          id: m.id,
+          url: m.url,
+          name: m.originalName || m.filename || m.name,
+          size: m.size,
+          uploadedAt: m.uploadedAt,
+        }));
+        setUploads(serverItems);
+        saveUploads(serverItems);
+      })
+      .catch(() => {
+        // Keep the cached list if the server is unreachable.
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cacheKey]);
 
   const saveUploads = (list) => {
@@ -71,10 +94,11 @@ export default function Media() {
     try {
       const res = await api.uploads.uploadFile(file);
       const newMedia = {
+        id: res.id,
         url: res.url,
-        name: res.name || file.name,
+        name: res.originalName || res.filename || res.name || file.name,
         size: res.size || file.size,
-        uploadedAt: new Date().toISOString(),
+        uploadedAt: res.uploadedAt || new Date().toISOString(),
       };
       const updated = [newMedia, ...uploads];
       saveUploads(updated);

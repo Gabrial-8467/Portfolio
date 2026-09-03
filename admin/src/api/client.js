@@ -237,6 +237,7 @@ export const api = {
   },
 
   uploads: {
+    list: () => api.get('/api/v1/uploads', { apiKey: true }),
     uploadFile: async (file) => {
       const form = new FormData();
       form.append('file', file);

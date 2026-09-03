@@ -21,6 +21,7 @@ import {
   revokeKey,
   uploadFile,
   deleteFile,
+  listUploads,
 } from '../controllers/v1Controller.js';
 
 const router = Router();
@@ -62,6 +63,7 @@ router.post('/api-keys', guardApiKeyQuota, sanitize({ name: validators.str(100) 
 router.delete('/api-keys/:id', revokeKey);
 
 router.post('/upload', uploadImage.single('file'), guardUploadQuota, uploadFile);
+router.get('/uploads', listUploads);
 router.delete('/upload/:filename', deleteFile);
 
 export default router;
