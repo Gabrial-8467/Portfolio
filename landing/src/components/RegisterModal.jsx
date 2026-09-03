@@ -28,7 +28,8 @@ function GithubIcon({ size = 18 }) {
   );
 }
 
-export default function RegisterModal({ isOpen, onClose }) {
+export default function RegisterModal({ isOpen, onClose, initialMode = 'register' }) {
+  const [mode, setMode] = useState(initialMode); // 'login' | 'register'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,7 +42,7 @@ export default function RegisterModal({ isOpen, onClose }) {
 
   useEffect(() => {
     if (!isOpen) return;
-    // eslint-disable-next-line react/set-state-in-effect
+    setMode(initialMode);
     setName('');
     setEmail('');
     setPassword('');
@@ -51,7 +52,7 @@ export default function RegisterModal({ isOpen, onClose }) {
     setRevealedKey(null);
     setCreatedPortfolio(null);
     setCopied(false);
-  }, [isOpen]);
+  }, [isOpen, initialMode]);
 
   if (!isOpen) return null;
 
@@ -61,21 +62,29 @@ export default function RegisterModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const res = await api.register({
-        name,
-        email,
-        password,
-        portfolioName: portfolioName || `${name}'s Portfolio`,
-      });
+      if (mode === 'login') {
+        const res = await api.login({ email, password });
+        if (res.token) {
+          setStoredToken(res.token);
+        }
+        onClose();
+      } else {
+        const res = await api.register({
+          name,
+          email,
+          password,
+          portfolioName: portfolioName || `${name}'s Portfolio`,
+        });
 
-      if (res.token) {
-        setStoredToken(res.token);
+        if (res.token) {
+          setStoredToken(res.token);
+        }
+        setRevealedKey(res.apiKey);
+        setCreatedPortfolio(res.portfolios?.[0] || res.portfolio);
+        setPassword('');
       }
-      setRevealedKey(res.apiKey);
-      setCreatedPortfolio(res.portfolios?.[0] || res.portfolio);
-      setPassword('');
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
+      setError(err.message || (mode === 'login' ? 'Sign in failed. Please check your credentials.' : 'Registration failed. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -120,7 +129,11 @@ export default function RegisterModal({ isOpen, onClose }) {
               <Sparkles size={16} />
             </div>
             <h3 className="modal-title">
-              {revealedKey ? 'Portfolio & API Key Ready' : 'Start Building with Portfolio CMS'}
+              {revealedKey
+                ? 'Portfolio & API Key Ready'
+                : mode === 'login'
+                ? 'Sign In to Your Workspace'
+                : 'Start Building with Portfolio CMS'}
             </h3>
           </div>
           <button type="button" onClick={onClose} style={{ color: '#94a3b8' }}>
@@ -195,7 +208,7 @@ export default function RegisterModal({ isOpen, onClose }) {
               {/* Action Buttons */}
               <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
                 <a
-                  href={`${ADMIN_URL}/admin/login`}
+                  href={`${ADMIN_URL}/admin`}
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-primary btn-lg"
@@ -207,6 +220,57 @@ export default function RegisterModal({ isOpen, onClose }) {
             </div>
           ) : (
             <div>
+              {/* Tab Switcher */}
+              <div
+                style={{
+                  display: 'flex',
+                  background: '#f1f5f9',
+                  padding: 4,
+                  borderRadius: 8,
+                  marginBottom: 16,
+                  gap: 4,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => { setMode('login'); setError(''); }}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    borderRadius: 6,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: mode === 'login' ? '#ffffff' : 'transparent',
+                    color: mode === 'login' ? 'var(--saas-text)' : 'var(--saas-text-secondary)',
+                    boxShadow: mode === 'login' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMode('register'); setError(''); }}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    borderRadius: 6,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: mode === 'register' ? '#ffffff' : 'transparent',
+                    color: mode === 'register' ? 'var(--saas-text)' : 'var(--saas-text-secondary)',
+                    boxShadow: mode === 'register' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  Create Account
+                </button>
+              </div>
+
               {/* GitHub OAuth Quick Button */}
               <div style={{ marginBottom: 16 }}>
                 <a
@@ -248,77 +312,117 @@ export default function RegisterModal({ isOpen, onClose }) {
               <form onSubmit={handleSubmit}>
                 {error && <div className="alert-danger">{error}</div>}
 
-              <div className="form-group">
-                <label className="form-label">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Alex Developer"
-                  className="form-input"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
+                {mode === 'register' && (
+                  <div className="form-group">
+                    <label className="form-label">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Alex Developer"
+                      className="form-input"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                )}
 
-              <div className="form-group">
-                <label className="form-label">Email Address</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="alex@example.com"
-                  className="form-input"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+                <div className="form-group">
+                  <label className="form-label">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="alex@example.com"
+                    className="form-input"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
 
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <input
-                  type="password"
-                  required
-                  minLength={8}
-                  placeholder="At least 8 characters"
-                  className="form-input"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={mode === 'register' ? 8 : 1}
+                    placeholder={mode === 'register' ? 'At least 8 characters' : 'Enter your password'}
+                    className="form-input"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
 
-              <div className="form-group">
-                <label className="form-label">Portfolio Name (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Alex — Full Stack Engineer"
-                  className="form-input"
-                  value={portfolioName}
-                  onChange={(e) => setPortfolioName(e.target.value)}
-                />
-              </div>
+                {mode === 'register' && (
+                  <div className="form-group">
+                    <label className="form-label">Portfolio Name (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Alex — Full Stack Engineer"
+                      className="form-input"
+                      value={portfolioName}
+                      onChange={(e) => setPortfolioName(e.target.value)}
+                    />
+                  </div>
+                )}
 
-              <button
-                type="submit"
-                className="btn btn-primary btn-lg"
-                style={{ width: '100%', marginTop: 8 }}
-                disabled={loading}
-              >
-                {loading ? 'Creating Account & Generating Key...' : 'Create Account & Get API Key'}
-                {!loading && <ArrowRight size={16} />}
-              </button>
-
-              <div style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: 'var(--saas-text-muted)' }}>
-                Already have an account?{' '}
-                <a
-                  href={`${ADMIN_URL}/admin/login`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ color: 'var(--saas-primary)', fontWeight: 600 }}
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-lg"
+                  style={{ width: '100%', marginTop: 8 }}
+                  disabled={loading}
                 >
-                  Sign in here
-                </a>
-              </div>
-            </form>
-          </div>
+                  {loading
+                    ? mode === 'login'
+                      ? 'Signing in...'
+                      : 'Creating Account & Generating Key...'
+                    : mode === 'login'
+                    ? 'Sign In to Workspace'
+                    : 'Create Account & Get API Key'}
+                  {!loading && <ArrowRight size={16} />}
+                </button>
+
+                <div style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: 'var(--saas-text-muted)' }}>
+                  {mode === 'login' ? (
+                    <>
+                      Don't have an account yet?{' '}
+                      <button
+                        type="button"
+                        onClick={() => { setMode('register'); setError(''); }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          color: 'var(--saas-primary)',
+                          fontWeight: 600,
+                          fontSize: 'inherit',
+                        }}
+                      >
+                        Create one now
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      Already have an account?{' '}
+                      <button
+                        type="button"
+                        onClick={() => { setMode('login'); setError(''); }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          color: 'var(--saas-primary)',
+                          fontWeight: 600,
+                          fontSize: 'inherit',
+                        }}
+                      >
+                        Sign in here
+                      </button>
+                    </>
+                  )}
+                </div>
+              </form>
+            </div>
           )}
         </div>
       </div>

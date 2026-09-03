@@ -88,6 +88,10 @@ export function setStoredToken(token) {
 }
 
 export const api = {
+  login: async (data) => {
+    const res = await request('/api/auth/login', { method: 'POST', body: data });
+    return res.data;
+  },
   register: async (data) => {
     const res = await request('/api/auth/register', { method: 'POST', body: data });
     return res.data;

@@ -19,9 +19,18 @@ import MagneticButton from './MagneticButton';
 import { ADMIN_URL } from '../api/client';
 import { useLandingAuth } from '../hooks/useLandingAuth';
 
-export default function Navbar({ onOpenRegister, onSelectTab }) {
+export default function Navbar({ onOpenRegister, onOpenLogin, onSelectTab }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAuthenticated } = useLandingAuth();
+
+  const handleSignInClick = (e) => {
+    e.preventDefault();
+    if (onOpenLogin) {
+      onOpenLogin();
+    } else if (onOpenRegister) {
+      onOpenRegister('login');
+    }
+  };
 
   return (
     <nav className="saas-nav" aria-label="Main navigation">
@@ -128,15 +137,14 @@ export default function Navbar({ onOpenRegister, onSelectTab }) {
               </div>
             ) : (
               <>
-                <a
-                  href={`${ADMIN_URL}/admin/login`}
+                <button
+                  type="button"
+                  onClick={handleSignInClick}
                   className="btn btn-secondary"
-                  target="_blank"
-                  rel="noreferrer"
                   data-cursor="SIGNIN"
                 >
                   Sign In
-                </a>
+                </button>
                 <MagneticButton
                   type="button"
                   className="btn btn-primary"

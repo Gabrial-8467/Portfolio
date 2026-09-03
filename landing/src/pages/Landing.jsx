@@ -19,7 +19,18 @@ import Footer from '../components/Footer';
 import { setStoredToken } from '../api/client';
 
 export default function Landing() {
-  const [registerOpen, setRegisterOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState('register'); // 'login' | 'register'
+
+  const openRegister = () => {
+    setAuthMode('register');
+    setAuthModalOpen(true);
+  };
+
+  const openLogin = () => {
+    setAuthMode('login');
+    setAuthModalOpen(true);
+  };
 
   // Sync token if redirected to landing with ?token=... or ?oauth_token=...
   useEffect(() => {
@@ -47,9 +58,9 @@ export default function Landing() {
       {/* Top Scroll Indicator */}
       <ScrollProgress />
 
-      <Navbar onOpenRegister={() => setRegisterOpen(true)} />
+      <Navbar onOpenRegister={openRegister} onOpenLogin={openLogin} />
       <main>
-        <Hero onOpenRegister={() => setRegisterOpen(true)} />
+        <Hero onOpenRegister={openRegister} />
         <CmsDemo />
         <ProblemSolution />
         <Features />
@@ -58,14 +69,15 @@ export default function Landing() {
         <ApiDocsSection />
         <ApiPlayground />
         <ResponseExplorer />
-        <Pricing onOpenRegister={() => setRegisterOpen(true)} />
+        <Pricing onOpenRegister={openRegister} />
         <FaqSection />
       </main>
-      <Footer onOpenRegister={() => setRegisterOpen(true)} />
+      <Footer onOpenRegister={openRegister} />
 
       <RegisterModal
-        isOpen={registerOpen}
-        onClose={() => setRegisterOpen(false)}
+        isOpen={authModalOpen}
+        initialMode={authMode}
+        onClose={() => setAuthModalOpen(false)}
       />
     </div>
   );
