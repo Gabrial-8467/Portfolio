@@ -67,7 +67,7 @@ export default function Login() {
     const oauthToken = searchParams.get('oauth_token');
     if (oauthToken) {
       loginWithToken(oauthToken);
-      toast.success('Successfully authenticated via GitHub!');
+      toast('Successfully authenticated via GitHub!', 'success');
       navigate('/admin', { replace: true });
     }
   }, [searchParams, loginWithToken, navigate, toast]);

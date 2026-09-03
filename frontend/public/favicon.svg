@@ -1,55 +1,161 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="50%" stop-color="#1e1b4b" />
-      <stop offset="100%" stop-color="#090d16" />
-    </linearGradient>
-    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366f1" />
-      <stop offset="50%" stop-color="#8b5cf6" />
-      <stop offset="100%" stop-color="#ec4899" />
-    </linearGradient>
-    <linearGradient id="accentGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+    <!-- Background Gradient -->
+    <radialGradient id="bgRadial" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#181829" />
+      <stop offset="60%" stop-color="#0b0d14" />
+      <stop offset="100%" stop-color="#05060a" />
+    </radialGradient>
+
+    <!-- Layer Gradients -->
+    <!-- Top Layer: Live Portfolio Frontend & View -->
+    <linearGradient id="topLayerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#38bdf8" />
-      <stop offset="100%" stop-color="#818cf8" />
+      <stop offset="60%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#8b5cf6" />
     </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="16" result="blur" />
+
+    <!-- Mid Layer: Headless CMS Engine -->
+    <linearGradient id="midLayerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+
+    <!-- Bottom Layer: Multi-Tenant Data & Storage -->
+    <linearGradient id="bottomLayerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+
+    <!-- Accent Laser Glow -->
+    <linearGradient id="cyanNeon" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+
+    <linearGradient id="sparkleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+
+    <filter id="coreGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18" result="blur1" />
+      <feGaussianBlur stdDeviation="32" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
 
-  <!-- Smooth Rounded Squircle Canvas -->
-  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
-  <rect width="508" height="508" x="2" y="2" rx="126" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="3" />
+  <!-- 1. Background Container Squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgRadial)" />
+  <rect width="508" height="508" x="2" y="2" rx="126" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2.5" />
 
-  <!-- Inner Ambient Aura -->
-  <circle cx="256" cy="256" r="140" fill="url(#primaryGrad)" opacity="0.25" filter="url(#glow)" />
+  <!-- 2. Ambient Headless Core Aura -->
+  <circle cx="256" cy="240" r="160" fill="url(#topLayerGrad)" opacity="0.18" filter="url(#coreGlow)" />
 
-  <!-- Modern Geometric Monogram 'P' (Portfolio & Platform) with Layered CMS facets -->
-  <g filter="url(#glow)">
-    <!-- Vertical Backbone / Column -->
-    <rect x="138" y="118" width="56" height="276" rx="24" fill="url(#primaryGrad)" />
+  <!-- 3. Isometric Headless CMS & Portfolio Layered Architecture -->
+  <g filter="url(#softGlow)" transform="translate(0, 8)">
 
-    <!-- Top Loop Segment -->
-    <path d="M 170 118 
-             H 290 
-             C 362 118, 396 156, 396 222 
-             C 396 288, 362 326, 290 326 
-             H 170 
-             Z" 
+    <!-- ==================== LAYER 3: BOTTOM (Multi-Tenant Core / Database) ==================== -->
+    <g opacity="0.6">
+      <!-- Diamond Polygon Base -->
+      <path d="M 256 312 
+               L 412 248 
+               L 412 268 
+               L 256 332 
+               L 100 268 
+               L 100 248 
+               Z" 
+            fill="#1e1b4b" stroke="url(#bottomLayerGrad)" stroke-width="3" />
+      <path d="M 256 312 L 412 248 L 256 184 L 100 248 Z" 
+            fill="#0f172a" opacity="0.9" stroke="url(#bottomLayerGrad)" stroke-width="3.5" />
+    </g>
+
+    <!-- Connector Data Stream 1 -->
+    <line x1="256" y1="280" x2="256" y2="244" stroke="url(#cyanNeon)" stroke-width="3.5" stroke-dasharray="4 3" opacity="0.7" />
+
+    <!-- ==================== LAYER 2: MIDDLE (Headless CMS API Engine) ==================== -->
+    <g opacity="0.85">
+      <path d="M 256 250 
+               L 412 186 
+               L 412 204 
+               L 256 268 
+               L 100 204 
+               L 100 186 
+               Z" 
+            fill="#2e1065" stroke="url(#midLayerGrad)" stroke-width="3" />
+      <path d="M 256 250 L 412 186 L 256 122 L 100 186 Z" 
+            fill="#1e1b4b" opacity="0.85" stroke="url(#midLayerGrad)" stroke-width="3.5" />
+      <!-- Terminal slash etched inside middle layer -->
+      <path d="M 270 170 L 242 202" stroke="url(#cyanNeon)" stroke-width="4.5" stroke-linecap="round" opacity="0.6" />
+    </g>
+
+    <!-- Connector Data Stream 2 -->
+    <line x1="256" y1="216" x2="256" y2="180" stroke="url(#cyanNeon)" stroke-width="3.5" stroke-dasharray="4 3" opacity="0.8" />
+
+    <!-- ==================== LAYER 1: TOP (The Portfolio Showcase & Visual UI) ==================== -->
+    <g>
+      <!-- Depth sides -->
+      <path d="M 256 186 
+               L 412 122 
+               L 412 140 
+               L 256 204 
+               L 100 140 
+               L 100 122 
+               Z" 
+            fill="url(#bottomLayerGrad)" stroke="url(#cyanNeon)" stroke-width="2.5" />
+
+      <!-- Top Face: Sleek Translucent Glass Surface -->
+      <path d="M 256 186 L 412 122 L 256 58 L 100 122 Z" 
+            fill="url(#topLayerGrad)" fill-opacity="0.25" stroke="url(#topLayerGrad)" stroke-width="4.5" stroke-linejoin="round" />
+
+      <!-- Top Face Inner Highlight Accent -->
+      <path d="M 256 174 L 396 122 L 256 70 L 116 122 Z" 
+            fill="none" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1.5" />
+    </g>
+
+    <!-- ==================== ICONIC CODE & CMS EMBLEM ON TOP FACE ==================== -->
+    <!-- Left Bracket < -->
+    <path d="M 204 104 L 176 122 L 204 140" 
           fill="none" 
-          stroke="url(#primaryGrad)" 
-          stroke-width="54" 
+          stroke="url(#cyanNeon)" 
+          stroke-width="7" 
+          stroke-linecap="round" 
           stroke-linejoin="round" 
-          stroke-linecap="round" />
+          filter="url(#softGlow)" />
 
-    <!-- Headless API Spark & Diamond Node (CMS dynamic data pulse) -->
-    <circle cx="282" cy="222" r="28" fill="url(#accentGrad)" />
-    <path d="M 282 176 L 286 210 L 320 222 L 286 234 L 282 268 L 278 234 L 244 222 L 278 210 Z" fill="#ffffff" opacity="0.9" />
+    <!-- Right Bracket > -->
+    <path d="M 308 104 L 336 122 L 308 140" 
+          fill="none" 
+          stroke="url(#cyanNeon)" 
+          stroke-width="7" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" 
+          filter="url(#softGlow)" />
 
-    <!-- Modern code terminal bracket accent -->
-    <path d="M 366 320 L 404 358 L 366 396" fill="none" stroke="url(#accentGrad)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Central Glowing API Data Core / Sparkle -->
+    <circle cx="256" cy="122" r="14" fill="#ffffff" filter="url(#coreGlow)" />
+    <circle cx="256" cy="122" r="8" fill="url(#cyanNeon)" />
+    
+    <!-- Micro Cross Sparkle Star -->
+    <path d="M 256 94 L 260 116 L 282 122 L 260 128 L 256 150 L 252 128 L 230 122 L 252 116 Z" 
+          fill="url(#sparkleGrad)" opacity="0.95" />
   </g>
+
+  <!-- 4. Subtle Front Dot Grid Matrix for Developer Vibe -->
+  <circle cx="152" cy="406" r="3" fill="#6366f1" opacity="0.5" />
+  <circle cx="176" cy="406" r="3" fill="#6366f1" opacity="0.3" />
+  <circle cx="200" cy="406" r="3" fill="#6366f1" opacity="0.2" />
+
+  <circle cx="312" cy="406" r="3" fill="#38bdf8" opacity="0.2" />
+  <circle cx="336" cy="406" r="3" fill="#38bdf8" opacity="0.3" />
+  <circle cx="360" cy="406" r="3" fill="#38bdf8" opacity="0.5" />
 </svg>
