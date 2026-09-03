@@ -15,6 +15,7 @@ import {
   Lock,
   Gauge,
   Layers,
+  Loader2,
 } from 'lucide-react';
 import { ConfirmDialog } from '../../admin/components/ConfirmDialog';
 import AdminLoader from '../../admin/components/AdminLoader';
@@ -31,6 +32,7 @@ export default function Settings() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // Plan usage state
   const [planStatus, setPlanStatus] = useState(null);
@@ -253,6 +255,7 @@ export default function Settings() {
                   type="button"
                   className="admin-btn admin-btn-secondary admin-btn-sm"
                   onClick={async () => {
+                    setCheckoutLoading(true);
                     try {
                       const orderRes = await api.billing.createOrder('pro');
                       const orderData = orderRes?.data || orderRes;
@@ -302,9 +305,13 @@ export default function Settings() {
                       rzp.open();
                     } catch (err) {
                       addToast({ type: 'error', message: err.message || 'Failed to initiate Razorpay checkout' });
+                    } finally {
+                      setCheckoutLoading(false);
                     }
                   }}
+                  disabled={checkoutLoading}
                 >
+                  {checkoutLoading && <Loader2 size={14} className="spin" />}
                   <span>Upgrade to Pro (₹799/mo)</span>
                 </button>
               )}
@@ -312,6 +319,7 @@ export default function Settings() {
                 type="button"
                 className="admin-btn admin-btn-primary admin-btn-sm"
                 onClick={async () => {
+                  setCheckoutLoading(true);
                   try {
                     const orderRes = await api.billing.createOrder('agency');
                     const orderData = orderRes?.data || orderRes;
@@ -361,9 +369,13 @@ export default function Settings() {
                     rzp.open();
                   } catch (err) {
                     addToast({ type: 'error', message: err.message || 'Failed to initiate Razorpay checkout' });
+                  } finally {
+                    setCheckoutLoading(false);
                   }
                 }}
+                disabled={checkoutLoading}
               >
+                {checkoutLoading && <Loader2 size={14} className="spin" />}
                 <span>Upgrade to Agency (₹2,499/mo)</span>
               </button>
             </div>
