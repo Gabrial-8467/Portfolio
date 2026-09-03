@@ -24,7 +24,10 @@ const PLAN_PRICES = {
 
 function getRazorpayInstance() {
   if (!config.razorpayKeyId || !config.razorpayKeySecret) {
-    throw new ApiError(500, "Razorpay API keys (RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET) are not configured");
+    throw new ApiError(
+      503,
+      "Payments are not configured yet. Please try again later or contact support.",
+    );
   }
   return new Razorpay({
     key_id: config.razorpayKeyId,

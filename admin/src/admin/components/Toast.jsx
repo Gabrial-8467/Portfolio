@@ -16,8 +16,15 @@ export default function ToastProvider({ children }) {
 
   const toast = useCallback(
     (message, type = 'info') => {
+      let msg = message;
+      let msgType = type;
+      // Support both toast('msg', 'success') and toast({ message, type })
+      if (message && typeof message === 'object' && !Array.isArray(message)) {
+        if (message.message !== undefined) msg = message.message;
+        if (message.type !== undefined) msgType = message.type;
+      }
       const id = ++toastId;
-      setToasts((current) => [...current, { id, message, type }]);
+      setToasts((current) => [...current, { id, message: msg, type: msgType }]);
       timers.current[id] = setTimeout(() => dismiss(id), 4000);
     },
     [dismiss],
@@ -36,7 +43,7 @@ export default function ToastProvider({ children }) {
               {t.type === 'error' && <AlertCircle size={18} color="#ef4444" />}
               {t.type === 'info' && <Info size={18} color="#2563eb" />}
             </span>
-            {t.message}
+            {typeof t.message === 'string' ? t.message : String(t.message ?? '')}
           </div>
         ))}
       </div>
