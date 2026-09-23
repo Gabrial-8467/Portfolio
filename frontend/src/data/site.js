@@ -59,8 +59,8 @@ export const STATS = [
   },
   {
     label: 'Python & AI',
-    value: '4',
-    subtext: 'Brain Simulator, Virtual Mouse & more',
+    value: '3',
+    subtext: 'Vyom, Virtual Mouse & more',
   },
   {
     label: 'Frontend JS',

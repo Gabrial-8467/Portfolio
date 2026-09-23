@@ -16,7 +16,7 @@ export const skills = [
     items: ['Flutter', 'Firebase Auth', 'Role-Based Auth'],
   },
   {
-    category: 'Python & AI/ML',
+    category: 'Python',
     items: ['Python', 'MediaPipe', 'OpenCV', 'PyAutoGUI', 'Voice Recognition'],
   },
   {

@@ -45,8 +45,8 @@ Accept: application/json`;
         "key": "projects",
         "label": "Featured Projects",
         "content": [
-          { "name": "Brain Simulator", "tags": ["Python", "AI", "Simulation"] },
-          { "name": "UniNest", "tags": ["Flutter", "Firebase", "Auth"] }
+          { "name": "UniNest", "tags": ["Flutter", "Firebase", "Auth"] },
+          { "name": "Vyom", "tags": ["Python", "Language Design"] }
         ],
         "isPublished": true
       }

@@ -136,6 +136,19 @@ export default function Home() {
   const renderDynamicSections = () => {
     const rawSections = Array.isArray(data.sections) ? data.sections : [];
 
+    // Default section order used when the CMS is unreachable and no admin-set
+    // order exists (server down / local-data fallback mode).
+    const DEFAULT_SECTION_ORDER = [
+      'hero',
+      'about',
+      'experience',
+      'projects',
+      'skills',
+      'hackathons',
+      'developer',
+      'contact',
+    ];
+
     // Sections that have a dedicated visual component and can be ordered.
     const hasKey = (key) => rawSections.some((s) => (s.key || '').toLowerCase() === key);
 
@@ -145,7 +158,12 @@ export default function Home() {
     const isHackathons = (key) => key === 'hackathons' || key === 'achievements';
     const seenHackathons = new Set();
 
-    rawSections.forEach((sec) => {
+    // When the CMS has no sections (server down / local fallback), render every
+    // core section using the default order instead of hiding them.
+    const sourceSections =
+      rawSections.length > 0 ? rawSections : DEFAULT_SECTION_ORDER.map((key) => ({ key }));
+
+    sourceSections.forEach((sec) => {
       let key = (sec.key || '').toLowerCase();
       if (!key || !SECTION_REGISTRY[key]) return;
 

@@ -206,7 +206,7 @@ export default function ApiDocsSection() {
     "key": "projects",
     "label": "Projects",
     "content": [
-      { "name": "Brain Simulator", "tags": ["Python", "AI"] }
+      { "name": "UniNest", "tags": ["Flutter", "Firebase"] }
     ]
   }
 }`}

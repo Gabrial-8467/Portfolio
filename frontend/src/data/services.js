@@ -4,6 +4,6 @@ export const services = [
   { num: '03', name: 'Node.js & Express REST APIs' },
   { num: '04', name: 'MongoDB, MySQL & PostgreSQL' },
   { num: '05', name: 'Flutter Mobile Apps' },
-  { num: '06', name: 'Python & AI Tool Development' },
+  { num: '06', name: 'Python' },
   { num: '07', name: 'Responsive UI Design' },
 ];
